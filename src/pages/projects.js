@@ -1,15 +1,38 @@
-import React from "react"
+import React, { useEffect } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
+import Project from "../components/Project"
+import { getImages } from "../helpers/techImages"
+import { useStaticQuery, graphql } from "gatsby"
 
 const Projects = ({ transitionStatus }) => {
-  React.useEffect(() => {
+  const data = useStaticQuery(graphql`
+    query MyProjectQuery {
+      allProject {
+        nodes {
+          name
+          techArray
+          description
+          link
+          imgSrc
+          id
+        }
+      }
+    }
+  `)
+
+  useEffect(() => {
+    console.log(data.allProject.nodes)
+  }, [data])
+
+  //Animation
+  useEffect(() => {
     gsap.to(".projects", {
       autoAlpha: 1,
-      duration: 0.3,
+      duration: 1,
     })
   }, []) //THIS IS RUN THE FIRST TIME THE SITE IS OPENED
-  React.useEffect(() => {
+  useEffect(() => {
     if (transitionStatus === "entering") {
       gsap.to(".projects", {
         autoAlpha: 1,
@@ -21,10 +44,20 @@ const Projects = ({ transitionStatus }) => {
     }
   }, [transitionStatus])
   return (
-    <div className="projects">
+    <>
       <SEO title="Projects" />
-      <p style={{ color: "white" }}>Projects</p>
-    </div>
+      {data.allProject.nodes.map((project, index) => {
+        return (
+          <Project
+            image={project.imgSrc}
+            description={project.description}
+            name={project.name}
+            techArray={getImages(project.techArray)}
+            index={index}
+          />
+        )
+      })}
+    </>
   )
 }
 

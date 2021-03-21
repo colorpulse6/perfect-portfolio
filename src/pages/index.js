@@ -27,7 +27,7 @@ const IndexPage = ({ transitionStatus }) => {
   return (
     <div style={{ opacity: 0 }} className="hometex">
       <SEO title="Home" />
-      <div class="title">
+      <div className="title">
         <h1>
           fullstack
           <br />
