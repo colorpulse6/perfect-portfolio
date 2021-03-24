@@ -44,7 +44,7 @@ const Projects = ({ transitionStatus }) => {
     }
   }, [transitionStatus])
   return (
-    <>
+    <div style={{ opacity: 0 }} className="projects">
       <SEO title="Projects" />
       {data.allProject.nodes.map((project, index) => {
         return (
@@ -57,7 +57,7 @@ const Projects = ({ transitionStatus }) => {
           />
         )
       })}
-    </>
+    </div>
   )
 }
 
