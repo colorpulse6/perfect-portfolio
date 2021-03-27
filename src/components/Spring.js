@@ -1,11 +1,16 @@
 import React from "react"
 import { useSpring, animated } from "react-spring"
 
-const Spring = ({ children }) => {
+const Spring = ({ isTitle, children }) => {
   //Spring Animation
   const calc = (x, y) => [
     -(y - window.innerHeight / 2) / 20,
     (x - window.innerWidth / 2) / 20,
+    1.1,
+  ]
+  const calcTitle = (x, y) => [
+    -(y - window.innerHeight / 2) / 40,
+    (x - window.innerWidth / 2) / 50,
     1.1,
   ]
   const trans = (x, y, s) =>
@@ -18,7 +23,9 @@ const Spring = ({ children }) => {
 
   return (
     <animated.div
-      onMouseMove={({ clientX: x, clientY: y }) => set({ xys: calc(x, y) })}
+      onMouseMove={({ clientX: x, clientY: y }) =>
+        isTitle ? set({ xys: calcTitle(x, y) }) : set({ xys: calc(x, y) })
+      }
       onMouseLeave={() => set({ xys: [0, 0, 1] })}
       style={{ transform: props.xys.interpolate(trans) }}
     >

@@ -1,23 +1,16 @@
 .flex {
-    display: flex;
-
+  display: flex;
 }
 
 .flex-reverse {
-    display: flex;
-    flex-direction:row-reverse;
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .project-container {
   display: flex;
-  margin:100px;
-}
-
-
-.project-images {
-  width: 750px;
-  height: 435px;
-  margin-bottom:20px;
+  margin: 50px;
+  margin-bottom: 50px;
 }
 
 .project-container h1 {
@@ -25,26 +18,36 @@
   margin: 0 auto;
 }
 
+.project-images {
+  width: 750px;
+  height: 435px;
+  margin-bottom: 20px;
+}
+
 .description-container {
   display: flex;
   flex-direction: column;
-  align-items:center;
-  margin-top:20px;
+  align-items: center;
   margin: 0 auto;
+}
+
+.description-container h1 {
+  margin-top: -50px;
 }
 
 .description-container p {
   padding: 20px;
   color: white;
+  margin-top: 50px;
 }
 
 .tech-image {
   width: 50px;
   height: 50px;
-  background-color:rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255);
   margin: 10px;
   border-radius: 50%;
-  padding: 5px;
+  padding: 10px;
 }
 
 .tech-container {
@@ -52,10 +55,20 @@
   margin: 0 auto;
   /* background-color: rgb(255, 255, 255); */
 
-  margin-top:-100px;
-  max-width:100%;
+  margin-top: -30px;
+  max-width: 100%;
   flex-wrap: wrap;
   justify-content: center;
+  margin-bottom: 200px;
 }
 
-
+h2 {
+  color: white;
+  font-size: 25px;
+  margin: 30px;
+}
+.project-title {
+  font-size: 80px;
+  color: white;
+  margin-top: -90px;
+}

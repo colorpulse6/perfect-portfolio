@@ -55,9 +55,6 @@ export default ({
     navOpen ? [sidebarRef, itemsRef] : [itemsRef, sidebarRef],
     navOpen ? [0, 0.25] : [0, 0.6]
   )
-  useEffect(() => {
-    console.log(transitionStatus)
-  }, [transitionStatus])
 
   const [isHover, setIsHover] = useState({ hover: false, index: null })
 

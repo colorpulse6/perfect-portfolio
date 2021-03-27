@@ -28,7 +28,7 @@ const IndexPage = ({ transitionStatus }) => {
     <div style={{ opacity: 0 }} className="hometex">
       <SEO title="Home" />
       <div className="title">
-        <h1>
+        <h1 className="background-video">
           fullstack
           <br />
           developer

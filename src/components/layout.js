@@ -34,10 +34,6 @@ const Layout = ({ children, transitionStatus }) => {
   const cursorYSpring = useSpring(cursorY, springConfig)
 
   React.useEffect(() => {
-    console.log("HomePage", transitionStatus)
-  }, [transitionStatus])
-
-  React.useEffect(() => {
     setNavOpen(false)
     const moveCursor = e => {
       cursorX.set(e.clientX - 16)
