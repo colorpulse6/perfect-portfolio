@@ -9,6 +9,7 @@ export default ({
   navOpen,
   setNavOpen,
   transitionStatus,
+
   // onAnimationStart,
   // onAnimationEnd
 }) => {

@@ -7,13 +7,14 @@ import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
 import "./header.css"
 const Header = props => {
+  
   return (
     <header>
       <div
         style={{
           margin: `0 auto`,
           // maxWidth: 960,
-          padding: `1.45rem 1.0875rem`,
+          padding: "20px",
           display: "flex",
           justifyContent: "space-between",
         }}

@@ -13,18 +13,27 @@ import gsap from "gsap"
 
 import Header from "./header"
 import SideBar from "../components/SideBar"
+import SideBarCollapsed from "../components/SideBarCollapsed"
+import Slide from "react-reveal/Slide"
+
 import "./layout.css"
 
-const Layout = ({ children, transitionStatus }) => {
+const Layout = ({ children, transitionStatus, location }) => {
   const data = useStaticQuery(graphql`
     query SiteTitleQuery {
       site {
         siteMetadata {
           title
+          siteURL
+          menuLinks {
+            name
+            link
+          }
         }
       }
     }
   `)
+  const [isHome, setIsHome] = React.useState(false)
   const [navOpen, setNavOpen] = React.useState(false)
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
@@ -46,6 +55,13 @@ const Layout = ({ children, transitionStatus }) => {
       window.removeEventListener("mousemove", moveCursor)
     }
   }, [])
+
+  React.useEffect(() => {
+    if (data.site.siteMetadata.siteURL === "http://localhost:8000/") {
+      setIsHome(true)
+    }
+  }, [data])
+
   return (
     <>
       <motion.div
@@ -59,8 +75,20 @@ const Layout = ({ children, transitionStatus }) => {
       <Header
         navOpen={navOpen}
         setNavOpen={setNavOpen}
-        siteTitle={data.site.siteMetadata?.title || `Title`}
+        siteTitle={data.site.siteMetadata.title || `Title`}
       />
+
+      <div>
+        <Slide left>
+          <SideBarCollapsed
+            navOpen={navOpen}
+            setNavOpen={setNavOpen}
+            homeURL={data.site.siteMetadata.siteURL}
+            menuLinks={data.site.siteMetadata.menuLinks}
+          />
+        </Slide>
+      </div>
+
       <SideBar
         navOpen={navOpen}
         setNavOpen={setNavOpen}

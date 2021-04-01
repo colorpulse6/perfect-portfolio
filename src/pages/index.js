@@ -24,6 +24,7 @@ const IndexPage = ({ transitionStatus }) => {
       gsap.to(".hometex", { autoAlpha: 0, duration: 1 }) //if we are exiting  the page, let's make the div with class .hometex transparent in one second
     }
   }, [transitionStatus])
+
   return (
     <div style={{ opacity: 0 }} className="hometex">
       <SEO title="Home" />

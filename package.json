@@ -8,6 +8,7 @@
     "delay": "^5.0.0",
     "framer-motion": "^3.10.3",
     "gatsby": "^3.0.1",
+    "gatsby-cli": "^3.2.0",
     "gatsby-plugin-gatsby-cloud": "^2.0.0",
     "gatsby-plugin-image": "^1.0.0",
     "gatsby-plugin-manifest": "^3.0.0",

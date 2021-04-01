@@ -3,6 +3,25 @@ module.exports = {
     title: `Nichalas Barnes`,
     description: `Nichalas Barnes Portfolio`,
     author: `Nicholas Barnes`,
+    siteURL: "http://localhost:8000/",
+    "menuLinks": [
+      {
+        "name": "home",
+        "link": "/"
+      },
+      {
+        "name": "projects",
+        "link": "/projects"
+      },
+      {
+        "name": "projects",
+        "link": "/about"
+      },
+      {
+        "name": "projects",
+        "link": "/contact"
+      }
+    ]
   },
   plugins: [
     {
@@ -38,6 +57,6 @@ module.exports = {
     // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
-    'gatsby-plugin-postcss'],
-  
+    "gatsby-plugin-postcss",
+  ],
 }

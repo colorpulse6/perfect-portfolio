@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, createRef, useEffect } from "react"
 import "../../src/pages/projects.css"
 import JobToastGif from "../images/job-toast-gif.gif"
 import HoopItAppGif from "../images/hoop.it.app.gif"
@@ -21,8 +21,8 @@ const Project = ({
   description,
   techArray,
   index,
-  refString,
-  executeScroll,
+  scrollToDiv,
+  firestore,
 }) => {
   const [hover, setHover] = useState(false)
   const [linkHover, setLinkHover] = useState({ active: false, index: "" })
@@ -134,18 +134,28 @@ const Project = ({
       </div>
       {index != 4 ? (
         <img
-          onClick={() => console.log("executeScroll"+refString)}
+          onClick={() => {
+            window.scrollBy(0, 1285)
+          }}
           src={arrowDown}
           className="icons"
-          style={{ margin: "0 auto" }}
+          style={{
+            margin: "0 auto",
+            marginTop: "100px",
+            marginBottom: "450px",
+          }}
         />
       ) : (
         <img
+          onClick={() => {
+            window.scrollTo(0, 0)
+          }}
           src={arrowUp}
-          className="icons"
+          className={firestore ? "fire-store icons" : "icons"}
           style={{
             transform: "rotate(180deg)",
             margin: "0 auto",
+            marginTop: name == "Fire Store" ? "550px" : "100px",
           }}
         />
       )}

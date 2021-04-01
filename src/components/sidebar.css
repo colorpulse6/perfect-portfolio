@@ -21,3 +21,28 @@
   font-weight: bold;
   z-index: 6;
 }
+
+.sidebar-collapsed {
+  color: white;
+  text-transform: uppercase;
+  font-family: Kano;
+  margin: 20px;
+  z-index: 5;
+  position: absolute;
+  width: 100%;
+}
+
+.sidebar-collapsed__item {
+  cursor: pointer;
+  padding-bottom: 25px;
+
+  z-index: 6;
+}
+
+.second-title {
+  width: 100%;
+  /* margin: 0 auto; */
+  margin-left: 575px;
+  margin-top: -50px;
+  font-size: 30px;
+}

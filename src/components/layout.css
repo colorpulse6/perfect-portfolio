@@ -1,8 +1,8 @@
-@font-face{
+@font-face {
   font-family: "SteinerLight-JR1o";
   src: url("../images//SteinerLight-JR1o.ttf") format("truetype");
 }
-@font-face{
+@font-face {
   font-family: "Kano";
   src: url("../images//Kano.otf") format("truetype");
 }
@@ -10,7 +10,7 @@
   cursor: none !important;
 }
 .cursor {
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   width: 22px;
@@ -19,9 +19,7 @@
   background-color: white;
   mix-blend-mode: difference;
   background-color: white;
-  
 }
-
 
 html {
   -ms-text-size-adjust: 100%;
@@ -79,8 +77,8 @@ template {
 a {
   background-color: transparent;
   -webkit-text-decoration-skip: objects;
-  color:white;
-  text-decoration:none
+  color: white;
+  text-decoration: none;
 }
 a:active,
 a:hover {
