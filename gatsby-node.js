@@ -17,7 +17,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1616361595/Portfolio/project-images/sdaembqjnoljspya3uug.png",
       description:
-        "Hoop.It.App is a web and mobile app that allows you to organize basketball games in your city and build teams with your friends. Includes a chat function for easy organization and an interactive map for finding courts and games in your area.",
+        "A tool to aid in the job search. Keep track of information for jobs found and applied, prepare for interviews and get the gig!",
     },
     {
       name: "Hoop.It.App",
@@ -40,7 +40,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1616361970/Portfolio/project-images/et8hsi32oszqi3e3bdl4.png",
       description:
-        "Hoop.It.App is a web and mobile app that allows you to organize basketball games in your city and build teams with your friends. Includes a chat function for easy organization and an interactive map for finding courts and games in your area.",
+        "A simple Book collection app using Google Books API.",
     },
     {
       name: "Gigzilla",
@@ -51,7 +51,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1616362260/Portfolio/project-images/x1ivnv5gchqi4tiph0q6.png",
       description:
-        "Hoop.It.App is a web and mobile app that allows you to organize basketball games in your city and build teams with your friends. Includes a chat function for easy organization and an interactive map for finding courts and games in your area.",
+        "Gigzilla offers a convenient platform for for musicians and venues to contact each other to make it easier for musicians to build tours and venues to book shows.",
     },
     {
       name: "Mad Science",
@@ -60,9 +60,9 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       techArray: [8, 1, 7, 11, 15],
       ref: "madScienceRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/q_auto,f_auto/v1596015872/Portfolio/project-images/s5xigxb6xn8ruluk6gq4.png",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1618133528/Portfolio/project-images/gdsjgsgl8bhkwbxonxcs.png",
       description:
-        "Hoop.It.App is a web and mobile app that allows you to organize basketball games in your city and build teams with your friends. Includes a chat function for easy organization and an interactive map for finding courts and games in your area.",
+        "Mad Science is a game where the player must click on the appropriate balls falling from the screen to fill his beakers with ingredients. Each beaker will hold 3 ingredients. If the player fills 4 beakers he will advance to the next level. The player starts with 10 lives and will loose a life if a target ball falls to the floor before he is able to catch it. He will also gain a life as well as score points if he clicks on a target ball.",
     },
   ]
   projects.forEach(project => {

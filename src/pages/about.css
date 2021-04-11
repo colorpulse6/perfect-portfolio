@@ -1,0 +1,26 @@
+.about {
+  margin: 150px 150px 0 150px;
+  opacity: 0;
+  text-align: center;
+}
+
+.about-content {
+  color: white;
+  font-size: 22px;
+  margin-top: -180px;
+}
+
+.about .second-title {
+  margin-top: -100px;
+}
+
+.external-container {
+  margin-top: 75px;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.external-container h1 {
+  font-size: 50px;
+}

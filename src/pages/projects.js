@@ -4,8 +4,10 @@ import gsap from "gsap"
 import Project from "../components/Project"
 import { getImages } from "../helpers/techImages"
 import { useStaticQuery, graphql } from "gatsby"
+import SideBarCollapsed from "../components/SideBarCollapsed"
+import Slide from "react-reveal/Slide"
 
-const Projects = ({ transitionStatus }) => {
+const Projects = ({ transitionStatus, location }) => {
   const data = useStaticQuery(graphql`
     query MyProjectQuery {
       allProject {
@@ -52,53 +54,41 @@ const Projects = ({ transitionStatus }) => {
     })
   }, [])
 
-  // const refs = useRef(data.allProject.nodes.map(() => createRef()))
-
-  // useEffect(() => {
-  //   console.log(refs)
-  // }, [refs])
-
-  // useEffect(() => {
-  //   setProjectRefs(refs)
-  // }, [refs])
-
-  // useEffect(() => {
-  //   console.log(projectRefs)
-  // }, [projectRefs])
-
-  // useEffect(() => {
-  //   itemsRef.current = itemsRef.current.slice(0, data.allProject.nodes.length)
-  // }, [data.allProject])
-
-  // const scrollToDiv = ref => window.scrollTo(0, ref.offsetTop)
   const scrollToDiv = ref => console.log(ref)
 
   return (
-    <div
-      style={{ opacity: 0, position: "relative", overflow: "scroll" }}
-      className="projects"
-    >
-      <SEO title="Projects" />
-      {data &&
-        data.allProject.nodes.map((project, i) => {
-          return (
-            <Project
-              image={project.imgSrc}
-              description={project.description}
-              name={project.name}
-              techArray={getImages(project.techArray)}
-              index={i}
-              link={project.link}
-              github={project.github}
-              // ref={el => (inputRef.current[i] = el)}
-              onChange={handler(i)}
-              key={i}
-              scrollToDiv={scrollToDiv}
-              firestore={project.name === "Fire Store"}
-            />
-          )
-        })}
-    </div>
+    <>
+      {" "}
+      <SideBarCollapsed currentWindow={location.pathname} />
+      <div
+        style={{ opacity: 0, position: "relative"}}
+        className="projects"
+      >
+        <SEO title="Projects" />
+        <p className="second-title background-video">
+          {location.pathname.substring(1)}
+        </p>
+        {data &&
+          data.allProject.nodes.map((project, i) => {
+            return (
+              <Project
+                image={project.imgSrc}
+                description={project.description}
+                name={project.name}
+                techArray={getImages(project.techArray)}
+                index={i}
+                link={project.link}
+                github={project.github}
+                // ref={el => (inputRef.current[i] = el)}
+                onChange={handler(i)}
+                key={i}
+                // scrollToDiv={scrollToDiv}
+                firestore={project.name === "Fire Store"}
+              />
+            )
+          })}
+      </div>
+    </>
   )
 }
 

@@ -2,11 +2,12 @@ import * as React from "react"
 import { Link } from "gatsby"
 import { StaticImage } from "gatsby-plugin-image"
 import gsap from "gsap"
-
+import SideBarCollapsed from "../components/SideBarCollapsed"
+import Slide from "react-reveal/Slide"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import "./index.css"
-const IndexPage = ({ transitionStatus }) => {
+const IndexPage = ({ transitionStatus, location }) => {
   React.useEffect(() => {
     gsap.to(".hometex", {
       autoAlpha: 1,
@@ -24,18 +25,22 @@ const IndexPage = ({ transitionStatus }) => {
       gsap.to(".hometex", { autoAlpha: 0, duration: 1 }) //if we are exiting  the page, let's make the div with class .hometex transparent in one second
     }
   }, [transitionStatus])
-
   return (
-    <div style={{ opacity: 0 }} className="hometex">
-      <SEO title="Home" />
-      <div className="title">
-        <h1 className="background-video">
-          fullstack
-          <br />
-          developer
-        </h1>
+    <>
+      {/* <Slide left>
+        <SideBarCollapsed currentWindow={location.pathname} />
+      </Slide> */}
+      <div style={{ opacity: 0 }} className="hometex">
+        <SEO title="Home" />
+        <div className="title">
+          <h1 className="background-video">
+            fullstack
+            <br />
+            developer
+          </h1>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

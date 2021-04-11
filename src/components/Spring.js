@@ -22,15 +22,17 @@ const Spring = ({ isTitle, children }) => {
   }))
 
   return (
-    <animated.div
-      onMouseMove={({ clientX: x, clientY: y }) =>
-        isTitle ? set({ xys: calcTitle(x, y) }) : set({ xys: calc(x, y) })
-      }
-      onMouseLeave={() => set({ xys: [0, 0, 1] })}
-      style={{ transform: props.xys.interpolate(trans) }}
-    >
-      {children}
-    </animated.div>
+    <>
+      <animated.div
+        onMouseMove={({ clientX: x, clientY: y }) =>
+          isTitle ? set({ xys: calcTitle(x, y) }) : set({ xys: calc(x, y) })
+        }
+        onMouseLeave={() => set({ xys: [0, 0, 1] })}
+        style={{ transform: props.xys.interpolate(trans) }}
+      >
+        {children}
+      </animated.div>
+    </>
   )
 }
 

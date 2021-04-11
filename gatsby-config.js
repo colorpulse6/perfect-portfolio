@@ -4,24 +4,24 @@ module.exports = {
     description: `Nichalas Barnes Portfolio`,
     author: `Nicholas Barnes`,
     siteURL: "http://localhost:8000/",
-    "menuLinks": [
+    menuLinks: [
       {
-        "name": "home",
-        "link": "/"
+        name: "home",
+        link: "/",
       },
       {
-        "name": "projects",
-        "link": "/projects"
+        name: "projects",
+        link: "/projects",
       },
       {
-        "name": "projects",
-        "link": "/about"
+        name: "projects",
+        link: "/about",
       },
       {
-        "name": "projects",
-        "link": "/contact"
-      }
-    ]
+        name: "projects",
+        link: "/contact",
+      },
+    ],
   },
   plugins: [
     {
@@ -50,7 +50,7 @@ module.exports = {
         background_color: `#663399`,
         theme_color: `#663399`,
         display: `minimal-ui`,
-        icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
+        icon: `src/images/nic-barnes-logo.png`, // This path is relative to the root of the site.
       },
     },
     `gatsby-plugin-gatsby-cloud`,

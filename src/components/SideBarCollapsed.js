@@ -11,18 +11,12 @@ import ContactIcon from "../images/letter-icon.png"
 import { useStaticQuery, graphql } from "gatsby"
 
 export default ({
-  homeURL,
+  currentWindow,
   transitionStatus,
   menuLinks,
   // onAnimationStart,
   // onAnimationEnd
 }) => {
-  const [isHomePage, setisHomePage] = useState(false)
-
-  React.useEffect(() => {
-    console.log(menuLinks)
-  }, [])
-
   // const sidebarRef = useRef()
   // const transition = useTransition(navOpen, null, {
   //   from: {
@@ -70,28 +64,23 @@ export default ({
   // useChain([sidebarRef, itemsRef], [0, 0.25])
 
   const [isHover, setIsHover] = useState({ hover: false, index: null })
-  React.useEffect(() => {
-    console.log(isHover)
-  }, [isHover])
 
-  // const isWindow = item => {
-  //   if(window.location.pathname === `/${String(item.name).toLowerCase()}`) {
-  //     return tr
-  //   }
+  useEffect(() => {
+    console.log(currentWindow)
+  }, [])
 
-  // }
-
+  const isHome = currentWindow === "/"
   return (
     <div className="sidebar-collapsed flex">
       <div>
         {items
-          ? items.map((item, index) => (
+          ? items.map(item => (
               <div className="sidebar-collapsed__item" key={item.name}>
                 <Spring>
                   <TransitionLink
-                    onMouseEnter={() =>
+                    onMouseEnter={() => {
                       setIsHover({ hover: true, index: item })
-                    }
+                    }}
                     onMouseLeave={() => setIsHover(false)}
                     to={
                       item && item.name != "Home"
@@ -101,14 +90,24 @@ export default ({
                   >
                     <img
                       style={{
-                        opacity: "100%",
-                        width: "40px",
+                        opacity:
+                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          (item.name === "Home" && isHome)
+                            ? "100%"
+                            : "20%",
+                        width:"40px",
                         backgroundImage:
-                          isHover.hover && isHover.index.name == item.name
+                          (isHover.hover && isHover.index.name == item.name) ||
+                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          (item.name === "Home" && isHome)
                             ? "url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif)"
                             : "",
 
-                        marginLeft: "25px",
+                        marginLeft:
+                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          (item.name === "Home" && isHome)
+                            ? "35px"
+                            : "25px",
 
                         marginTop: "-40px",
                       }}
@@ -121,7 +120,6 @@ export default ({
             ))
           : null}
       </div>
-      <p className="second-title"> Fuck yall! </p>
     </div>
   )
 }

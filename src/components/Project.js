@@ -132,7 +132,7 @@ const Project = ({
           )
         })}
       </div>
-      {index != 4 ? (
+      {/* {index != 4 ? (
         <img
           onClick={() => {
             window.scrollBy(0, 1285)
@@ -158,7 +158,8 @@ const Project = ({
             marginTop: name == "Fire Store" ? "550px" : "100px",
           }}
         />
-      )}
+      )} */}
+      {index !== 4?  <hr></hr> : null}
     </>
   )
 }

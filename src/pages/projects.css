@@ -8,6 +8,7 @@
 }
 .projects {
   margin-top: 50px;
+  text-align: center;
 }
 
 .projects .fire-store {
@@ -17,9 +18,10 @@
 
 .project-container {
   display: flex;
-  margin: 50px;
+  margin: 100px;
   margin-bottom: 350px;
   margin-top: 100px;
+  
 }
 
 .project-container h1 {
@@ -68,7 +70,13 @@
   max-width: 100%;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 100px;
+  margin-bottom: 150px;
+}
+
+hr {
+  display: block; height: 1px;
+     border-top: 1px solid #ccc;
+    margin: 0 auto; padding: 0; width: 50%;margin-bottom: 200px;
 }
 
 h2 {

@@ -6,7 +6,7 @@
   font-family: "Kano";
   src: url("../images//Kano.otf") format("truetype");
 }
-* {
+/* * {
   cursor: none !important;
 }
 .cursor {
@@ -19,7 +19,7 @@
   background-color: white;
   mix-blend-mode: difference;
   background-color: white;
-}
+} */
 
 html {
   -ms-text-size-adjust: 100%;
@@ -177,7 +177,7 @@ hr {
   padding-right: 0;
   padding-top: 0;
   margin-bottom: calc(1.45rem - 1px);
-  background: hsla(0, 0%, 0%, 0.2);
+  background: hsla(0, 11%, 95%, 0.2);
   border: none;
   height: 1px;
 }
@@ -621,3 +621,5 @@ pre tt:after {
     font-size: 100%;
   }
 }
+
+

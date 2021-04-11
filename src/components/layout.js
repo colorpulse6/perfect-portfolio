@@ -33,11 +33,9 @@ const Layout = ({ children, transitionStatus, location }) => {
       }
     }
   `)
-  const [isHome, setIsHome] = React.useState(false)
   const [navOpen, setNavOpen] = React.useState(false)
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
-
   const springConfig = { damping: 25, stiffness: 700 }
   const cursorXSpring = useSpring(cursorX, springConfig)
   const cursorYSpring = useSpring(cursorY, springConfig)
@@ -48,46 +46,29 @@ const Layout = ({ children, transitionStatus, location }) => {
       cursorX.set(e.clientX - 16)
       cursorY.set(e.clientY - 16)
     }
-
-    window.addEventListener("mousemove", moveCursor)
+    if (window) window.addEventListener("mousemove", moveCursor)
 
     return () => {
-      window.removeEventListener("mousemove", moveCursor)
+      if (window) window.removeEventListener("mousemove", moveCursor)
     }
   }, [])
 
-  React.useEffect(() => {
-    if (data.site.siteMetadata.siteURL === "http://localhost:8000/") {
-      setIsHome(true)
-    }
-  }, [data])
-
   return (
     <>
-      <motion.div
+      {/* <p>Path is {location.pathname}</p> */}
+      {/* <motion.div
         id="cursor"
         className="cursor"
         style={{
           translateX: cursorXSpring,
           translateY: cursorYSpring,
         }}
-      />
+      /> */}
       <Header
         navOpen={navOpen}
         setNavOpen={setNavOpen}
         siteTitle={data.site.siteMetadata.title || `Title`}
       />
-
-      <div>
-        <Slide left>
-          <SideBarCollapsed
-            navOpen={navOpen}
-            setNavOpen={setNavOpen}
-            homeURL={data.site.siteMetadata.siteURL}
-            menuLinks={data.site.siteMetadata.menuLinks}
-          />
-        </Slide>
-      </div>
 
       <SideBar
         navOpen={navOpen}

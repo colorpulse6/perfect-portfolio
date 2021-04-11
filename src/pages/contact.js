@@ -1,18 +1,14 @@
-import React from "react"
+import React, { useEffect } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
 import Slide from "react-reveal/Slide"
 import Flip from "react-reveal/Flip"
 import "./contact.css"
+import SideBarCollapsed from "../components/SideBarCollapsed"
 
-const Contact = ({ transitionStatus }) => {
-  React.useEffect(() => {
-    gsap.to(".contact", {
-      autoAlpha: 1,
-      duration: 1,
-    })
-  }, []) //THIS IS RUN THE FIRST TIME THE SITE IS OPENED
-  React.useEffect(() => {
+const Contact = ({ transitionStatus, location }) => {
+  //THIS IS RUN THE FIRST TIME THE SITE IS OPENED
+  useEffect(() => {
     if (transitionStatus === "entering") {
       gsap.to(".contact", {
         autoAlpha: 1,
@@ -23,12 +19,19 @@ const Contact = ({ transitionStatus }) => {
       gsap.to(".contact", { autoAlpha: 0, duration: 0.3 }) //if we are exiting  the page, let's make the div with class .hometex transparent in one second
     }
   }, [transitionStatus])
+  useEffect(() => {
+    gsap.to(".contact", {
+      autoAlpha: 1,
+      duration: 1,
+    })
+  }, [])
   return (
-    <div>
+    <>
+      <SideBarCollapsed currentWindow={window.location.pathname} />
       <SEO title="Contact" />
-      <div className="container">
-        <h1 style={{ paddingTop: "20px" }}>
-          <Slide left>Contact Me</Slide>
+      <div className="container contact">
+        <h1 className="contact-title background-video">
+        {location.pathname.substring(1)}
         </h1>
         <h4 className="lead">
           <Slide right>Have a question or want to work together?</Slide>
@@ -81,7 +84,7 @@ const Contact = ({ transitionStatus }) => {
           </button>
         </form>
       </div>
-    </div>
+    </>
   )
 }
 
