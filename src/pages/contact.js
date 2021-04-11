@@ -27,7 +27,7 @@ const Contact = ({ transitionStatus, location }) => {
   }, [])
   return (
     <>
-      <SideBarCollapsed currentWindow={window.location.pathname} />
+      <SideBarCollapsed currentWindow={location.pathname} />
       <SEO title="Contact" />
       <div className="container contact">
         <h1 className="contact-title background-video">
