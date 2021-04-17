@@ -2,7 +2,8 @@ import React, { useEffect } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
 import SideBarCollapsed from "../components/SideBarCollapsed"
-import Link from "gatsby"
+import Spring from "../components/Spring"
+import {Link} from "gatsby"
 import "./about.css"
 const About = ({ transitionStatus, location }) => {
   
@@ -73,16 +74,17 @@ const About = ({ transitionStatus, location }) => {
         </div>
       </div>
       <div className="external-container">
-        <a href="https://alexshand.bandcamp.com/" target="_blank">
+      <Spring><a href="https://alexshand.bandcamp.com/" target="_blank">
           <h1 className="background-video">Music</h1>
-        </a>
-        <a
+        </a></Spring>
+        <Spring><a
           href="https://www.tumblr.com/blog/craftedcoils-blog-blog"
           target="_blank"
         >
           {" "}
           <h1 className="background-video">Writing</h1>
-        </a>
+        </a></Spring>
+        {/* <Link to="/writing/" className="background-video">blog</Link> */}
       </div>
     </>
   )

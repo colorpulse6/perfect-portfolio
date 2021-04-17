@@ -54,7 +54,7 @@ const Layout = ({ children, transitionStatus, location }) => {
   }, [])
 
   return (
-    <>
+    <div className="layout-container">
       {/* <p>Path is {location.pathname}</p> */}
       {/* <motion.div
         id="cursor"
@@ -87,7 +87,7 @@ const Layout = ({ children, transitionStatus, location }) => {
         <footer
           style={{
             color: "white",
-            position: "fixed",
+            marginTop:"150px",
             bottom: 5,
           }}
         >
@@ -96,7 +96,7 @@ const Layout = ({ children, transitionStatus, location }) => {
           <a href="https://www.gatsbyjs.com">Gatsby</a>
         </footer>
       </div>
-    </>
+    </div>
   )
 }
 

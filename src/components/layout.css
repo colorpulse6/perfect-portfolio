@@ -617,9 +617,14 @@ pre tt:after {
   content: "";
 }
 @media only screen and (max-width: 480px) {
+  .layout-container {
+    width:100vw;
+  }
   html {
     font-size: 100%;
+    
   }
+  
 }
 
 

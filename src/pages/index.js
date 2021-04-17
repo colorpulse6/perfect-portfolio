@@ -7,6 +7,7 @@ import Slide from "react-reveal/Slide"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import "./index.css"
+
 const IndexPage = ({ transitionStatus, location }) => {
   React.useEffect(() => {
     gsap.to(".hometex", {
@@ -26,7 +27,7 @@ const IndexPage = ({ transitionStatus, location }) => {
     }
   }, [transitionStatus])
   return (
-    <>
+    <div>
       {/* <Slide left>
         <SideBarCollapsed currentWindow={location.pathname} />
       </Slide> */}
@@ -40,7 +41,7 @@ const IndexPage = ({ transitionStatus, location }) => {
           </h1>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

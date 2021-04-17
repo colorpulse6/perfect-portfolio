@@ -7,3 +7,23 @@
   margin-left: 20px;
   margin-top: 18px;
 }
+.header-container {
+  margin: 0 auto;
+          padding: 20px;
+          display: flex;
+          justify-content: space-between;
+}
+
+.header-text{
+  margin: -50px 0 0 -80px
+}
+
+@media only screen and (max-width: 550px) {
+ 
+  .header-container{
+    margin-right:-40vw
+  }
+  .header-text {
+   
+  }
+}

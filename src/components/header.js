@@ -11,18 +11,13 @@ const Header = props => {
   return (
     <header>
       <div
-        style={{
-          margin: `0 auto`,
-          // maxWidth: 960,
-          padding: "20px",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
+      className="header-container"
+        
       >
         <div style={{ display: "flex" }}>
           <Spring isTitle>
             <div style={{ display: "flex", alignSelf: "center" }}>
-              <h1 style={{ margin: "-50px 0 0 -80px" }}>
+              <h1 className="header-text " >
                 <Link
                   to="/"
                   style={{
