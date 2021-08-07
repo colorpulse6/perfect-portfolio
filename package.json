@@ -25,6 +25,7 @@
     "react-animated-burgers": "^1.2.8",
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
+    "react-pdf": "^5.3.2",
     "react-placeholder": "^4.1.0",
     "react-reveal": "^1.2.2",
     "react-spring": "^8.0.27",
