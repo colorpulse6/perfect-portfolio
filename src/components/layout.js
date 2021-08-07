@@ -74,7 +74,7 @@ const Layout = ({ children, transitionStatus, location }) => {
         navOpen={navOpen}
         setNavOpen={setNavOpen}
         key="sidebar"
-      ></SideBar>
+      />
 
       <div
         style={{
