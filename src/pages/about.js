@@ -74,17 +74,20 @@ const About = ({ transitionStatus, location }) => {
         </div>
       </div>
       <div className="external-container">
-      <Spring><a href="https://alexshand.bandcamp.com/" target="_blank">
+      {/*<Spring><a href="https://alexshand.bandcamp.com/" target="_blank">*/}
+      {/*    <h1 className="background-video">Music</h1>*/}
+      {/*  </a></Spring>*/}
+      {/*  <Spring><a*/}
+      {/*    href="https://www.tumblr.com/blog/craftedcoils-blog-blog"*/}
+      {/*    target="_blank"*/}
+      {/*  >*/}
+      {/*    {" "}*/}
+      {/*    <h1 className="background-video">Writing</h1>*/}
+      {/*  </a></Spring>*/}
+        <Spring><a href="https://alexshand.bandcamp.com/" target="_blank">
           <h1 className="background-video">Music</h1>
         </a></Spring>
-        <Spring><a
-          href="https://www.tumblr.com/blog/craftedcoils-blog-blog"
-          target="_blank"
-        >
-          {" "}
-          <h1 className="background-video">Writing</h1>
-        </a></Spring>
-        {/* <Link to="/writing/" className="background-video">blog</Link> */}
+        <Spring><h1 className="background-video"><Link to="/writing/">Writing</Link></h1></Spring>
       </div>
     </>
   )

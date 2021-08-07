@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef, createRef } from "react"
+import React, { useEffect, useRef } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
 import Project from "../components/Project"
 import { getImages } from "../helpers/techImages"
 import { useStaticQuery, graphql } from "gatsby"
 import SideBarCollapsed from "../components/SideBarCollapsed"
-import Slide from "react-reveal/Slide"
 
 const Projects = ({ transitionStatus, location }) => {
   const data = useStaticQuery(graphql`

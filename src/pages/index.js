@@ -1,10 +1,5 @@
 import * as React from "react"
-import { Link } from "gatsby"
-import { StaticImage } from "gatsby-plugin-image"
 import gsap from "gsap"
-import SideBarCollapsed from "../components/SideBarCollapsed"
-import Slide from "react-reveal/Slide"
-import Layout from "../components/layout"
 import SEO from "../components/seo"
 import "./index.css"
 
