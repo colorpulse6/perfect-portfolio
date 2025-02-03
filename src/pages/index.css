@@ -26,7 +26,7 @@ h1 {
   background-image: url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif);
   background-size: cover;
   color: transparent !important;
-  -moz-background-clip: text;
+  -moz-background-clip: initial;
   -webkit-background-clip: text;
   /* -webkit-text-stroke: .3px grey; */
 }
@@ -38,6 +38,7 @@ h1 {
   font-size: 60px;
   color: white;
   text-transform: uppercase;
+  padding: 8px 0;
 }
 
 

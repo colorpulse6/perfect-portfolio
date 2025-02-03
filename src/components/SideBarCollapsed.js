@@ -70,12 +70,13 @@ export default ({
   }, [])
 
   const isHome = currentWindow === "/"
+
   return (
     <div className="sidebar-collapsed flex">
       <div>
         {items
           ? items.map(item => (
-              <div className="sidebar-collapsed__item" key={item.name}>
+              <div className="sidebar-collapsed__item " key={item.name}>
                 <Spring>
                   <TransitionLink
                     onMouseEnter={() => {
@@ -91,20 +92,20 @@ export default ({
                     <img
                       style={{
                         opacity:
-                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
                           (item.name === "Home" && isHome)
                             ? "100%"
                             : "20%",
                         width:"40px",
                         backgroundImage:
                           (isHover.hover && isHover.index.name == item.name) ||
-                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
                           (item.name === "Home" && isHome)
                             ? "url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif)"
                             : "",
 
                         marginLeft:
-                          `/${item.name.toLowerCase()}` === currentWindow ||
+                          `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
                           (item.name === "Home" && isHome)
                             ? "35px"
                             : "25px",

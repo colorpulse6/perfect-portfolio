@@ -32,45 +32,17 @@ const About = ({ transitionStatus, location }) => {
       <div style={{ opacity: 0, position: "relative"}} className="about">
         <SEO title="About" />
         <p className="second-title background-video">
-          {location.pathname.substring(1)}
+          {location.pathname.substring(1).replace(/\/$/, "")}
         </p>
         <div className="about-content">
           <p>
-            I am a web developer from Seattle now living in Berlin. I am
-            interested in creative solutions to complex problems. I like to make
-            corny video games, arrange orchestral music and solve math problems.
-            My passion for programming is wrapped in a deep interest in science
-            and technology.
+            I’m a web developer originally from Seattle, now based in Madrid. My passion for solving complex problems creatively drives everything I do—whether it’s building innovative web applications, composing orchestral music, or experimenting with building corny video games. I approach both programming and life with full commitment, seeking to learn, grow, and tackle new challenges.
           </p>
-          <p>
-            I have a background as a professional audio technician, composer,
-            and musician. In 2019 I decided to start to learn to code but was
-            unable to fully commit due to my full-time work as a musician. In
-            March of 2020, the Corona virus effectively disabled musicians
-            around the world provided a window of opportunity for me to study
-            programming full-time. <br></br>I attended the Iron Hack Full-stack
-            Web Development Bootcamp from May - July 2020 which helped solidify
-            my knowledge of JavaScript, React, and Node.js/Express. My previous
-            commitment to music enabled a perfect transition into programming
-            and I basically transplanted my passion from one to the other.
-            Whatever I choose to do in my life, I do it with full commitment,
-            and since I have chosen to be a programmer I have been completely
-            invested in learning more and building projects. I believe the
-            skills I obtained working as an audio technician, bandleader,
-            manager, fund-raiser, composer, and performer have suited me well as
-            a web developer. Not only do the hard skills transition nicely from
-            one discipline to the other but the soft skills as well such as
-            strong communication, conflict management, leadership, teamwork,
-            self-responsibility, and professionalism. <br></br> I treat my code
-            as I would treat my compositions, with care, attention to detail,
-            and a high level of organization. I am an ardent disciple of
-            challenging and difficult music and I would say the same is true for
-            programming. I like to challenge myself with complex systems and
-            applications that require strict organization and planning. In the
-            end, I feel the effort is worth it and I have something that I can
-            be proud of. I am always looking to learn more and grow as a
-            developer.
-          </p>
+        <p>
+          My journey into programming began in 2019 while working as a musician, but it wasn’t until the global pandemic in 2020 that I had the opportunity to pursue coding full-time. I enrolled in the Ironhack Full-stack Web Development Bootcamp, where I deepened my skills in JavaScript, React, and Node.js/Express. This transition was seamless for me—my background in music provided a perfect foundation. Both music and programming require precision, creativity, and an ability to break down complex systems into manageable pieces.
+        </p>
+          <p>Before programming, I worked as an audio technician, bandleader, composer, and manager. My diverse career in music shaped my approach to development—emphasizing clear communication, collaboration, leadership, and attention to detail. These soft skills, combined with my technical expertise, allow me to tackle complex projects with confidence and efficiency.</p>
+        <p>I treat my code as I would my compositions—carefully crafted, well-organized, and always striving for improvement. Whether working on a challenging feature or an intricate piece of music, I enjoy the process of pushing my limits and delivering something I can be proud of. I’m always eager to learn and take on new challenges in the world of web development.</p>
         </div>
       </div>
       <div className="external-container">
@@ -87,7 +59,7 @@ const About = ({ transitionStatus, location }) => {
         <Spring><a href="https://alexshand.bandcamp.com/" target="_blank">
           <h1 className="background-video">Music</h1>
         </a></Spring>
-        <Spring><h1 className="background-video"><Link to="/writing/">Writing</Link></h1></Spring>
+        <Spring><h1><Link className="background-video" to="/writing/">Writing</Link></h1></Spring>
       </div>
     </>
   )

@@ -14,7 +14,6 @@ import gsap from "gsap"
 import Header from "./header"
 import SideBar from "../components/SideBar"
 import SideBarCollapsed from "../components/SideBarCollapsed"
-import Slide from "react-reveal/Slide"
 
 import "./layout.css"
 

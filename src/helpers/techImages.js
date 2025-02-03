@@ -14,6 +14,8 @@ import postgres from "../images/postgresql.svg"
 import react from "../images/react-original-wordmark.svg"
 import typescript from "../images/typescript.svg"
 import vscode from "../images/visualstudio-plain-wordmark.svg"
+import graphql from "../images/graph-ql.png"
+import gpt from "../images/gpt.jpg"
 
 export const techImages = [
   bootstrap,
@@ -32,6 +34,8 @@ export const techImages = [
   react,
   typescript,
   vscode,
+  graphql,
+  gpt
 ]
 
 export const getImages = (array) => {

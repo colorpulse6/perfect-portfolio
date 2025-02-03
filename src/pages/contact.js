@@ -1,8 +1,7 @@
 import React, { useEffect } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
-import Slide from "react-reveal/Slide"
-import Flip from "react-reveal/Flip"
+import { Slide,Flip } from "react-awesome-reveal"
 import "./contact.css"
 import SideBarCollapsed from "../components/SideBarCollapsed"
 
@@ -31,7 +30,7 @@ const Contact = ({ transitionStatus, location }) => {
       <SEO title="Contact" />
       <div className="container contact">
         <h1 className="contact-title background-video">
-        {location.pathname.substring(1)}
+          {location.pathname.substring(1).replace(/\/$/, "")}
         </h1>
         <h4 className="lead">
           <Slide right>Have a question or want to work together?</Slide>
@@ -48,29 +47,29 @@ const Contact = ({ transitionStatus, location }) => {
           <div className="main">
             <div>
               <label>
-                <Flip left>Your Name: </Flip>
-                <Flip left>
+                <Flip left duration={300}>Your Name: </Flip>
+                <span >
                   {" "}
                   <input type="text" name="name" />
-                </Flip>
+                </span>
               </label>
             </div>
             <div>
               <label>
-                <Flip left>Your Email:</Flip>{" "}
-                <Flip right>
+                <Flip right duration={300}>Your Email:</Flip>{" "}
+                <span >
                   {" "}
                   <input type="email" name="email" required />
-                </Flip>
+                </span>
               </label>
             </div>
 
             <div>
               <label>
-                <Flip left>Message: </Flip>
-                <Flip left>
+                <Flip left duration={300}>Message: </Flip>
+                <span >
                   <textarea name="message"></textarea>
-                </Flip>
+                </span>
               </label>
             </div>
           </div>

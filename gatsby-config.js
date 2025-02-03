@@ -1,5 +1,6 @@
 module.exports = {
   siteMetadata: {
+    html: { useGatsbyImage: false },
     title: `Nichalas Barnes`,
     description: `Nichalas Barnes Portfolio`,
     author: `Nicholas Barnes`,

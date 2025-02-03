@@ -1,17 +1,13 @@
-import React, { useState, useRef, createRef, useEffect } from "react"
+import React, { useState } from "react"
 import "../../src/pages/projects.css"
-import JobToastGif from "../images/job-toast-gif.gif"
 import HoopItAppGif from "../images/hoop.it.app.gif"
 import FireStoreGif from "../images/fire-store-gif.gif"
 import GigZillaGif from "../images/Gigzilla.gif"
 import MadScienceGif from "../images/mad-science-gif.gif"
-import Slide from "react-reveal/Slide"
-import Fade from "react-reveal/Fade"
-import Flip from "react-reveal/Flip"
-import Tada from "react-reveal/Tada"
+import JobToastGif from "../images/job-toast.gif"
+import { Slide, Fade ,Flip  } from "react-awesome-reveal"
+
 import Spring from "../components/Spring"
-import arrowDown from "../images/arrow-down.png"
-import arrowUp from "../images/up-arrow.png"
 
 const Project = ({
   name,
@@ -57,8 +53,7 @@ const Project = ({
           />
         </Fade>
         <div className="description-container">
-          <Slide left={index % 2 == 0} right={index % 2 != 0}>
-            <Spring>
+          <Slide direction={index % 2 !== 0 ? "left" : "right"}>            <Spring>
               <a
                 href={link}
                 target="_blank"
@@ -73,15 +68,20 @@ const Project = ({
                   }
                 >
                   {name}
+
                 </h3>
+               <span> {name === "Gigzilla" && " (Deprecated)"}</span>
               </a>
             </Spring>
+            <p>{description}</p>
+
           </Slide>
-          <Flip left opposite cascade collapse>
+          <Flip left opposite cascade collapse duration={500}>
             <div>
-              <p>{description}</p>
+
               <a
                 href={github}
+                target="_blank"
                 onMouseEnter={() =>
                   setLinkHover({ active: true, index: "github" })
                 }
@@ -101,6 +101,7 @@ const Project = ({
               </a>
               <a
                 href={link}
+                target="_blank"
                 onMouseEnter={() =>
                   setLinkHover({ active: true, index: "link" })
                 }
@@ -126,9 +127,9 @@ const Project = ({
       <div className="tech-container">
         {techArray.map((image, i) => {
           return (
-            <Tada key={i}>
+            // <Tada key={i}>
               <img className="tech-image" src={image} />
-            </Tada>
+            // </Tada>
           )
         })}
       </div>

@@ -29,6 +29,10 @@
   margin: 0 auto;
 }
 
+.strikethrough {
+  text-decoration: line-through;
+}
+
 .project-images {
   width: 750px;
   height: 435px;
