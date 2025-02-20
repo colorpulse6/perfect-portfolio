@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
-import Project  from "../components/Project.js"
+import Project from "../components/Project.js"
 import { getImages } from "../helpers/techImages"
 import { useStaticQuery, graphql } from "gatsby"
 import SideBarCollapsed from "../components/SideBarCollapsed"
@@ -54,15 +54,12 @@ const Projects = ({ transitionStatus, location }) => {
   }, [])
 
   const scrollToDiv = ref => console.log(ref)
-console.log(data)
+
   return (
     <>
       {" "}
       <SideBarCollapsed currentWindow={location.pathname} />
-      <div
-        style={{ opacity: 0, position: "relative"}}
-        className="projects"
-      >
+      <div style={{ opacity: 0, position: "relative" }} className="projects">
         <SEO title="Projects" />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
