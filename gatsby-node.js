@@ -6,18 +6,17 @@
 
 // You can delete this file if you're not using it
 
-const { SourceMapConsumer } = require('source-map');
+const { SourceMapConsumer } = require("source-map")
 
 SourceMapConsumer.initialize({
-  'lib/mappings.wasm': 'https://unpkg.com/source-map@0.7.3/lib/mappings.wasm'
-});
+  "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.3/lib/mappings.wasm",
+})
 
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
       name: "Job Toast",
       link: "https://jobtoast.io/",
-      github: "https://github.com/colorpulse6/jt3",
       techArray: [13, 10, 12, 2, 8, 1, 7, 6, 15, 16, 17],
       ref: "jobToastRef",
       imgSrc:
@@ -45,8 +44,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       ref: "fireStoreRef",
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1616361970/Portfolio/project-images/et8hsi32oszqi3e3bdl4.png",
-      description:
-        "A simple Book collection app using Google Books API.",
+      description: "A simple Book collection app using Google Books API.",
     },
     {
       name: "Gigzilla",
@@ -92,7 +90,8 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const writing = [
     {
       title: "A Room With A View",
-      content:"\t   Not only is the floor hard but its covered in wires.  The empty cigarette packs make a nice cushion if they're in the right position.  Theres a vent high above me that almost touches the cement ceiling but stops short.  I like to look at it like it's some bond villain; more powerful than the wall but not quite as collected and austere as the ceiling.  Like it's waiting at the bus terminal with a bomb.  Waiting for a certain bus with a certain passenger but is to distracted by it's own motive and doesn't read the right sign and ends up missing the bus because he isn't sure which passenger is on which bus.  Always he misses the bus.  Will always miss the bus.  Theres no two ways about it.  \n" +
+      content:
+        "\t   Not only is the floor hard but its covered in wires.  The empty cigarette packs make a nice cushion if they're in the right position.  Theres a vent high above me that almost touches the cement ceiling but stops short.  I like to look at it like it's some bond villain; more powerful than the wall but not quite as collected and austere as the ceiling.  Like it's waiting at the bus terminal with a bomb.  Waiting for a certain bus with a certain passenger but is to distracted by it's own motive and doesn't read the right sign and ends up missing the bus because he isn't sure which passenger is on which bus.  Always he misses the bus.  Will always miss the bus.  Theres no two ways about it.  \n" +
         "\tThere are pipes.  One is in a perpendicular erection to the wall but straight forward like the penis had a muzzled dog nose.  Another pipe behind it, thicker and spray painted for some reason, was burrowed into a drywall box in one corner on one end and painted the same color as the drywall box in the opposite corner.  This is weird to me.  Fucking weird.  Like an ironic mistake.   It occurs to me that I have to think about these things if I ever want to fall asleep.  Especially in this place.   Unless I am comfortable, my mind will devour me and I will eat reality like I'm starving and it's a delicious hamburger, until the daydream becomes a nightmare and I become comfortable because I have picked certain things out to help occupy my brain with meaningless information.  It has to be this way.  Things have to bear absolutely no importance on my waking life, it has to be random, arbitrary, stupid…otherwise my mind will eat it up and I cannot handle the digestion because my metabolism is too quick.  And insatiable, never filled, always hungry.  Like there is a tunnel inside of the mind and at the end is a slight glimmer of something you can barely touch and despite how much you want it and how obsessed you become with it, it just becomes a part of your dream or twisted nightmare.  And then you fall asleep.   \n" +
         "\tI have been in this room for an indeterminable amount of time.  Its part of an experiment, I have agreed to.  I cannot leave, it is part of the experiment, and if I do, everything will fall apart somehow and I will loose what I have been trying to obtain and in one fell swoop become exposed again to the fucked up world outside and my mind, the frailest of organs, will once again become diluted by society.  It will give me information that I do not need or want and it will reduce me proper.  Like vermiculite to soil, like sand, like the croppings of beetle wings, sawdust and basil that, in some mad scientist's version of  an antidote to some disease I do not have, is somehow connected to the panacea that I need but can never bring myself to ask for.  \n" +
         "\tI have a friend that comes by and brings me things.  Survival elements;  Food, beer and cigarettes mostly.  The later two without question, the former can momentarily be substituted by meditation and further drinking.  The food is usually dim sum.  I didn't ask for it but I don't really care.  I'll eat shoelaces when Im drunk and the MSG makes me feel like i'm sparkles and helps me sleep so I go with it.  Sometimes he brings me trinkets which I usually throw into a corner somewhere but then rearrange them quickly if I know he's coming to establish a perception that maybe I am ministering these stupid items as if they mean something to me.  Maybe they should.  I just don't seem to care.  My friend's name is Fred.\n" +
@@ -108,63 +107,61 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "\tThe list of items I have in this room are as follows:  a tiny glockenspiel that I hammer out rhythms with, a recording interface, two microphones, two speakers, a children sized drum set, 37 books of empty college ruled paper piled up in the corner and 3 scattered about the room with diametric scribblings and esoteric remarks on random pages about divinity, 20 30 paged books of staff paper untouched, a USB keyboard, a Bob Hope marionette I bought from a Ukrainian gypsy on 4th ave in Olympia, 3 firewire cables, 7 xlr cables, a pair of colorful boots, an amplifier and 3 foot switches.  \n" +
         "\tI have acquired the habit of marking, with a ball point pen, all of the spots where I bruised, cut or hurt myself.  For example, I fell onto a cymbal stand the other day and now my shoulder is in considerable pain.  I think i'll keep re-marking it until it goes away.  At least I can reach it.  At least I can diagnose the problem.  I feel as if this calculated procedure will help in identifying things about myself that would otherwise go unnoticed.  At least the parts of myself that I can reach.  If I am not becoming a robot, than I am coming close to being one.  As if thought were just an amalgam of circumstance.  My environment is finite, like a local bar where you are a regular.  You keep thinking you are going to experience something different with each day, but nothing ever changes.  You go in, expecting to find that one thing that tells you that you are alive and not just a machine, but it never comes.  You are the same person you were yesterday, and the day before, and you can never expect anything different.  You can never expect life to be something that it isn't because then it never will.  You will always be seeing past life instead of through it.  Your frustration of what is not happening will shadow reality and make you a non-entity, a husk of what was once a human.  But then you wake up for some reason in the middle of the night and go outside, because this is where you think life happens.",
-
-},
+    },
     {
       title: "Jeff's Weird Fantasy",
       content:
         "   Jeffrey is the most powerful being in the universe.  He had his qualms with it though.  For example, he couldn't stand being the outcast of a situation.  The foreigner.  The Social Interaction was his god and he prayed to it just a little bit more than the rest of us.  Its not as if he had to be at the center of anything, no, he didn't like that either, made him feel weird, on the spot, like he was being admired as is a shinny diamond or a sunset, something that had no foundation other than what was imagined; unreachable, untouchable, just a catalyst for someone else's perceived version of  beauty, contorted, disturbed, diluted.  If not anything else, he at least wanted to communicate this with people.  Was sad when he wasn't able to.  Made him feel limp, lost, a decrepit goblin scouring the streets around the golden gates.  \n" +
         "\n" +
         "But like us all he was his own worst enemy.  The guy could write his way out of a box made of one way mirrors, but never mustered up the apathy to do so.  Jeffrey was so concerned with the stroke marks that he could never see the full painting.  He cared too much about the little movements of things, the stuff, the shit that doesn't matter, the shit.  He had it down to a science, a mathematics of movement that went on forever.  The end is something you create, and if you don't then life will go on and on and you will miss everything.  The importance of the details can only last for so long before you disintegrate into the surroundings, become just wallpaper with an interesting design on it, but its just wallpaper so no one gives a shit because it's the wallpaper of a really cool bar.  And that would be fine for him even, but in his mind he would be the wallpaper that every talks about.  It would be more like that shit on the walls that make people not want to go to the bar at all.  That shit thats in the background for a reason, stuffed away from the point of focus like a withering flower on which there is maybe one petal left.  A petal that is covered in shit and just trying to lay to rest but can't because reality wont let it.  In his mind Jeff's bullshit would be more important to everyone else than anything good around it.  It would be like a disaster, like a bombing; more influential than any art.  And he would never realize that it's because of his gross, blackened and disgusting flower petal, covered in shit that anyone would ever experience anything at all.  \n" +
-        "\n"
-
+        "\n",
     },
     {
       title: "Jerks",
       content:
         "   At the same time, or slightly before you read this, on a small vessel just outside of the planet Earth's atmosphere, two rather bored looking individuals sat in silence flipping unmarked cards onto a table.  The cards gradually piled up.  \n" +
         "\n" +
-        "\"I win,\" one of them said.\n" +
+        '"I win," one of them said.\n' +
         "\n" +
         "The other collected the cards, shuffled them, split the deck and started over.\n" +
         "\n" +
-        "\"I win. Thats six.  Im telling you, its all in the wrist.\"\n" +
+        '"I win. Thats six.  Im telling you, its all in the wrist."\n' +
         "\n" +
-        "The other shook his head as he gathered up the cards again. \"For you maybe.  But I'm on a whole other level.  I'm working on a special technique,\" he said looking downward with a grimace-like expression, \"a secret technique.  Ancient.  A technique of the mind.\"\n" +
+        'The other shook his head as he gathered up the cards again. "For you maybe.  But I\'m on a whole other level.  I\'m working on a special technique," he said looking downward with a grimace-like expression, "a secret technique.  Ancient.  A technique of the mind."\n' +
         "\n" +
-        "\"Well whatever, I've grown rather fond of the wrist technique.  It seems to be effective for winning.\"\n" +
+        '"Well whatever, I\'ve grown rather fond of the wrist technique.  It seems to be effective for winning."\n' +
         "\n" +
-        "\"Its not all about winning, Siggy.\"\n" +
+        '"Its not all about winning, Siggy."\n' +
         "\n" +
-        "\"Actually thats all its about.\"  \n" +
+        '"Actually thats all its about."  \n' +
         "\n" +
         "He flipped another card\n" +
         "\n" +
-        "  \"I win.\"\n" +
+        '  "I win."\n' +
         "\n" +
-        "\"Well maybe in the long run, but once I get this down, I'll be winning in my sleep.\"\n" +
+        '"Well maybe in the long run, but once I get this down, I\'ll be winning in my sleep."\n' +
         "\n" +
-        "\"And how long does this technique take to develop?\"\n" +
+        '"And how long does this technique take to develop?"\n' +
         "\n" +
-        "\"Dunno, probably like another four thousand years.  You just keep wristing about…you'll see.\"\n" +
+        '"Dunno, probably like another four thousand years.  You just keep wristing about…you\'ll see."\n' +
         "\n" +
-        "\"Well I don't have time for that.\"  Flip.  \"I win.  I quit.\"\n" +
+        '"Well I don\'t have time for that."  Flip.  "I win.  I quit."\n' +
         "\n" +
         "\"You can't quit.  I can't master the technique unless you play.  Just one more, I've almost got it.\"\n" +
         "\n" +
-        "\"Nope.\" He got up and adjusted his jumpsuit as he floated away.  \"I'm done,\" he said, \"have fun,\" yawning so it sounded more like 'howl run'.  He floated across the room and brought his ass down onto the rotating stool in front of the control console.  Just beyond him was a window, on its glass surface was a vast diagram of the galaxy, the screen activated automatically as he sat and the Earth appeared.  He moved his palm across the ball in the middle of the board and various index fields opened up.  Lines of glyphs streamed along the fields and he selected a certain parameter of information that he needed.  \"Hey Salamander,\" he said.\n" +
+        '"Nope." He got up and adjusted his jumpsuit as he floated away.  "I\'m done," he said, "have fun," yawning so it sounded more like \'howl run\'.  He floated across the room and brought his ass down onto the rotating stool in front of the control console.  Just beyond him was a window, on its glass surface was a vast diagram of the galaxy, the screen activated automatically as he sat and the Earth appeared.  He moved his palm across the ball in the middle of the board and various index fields opened up.  Lines of glyphs streamed along the fields and he selected a certain parameter of information that he needed.  "Hey Salamander," he said.\n' +
         "\n" +
-        "\"Not now I'm concentrating.\"  He flipped another card.\n" +
+        '"Not now I\'m concentrating."  He flipped another card.\n' +
         "\n" +
-        "\"No seriously,\" Sigfried checked the text once again for verification and then turned around.  Salamander, narrowed his eyes on the target and flipped again.  The card went out of control, catching a maverick pocket of gravity and flew to the other end of the room.\n" +
+        '"No seriously," Sigfried checked the text once again for verification and then turned around.  Salamander, narrowed his eyes on the target and flipped again.  The card went out of control, catching a maverick pocket of gravity and flew to the other end of the room.\n' +
         "\n" +
-        "\"Shit,\" he said.\n" +
+        '"Shit," he said.\n' +
         "\n" +
-        "\"Salamander you dull witted bastard.  I've got the lock-in.  Lets get dressed, its time to do this.\"\n" +
+        '"Salamander you dull witted bastard.  I\'ve got the lock-in.  Lets get dressed, its time to do this."\n' +
         "\n" +
-        "Salamander shot up from his seat, and immediately found himself in a deep, orgasmic black-out stretch that disabled him even as he drifted into the ceiling.  \"Yearrrhhh!\"  He announced upon his recovery.  He positioned his feet on the ceiling and propelled himself in the direction of the door.  \"Its about damn time.  Im startin' to get space-crazy.\"  The door opened and he drifted through it.  \n" +
+        'Salamander shot up from his seat, and immediately found himself in a deep, orgasmic black-out stretch that disabled him even as he drifted into the ceiling.  "Yearrrhhh!"  He announced upon his recovery.  He positioned his feet on the ceiling and propelled himself in the direction of the door.  "Its about damn time.  Im startin\' to get space-crazy."  The door opened and he drifted through it.  \n' +
         "\n" +
-        "\"Yeah right.\"  Sigfried palmed the ball and brought up the log.  He typed something into the field, read it, deleted it and typed something else.  He cleared the screen, leaving only the live video feed of the Earth before doing a backflip that sent him flying towards the door.\n" +
+        '"Yeah right."  Sigfried palmed the ball and brought up the log.  He typed something into the field, read it, deleted it and typed something else.  He cleared the screen, leaving only the live video feed of the Earth before doing a backflip that sent him flying towards the door.\n' +
         "\n" +
         "Sigfried drifted through the bright tunnel after Salamander.  \"Goddamn this lexicon.  It keeps fucking me up. I almost made an entry in English.  The translation would have been something like 'smoking mango bridge platoon'.\n" +
         "\n" +
@@ -176,41 +173,41 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "They flew over to a platform and, with their legs straight, bent over so that their heads were at their knees and grabbed onto handles sticking out of the floor.  \n" +
         "\n" +
-        "\"Yeah and your name's a lizard,\" said Sigfried.\n" +
+        '"Yeah and your name\'s a lizard," said Sigfried.\n' +
         "\n" +
         "The gravity came back on and their legs flopped up which instantly became down.  They fell from the handles like sausages and flopped around on the floor for a while.  \n" +
         "\n" +
-        "\"Wee.\"\n" +
+        '"Wee."\n' +
         "\n" +
-        "\"Ugh,\" Salamander grunted, \"my organs\".\n" +
+        '"Ugh," Salamander grunted, "my organs".\n' +
         "\n" +
-        "\"Yeah its like spontaneous obesity.\"  I feel like an elfant.\"\n" +
+        '"Yeah its like spontaneous obesity."  I feel like an elfant."\n' +
         "\n" +
         "They crawled towards the ladder in a similar fashion to the behavior of helpless, brain starved zombies.\n" +
         "\n" +
-        "Salamander panted, \"Oh, I think you mean elephant. Get on it.\"\n" +
+        'Salamander panted, "Oh, I think you mean elephant. Get on it."\n' +
         "\n" +
-        "\"On it?\" , he pondered, \"mmm.  Oh yeah.\"  \n" +
+        '"On it?" , he pondered, "mmm.  Oh yeah."  \n' +
         "\n" +
         "They managed to make there way to the ladder, but by then they had grown accustomed to the dead air and were walking normally.  \n" +
         "\n" +
         "\"Better not be doing that when we're on the ground or you'll blow our super secret cover.  Ruin everything.\"  Salamander keyed open a glass container on the wall and flipped the switch inside.  The door flew open.\n" +
         "\n" +
-        "\"Doubt it.  Are you sure they can even speak they're own language?\"\n" +
+        '"Doubt it.  Are you sure they can even speak they\'re own language?"\n' +
         "\n" +
-        "\"Language is language.  I guess it doesn't help either that we were tutored in the lexicon of 21st century American English.  \"\n" +
+        '"Language is language.  I guess it doesn\'t help either that we were tutored in the lexicon of 21st century American English.  "\n' +
         "\n" +
         "\"Yeah they're already going to think we're crazy.  But whatever.  After a few of these, I'm almost beginning to loose interest in the art of  it all.\"\n" +
         "\n" +
-        "Salamander blew out. \"Yeah right.  The art.  Good one.\"\n" +
+        'Salamander blew out. "Yeah right.  The art.  Good one."\n' +
         "\n" +
-        "\"Yeah.  Right.\"\n" +
+        '"Yeah.  Right."\n' +
         "\n" +
         "Once inside the room they stripped from their white jump suits and stepped into the showers.  Sigfried slammed his hand onto a button and they closed their eyes.  With a high pitched sound, a thousand subatomic sanitation capsules began their molecular fornication, splitting, exploding, and instantly covering them in a fine white powder.\n" +
         "\n" +
-        "Sigfried opened his eyes back up, \"yeah well, we'll only be dealing with Grey for the most part.  But lets keep it classy, he turned around to face Salamander with a hard winkish expression, wish I was the jovial one.\"\n" +
+        'Sigfried opened his eyes back up, "yeah well, we\'ll only be dealing with Grey for the most part.  But lets keep it classy, he turned around to face Salamander with a hard winkish expression, wish I was the jovial one."\n' +
         "\n" +
-        "\"No way.  You had your chances.  Its my turn.  Plus, with how much experience you have with it, imagine how much better you'll do with the other!\"  Said Salamander voluptuously, \"and we also have to deal with Tatum this time.  So I got dibs.\"\n" +
+        '"No way.  You had your chances.  Its my turn.  Plus, with how much experience you have with it, imagine how much better you\'ll do with the other!"  Said Salamander voluptuously, "and we also have to deal with Tatum this time.  So I got dibs."\n' +
         "\n" +
         "Sigfried's preparation for this one was pure documentation.  It still allowed for an equal performance to Salamander's; being directly conditioned through the eyes and experiences of human beings, but Sigfried's was still a more analytical one.  'Participation On Top Priority Of Importance.'  This was not his preferred rodeo.\n" +
         "\n" +
@@ -220,45 +217,45 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "The pod doors opened up and they each stepped out, rejuvenated, disinfected, and freshly furry with a specific calibration of body hair.  They stepped out and headed back into the locker room.\n" +
         "\n" +
-        "\"Alright Siggy,\" Salamander adjusted his shirt collar, \"should we do some sight seeing first, or just get straight down to business?\"\n" +
+        '"Alright Siggy," Salamander adjusted his shirt collar, "should we do some sight seeing first, or just get straight down to business?"\n' +
         "\n" +
-        "\"You know my answer.  I can't stand pre-dhonic human society.  Any period actually.\"\n" +
+        '"You know my answer.  I can\'t stand pre-dhonic human society.  Any period actually."\n' +
         "\n" +
-        "\"Oh c'mon its fun.  Its like…\"\n" +
+        '"Oh c\'mon its fun.  Its like…"\n' +
         "\n" +
-        "\"Its like visiting your smelly old grandma's preserved vagina.  What are the coordinates?\"\n" +
+        '"Its like visiting your smelly old grandma\'s preserved vagina.  What are the coordinates?"\n' +
         "\n" +
-        "\"Alright.  Achille, Oklahoma.  40-00100.  33°50′5″N 96°23′25″W﻿ / ﻿33.83472°N 96.39028°W﻿ / 33.83472; -96.39028.\"\n" +
+        '"Alright.  Achille, Oklahoma.  40-00100.  33°50′5″N 96°23′25″W﻿ / ﻿33.83472°N 96.39028°W﻿ / 33.83472; -96.39028."\n' +
         "\n" +
-        "Sigfried typed on the key board, it made bloopity bleep blop sounds. \"Alright lets do this.\"  \n" +
+        'Sigfried typed on the key board, it made bloopity bleep blop sounds. "Alright lets do this."  \n' +
         "\n" +
         "They stepped into the Fader and Disappeared.\n" +
         "\n" +
         "How to Disassemble a Plate\n" +
         "A naked women sat on the edge of the bed smoking a thin cigarette, bent like a string bean.  She let the smoke billow from her tiny nostrils and creased mouth, something Jimmy McKimberly couldn't stand.  He liked it when they blew it out their mouth as if blowing out a candle.  \n" +
         "\n" +
-        "\"Are you going to leave?\"  He asked plainly, terse even.  The woman inhaled again and exhaled and said nothing, not that one should assume that she would have but maybe there are those that would.  \"Come over here,\" he propositioned and shifted his weight beneath the covers, wrapping his own legs around one another, twisting about like a creature, fully aware of his own whiney tone as he spoke - a version of speech that contradicted his situationally effecting intentions.  A few moments passed and he could see into her now and he saw her sigh, inside.  Her mind was an abyss, gathering random fragments from the aether and piling them up until the tower of ideas was too high and massive for her to observe and ultimately gain anything from at all.  She laid back onto the bed with intent, exhausted and perhaps giving up.  Perhaps she had given up on her estranged emotional state, or perhaps not.  The room froze in an ice age.  \n" +
+        '"Are you going to leave?"  He asked plainly, terse even.  The woman inhaled again and exhaled and said nothing, not that one should assume that she would have but maybe there are those that would.  "Come over here," he propositioned and shifted his weight beneath the covers, wrapping his own legs around one another, twisting about like a creature, fully aware of his own whiney tone as he spoke - a version of speech that contradicted his situationally effecting intentions.  A few moments passed and he could see into her now and he saw her sigh, inside.  Her mind was an abyss, gathering random fragments from the aether and piling them up until the tower of ideas was too high and massive for her to observe and ultimately gain anything from at all.  She laid back onto the bed with intent, exhausted and perhaps giving up.  Perhaps she had given up on her estranged emotional state, or perhaps not.  The room froze in an ice age.  \n' +
         "\n" +
-        "\"Do you ever think about what it would be like to be dead?\"  She asked.\n" +
+        '"Do you ever think about what it would be like to be dead?"  She asked.\n' +
         "\n" +
         "A thousand ice ages.\n" +
         "\n" +
         "Jimmy McKimberly did not want his words to come across as stale or contrived or situationally appropriate or vague and searching, but rather, he wanted them to be profound, situationally unexpected, deliberate and brave.  \n" +
         "\n" +
-        "\"A thousand ice ages,\" he said, fuck thinking about it.\n" +
+        '"A thousand ice ages," he said, fuck thinking about it.\n' +
         "\n" +
-        "\"No more then?  Just a thousand,\" she said immediately, \"not one ice age more even, or less?  \n" +
+        '"No more then?  Just a thousand," she said immediately, "not one ice age more even, or less?  \n' +
         "\n" +
         "He found himself thinking about fire escapes and images of what the society and media had told him regarding the subject of fire escapes filled his head.  He waited and listened to the silence, the words they had spoken earlier freezing in mid air and left to dangle about posthumously.  Other information blew through him but was incapable of enabling his mind to garner any immediate attention, for he was distracted by his own monologue that was sure to ensue and that would actually be more of a soliloquy than anything.\n" +
         "\n" +
-        "\"There was a goat right.  And he had a lot of friends.  His friends followed him around and respected the fact that he was born in a different country.  In other words, he had a foreign accent and everyone thought that was cool because they studied art.  The goat was not an artist though and he could never manage to get across to these people, his admirers, that he didn't know what the fuck he was talking about.  But every time he opened his mouth and said anything at all even, it just came across as satire; a joke played on the ineffectual by the super intellectual and in this case it was perceived conventionally as actually who he was.  The goat, himself however, never quite reached these levels of understanding regarding his own participation in this confused circus, but did understand at least enough of it to know the way out,\"  Jimmy McKimberly paused waiting for a response of any kind and then sat up in the bed and stared at the back of her head, \"the goat ,\"  he paused, \"hung himself in the back of a taxi cab.\"\n" +
+        '"There was a goat right.  And he had a lot of friends.  His friends followed him around and respected the fact that he was born in a different country.  In other words, he had a foreign accent and everyone thought that was cool because they studied art.  The goat was not an artist though and he could never manage to get across to these people, his admirers, that he didn\'t know what the fuck he was talking about.  But every time he opened his mouth and said anything at all even, it just came across as satire; a joke played on the ineffectual by the super intellectual and in this case it was perceived conventionally as actually who he was.  The goat, himself however, never quite reached these levels of understanding regarding his own participation in this confused circus, but did understand at least enough of it to know the way out,"  Jimmy McKimberly paused waiting for a response of any kind and then sat up in the bed and stared at the back of her head, "the goat ,"  he paused, "hung himself in the back of a taxi cab."\n' +
         "\n" +
         "Another wayward silence was arrived at, but this time it was actually free of any discrepancy.  ",
     },
     {
       title: "A Familiar Poker Tournament",
       content:
-        "I am here and thats all that matters. I don't know what it means but try and remember that.  My goddamn wife is on a plane with some professional poker player.  James Spellmaen.  They're going to Vegas for a tournament.  She is a statistics major, specializing in card game research and she needs sources for her thesis.  I was okay with it in the beginning, completely supportive and the like, like any good partner in foreverness.  \"Forever\", I said, \"And always\".   But I am beginning to think this is a one way train.  She is vey convincing in her behavior and  I would love to think she is not a manipulative piece of shit cunt but I am very sensitive to my surroundings and therefore I cannot avoid certain signs.  \n" +
+        'I am here and thats all that matters. I don\'t know what it means but try and remember that.  My goddamn wife is on a plane with some professional poker player.  James Spellmaen.  They\'re going to Vegas for a tournament.  She is a statistics major, specializing in card game research and she needs sources for her thesis.  I was okay with it in the beginning, completely supportive and the like, like any good partner in foreverness.  "Forever", I said, "And always".   But I am beginning to think this is a one way train.  She is vey convincing in her behavior and  I would love to think she is not a manipulative piece of shit cunt but I am very sensitive to my surroundings and therefore I cannot avoid certain signs.  \n' +
         "\n" +
         "I am drunk in bar in the middle of a strange park in Antwerp.  It is actually the greatest thing I have ever witnessed.  Surrounding the park at every entrance is a team of drug dealing scoundrels, the nicest you have ever known.  They hail you but thats as far as it goes.  They don't follow you, they don't harass you, they are not demanding at all.  It helps that I don't speak the language but they don't know that.  The best part is that as soon as you break through the friendly shade and enter the park, which looks like some square in the projects on the East Side of New York, complete with graffiti on every surface and wandering miscreants looking for any available opportunity to ask you to buy or give them something, there are children playing.  Everywhere.  Families taking their kids out for a stroll and ice cream.  The weird mudslide that they see as a jurassic hill with eternity at the top.  Playing soccer with a goddamn crayon.  Having the time of their lives.\n" +
         "\n" +
@@ -269,21 +266,21 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       content:
         "A naked women sat on the edge of the bed smoking a thin cigarette, bent like a string bean.  She let the smoke billow from her tiny nostrils and creased mouth, something Jimmy McKimberly couldn't stand.  He liked it when they blew it out their mouth as if blowing out a candle.  \n" +
         "\n" +
-        "\"Are you going to leave?\"  He asked plainly, terse even.  The woman inhaled again and exhaled and said nothing, not that one should assume that she would have but maybe there are those that would.  \"Come over here,\" he propositioned and shifted his weight beneath the covers, wrapping his own legs around one another, twisting about like a creature, fully aware of his own whiney tone as he spoke - a version of speech that contradicted his situationally effecting intentions.  A few moments passed and he could see into her now and he saw her sigh, inside.  Her mind was an abyss, gathering random fragments from the aether and piling them up until the tower of ideas was too high and massive for her to observe and ultimately gain anything from at all.  She laid back onto the bed with intent, exhausted and perhaps giving up.  Perhaps she had given up on her estranged emotional state, or perhaps not.  The room froze in an ice age.  \n" +
+        '"Are you going to leave?"  He asked plainly, terse even.  The woman inhaled again and exhaled and said nothing, not that one should assume that she would have but maybe there are those that would.  "Come over here," he propositioned and shifted his weight beneath the covers, wrapping his own legs around one another, twisting about like a creature, fully aware of his own whiney tone as he spoke - a version of speech that contradicted his situationally effecting intentions.  A few moments passed and he could see into her now and he saw her sigh, inside.  Her mind was an abyss, gathering random fragments from the aether and piling them up until the tower of ideas was too high and massive for her to observe and ultimately gain anything from at all.  She laid back onto the bed with intent, exhausted and perhaps giving up.  Perhaps she had given up on her estranged emotional state, or perhaps not.  The room froze in an ice age.  \n' +
         "\n" +
-        "\"Do you ever think about what it would be like to be dead?\"  She asked.\n" +
+        '"Do you ever think about what it would be like to be dead?"  She asked.\n' +
         "\n" +
         "A thousand ice ages.\n" +
         "\n" +
         "Jimmy McKimberly did not want his words to come across as stale or contrived or situationally appropriate or vague and searching, but rather, he wanted them to be profound, situationally unexpected, deliberate and brave.  \n" +
         "\n" +
-        "\"A thousand ice ages,\" he said, fuck thinking about it.\n" +
+        '"A thousand ice ages," he said, fuck thinking about it.\n' +
         "\n" +
-        "\"No more then?  Just a thousand,\" she said immediately, \"not one ice age more even, or less?  \n" +
+        '"No more then?  Just a thousand," she said immediately, "not one ice age more even, or less?  \n' +
         "\n" +
         "He found himself thinking about fire escapes and images of what the society and media had told him regarding the subject of fire escapes filled his head.  He waited and listened to the silence, the words they had spoken earlier freezing in mid air and left to dangle about posthumously.  Other information blew through him but was incapable of enabling his mind to garner any immediate attention, for he was distracted by his own monologue that was sure to ensue and that would actually be more of a soliloquy than anything.\n" +
         "\n" +
-        "\"There was a goat right.  And he had a lot of friends.  His friends followed him around and respected the fact that he was born in a different country.  In other words, he had a foreign accent and everyone thought that was cool because they studied art.  The goat was not an artist though and he could never manage to get across to these people, his admirers, that he didn't know what the fuck he was talking about.  But every time he opened his mouth and said anything at all even, it just came across as satire; a joke played on the ineffectual by the super intellectual and in this case it was perceived conventionally as actually who he was.  The goat, himself however, never quite reached these levels of understanding regarding his own participation in this confused circus, but did understand at least enough of it to know the way out,\"  Jimmy McKimberly paused waiting for a response of any kind and then sat up in the bed and stared at the back of her head, \"the goat ,\"  he paused, \"hung himself in the back of a taxi cab.\"\n" +
+        '"There was a goat right.  And he had a lot of friends.  His friends followed him around and respected the fact that he was born in a different country.  In other words, he had a foreign accent and everyone thought that was cool because they studied art.  The goat was not an artist though and he could never manage to get across to these people, his admirers, that he didn\'t know what the fuck he was talking about.  But every time he opened his mouth and said anything at all even, it just came across as satire; a joke played on the ineffectual by the super intellectual and in this case it was perceived conventionally as actually who he was.  The goat, himself however, never quite reached these levels of understanding regarding his own participation in this confused circus, but did understand at least enough of it to know the way out,"  Jimmy McKimberly paused waiting for a response of any kind and then sat up in the bed and stared at the back of her head, "the goat ,"  he paused, "hung himself in the back of a taxi cab."\n' +
         "\n" +
         "Another wayward silence was arrived at, but this time it was actually free of any discrepancy.  \n" +
         "\n",
@@ -315,22 +312,22 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "A bird takes a shit on the umbrella of an unaware by-passer.  This is the type of degrading shit that really makes Timothy Everett chuckle inside or, in this case in particular, out loud.  The brutal type of human injury that does not directly effect the person like an old woman falling down the stairs or a douche-bag running a shopping cart off of a four story building into a human shit pit.  This is all in good fun but for Timothy Everet the psychological injury that potentially may occur (one, of course, that he will never see) when the person finds the bird shit on her umbrella after she has thrown it into her living room and the cat has gotten at it and spread it all over the carpet and whatever the hell else, which is not in good fun but completely infuriating and obsessively time consuming, leaving this person no option but to take the time that could have, relying on the individual's living arrangement and drive in general, been spent in a much more productive manor, will always tickle his nerves.\n" +
         "\n" +
-        "\"A guy as smart as you,\" said a guy at the bar next to Cafe'le Shoppe, \"needs to know where Croatia is.\"\n" +
+        '"A guy as smart as you," said a guy at the bar next to Cafe\'le Shoppe, "needs to know where Croatia is."\n' +
         "\n" +
-        "\"Alright,\" said the guy sitting next to the Guy at the bar.\n" +
+        '"Alright," said the guy sitting next to the Guy at the bar.\n' +
         "\n" +
         "\"Don't judge me,\" he would think later after the initial satisfaction of having his intelligence worshipped wore off, \"just because I work at a bar, and serve you holier-than-thou suburban folks with your fat chick pay checks, empty crowd stench and double crown's worth of empty threats, do not include me in the 'i work here because I'm too stupid to do anything else category' or 'i work here because I'm a stupid musician who can't do anything but write simple songs that are not catchy enough to make any money off of'\".  But you can, he thinks, because its all but hideously untrue and true and passe and not only is it not cute enough to be attractive but so cute that its not only attractive but irresistible.  No matter how many deadbeats fail at attempting to be gods, people will always love it.",
     },
     {
       title: "The Coward Adventurer",
       content:
-        "\"I think I'm slowly growing a mustache that will conduct a transvestite orchestra.\"\n" +
+        '"I think I\'m slowly growing a mustache that will conduct a transvestite orchestra."\n' +
         "\n" +
-        "I looked at him briefly during the downwards arc of my glance, \"well thats good\", and I meant it sincerely, \"because someones gotta do it. This bastard over here\", I gestured towards the other room and through the doorway, \"he's got slugs for days but wont grow the balls to commit.\"\n" +
+        'I looked at him briefly during the downwards arc of my glance, "well thats good", and I meant it sincerely, "because someones gotta do it. This bastard over here", I gestured towards the other room and through the doorway, "he\'s got slugs for days but wont grow the balls to commit."\n' +
         "\n" +
-        "He sat  with his bass guitar, teeth clenched, managing a few acronyms \"Ehh?\" like a frantic centipede on his last legs, disregarding it all to return to some strange form of science.\n" +
+        'He sat  with his bass guitar, teeth clenched, managing a few acronyms "Ehh?" like a frantic centipede on his last legs, disregarding it all to return to some strange form of science.\n' +
         "\n" +
-        "\"No matter\", I said, redirecting my attention towards the maniac trying to sleep at my feet, \"I think you should cool your guns.  It happens, it happens.  You can't expect something to happen if it hasn't happened before.  Right?\"\n" +
+        '"No matter", I said, redirecting my attention towards the maniac trying to sleep at my feet, "I think you should cool your guns.  It happens, it happens.  You can\'t expect something to happen if it hasn\'t happened before.  Right?"\n' +
         "\n" +
         "In the beginning I was approached by Dynastic Industries to commission a musical piece based on the time I spent in Indonesia.  I was there initially to do some work for a successful blog I was a part of called Why Where and What the Fuck.    And why the fuck D.I. approached me or chose to employ me in any way or for any reason at all still bewilders me.  \n" +
         "\n" +
@@ -344,17 +341,18 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "For example:  I don't have a lot of standards for living and still there are things now that are capable of disrupting what I have always thought to be eternal.  Because of the situation I have currently found myself in, I no longer feel as if I have a subtle and well conceived balance and I feel as if I have become a monster in trying to achieve such a thing even though I know it's already there and it's something that had been in front of me my entire life.   And here It's like I am constantly trying to balance the finite with the infinite and in the end all I am is shit and that's what I see.  It is what you become.  White drapes on white sheets with dirty boot scuffs on the trim and dirty oatmeal floors and moldy shower curtains, but everything set to a standard you have set either way.  And peoples' minds, constantly enforcing, even if they are rudimentary.   Especially so.  I had to say fuck it all or become it all.  To me it really has not or has ever made a difference at all which way I lean.  But of course this is my fault, and because of this perhaps I am a mutant, the holder of the all seeing hand, detached, and it's beckoning the circus freak inside to be let loose, and yet, to live this way is not out of pride or conviction, necessity or convenience and, quite possibly, not even out of lack of trying.  But because it is my basic human stigmatic function to build a home and relish in its 'my-ness'  whether its a shopping cart or a castle.  I have no choice.  I am driven to order and none of us can escape it.  Even the most avant-garde lifestyle is a victim.  Its a 12 tone composition gone wrong, or right, it no longer matters for there is always a boundary.  \n" +
         "\n" +
-        "We were passing through the sewers.  Gulping sounds stuck out like we were being sucked into some undercurrent.  We came across a television stuck in the wall.  It was the \"Old Last Time Agenda Variety Show\"  and there was Razputin, the social phenomenon that was just recently resurfacing from a long term hibernation and public disappearance, his face always recognizable.  He stood with his guitar and legendary mustache, the orchestra moving with each flowing twitch.  As the bouncy music continues, the camera widened to show his famous and, although now sagging a bit, voluptuous breasts .  The dance number began and 2 women and a man appeared, they linked arms with Raz himself and tapped around each other to swaying rhythms and choreography patterns, like drunken swans.  The music began to swell and Razputin began to open chambers of his body like cupboards in german kitchen.  Hands appeared out of nowhere to reveal his various implants and gender surgery.  He revealed his cock, which was filleted into two pieces and inverted, exposed from the inside out.  He flicked it like a guitar string and smiled ferociously.  His mustache was now two huge, stretching arms.  Another drawer revealed what seemed to be his intestines.  His face became nontransparent and the music kept bouncing along.  He reached down and plucked his bloody coils like a harp, ruffing them up as if to break the strings and find some kind of new tonality, as if to say that none of this mattered, his martyrdom, strange that it was so accepted, but we all knew that this was big.\n" +
-        "\"Man, this will probably be on the news.\"\n" +
-        "\"Yeah of course it will.  This is huge.\"\n" +
+        'We were passing through the sewers.  Gulping sounds stuck out like we were being sucked into some undercurrent.  We came across a television stuck in the wall.  It was the "Old Last Time Agenda Variety Show"  and there was Razputin, the social phenomenon that was just recently resurfacing from a long term hibernation and public disappearance, his face always recognizable.  He stood with his guitar and legendary mustache, the orchestra moving with each flowing twitch.  As the bouncy music continues, the camera widened to show his famous and, although now sagging a bit, voluptuous breasts .  The dance number began and 2 women and a man appeared, they linked arms with Raz himself and tapped around each other to swaying rhythms and choreography patterns, like drunken swans.  The music began to swell and Razputin began to open chambers of his body like cupboards in german kitchen.  Hands appeared out of nowhere to reveal his various implants and gender surgery.  He revealed his cock, which was filleted into two pieces and inverted, exposed from the inside out.  He flicked it like a guitar string and smiled ferociously.  His mustache was now two huge, stretching arms.  Another drawer revealed what seemed to be his intestines.  His face became nontransparent and the music kept bouncing along.  He reached down and plucked his bloody coils like a harp, ruffing them up as if to break the strings and find some kind of new tonality, as if to say that none of this mattered, his martyrdom, strange that it was so accepted, but we all knew that this was big.\n' +
+        '"Man, this will probably be on the news."\n' +
+        '"Yeah of course it will.  This is huge."\n' +
         "He kept going at it like some kind of sexual torture, throwing his organs around inside of what was left of himself and still maintaining that maniacal grin.  The other dancers began to force him out,  concerned with the drunken patterns that he was disrupting.  But he kept on, his body now three times wider, revealing parts of himself that could not be contained.\n" +
         "Eventually he was forced off stage and everyone cheered.  I remember thinking that this was not something to take lightly as the dancers bowed and accolades were distributed.  This was not some typical piece of choreography to briefly consider and then forget.  \n" +
         "The haunting voices of the dead appeared again.\n" +
-        "\"Lets go,\"  someone seemed to have said, and we were off, our feet like popcorn in a mushroom patch.  \n" +
+        '"Lets go,"  someone seemed to have said, and we were off, our feet like popcorn in a mushroom patch.  \n' +
         "Things stuck out to us then like blue flowers in a field of wilted dandelions.  Our senses were too abrupt.  We had found a church.\n" +
         "\n" +
         "Like ruins.",
-    },  {
+    },
+    {
       title: "This Life and Death",
       content:
         "Beating hearts drive my coma and there is a stench that fills my world.  I haven't come to agree with it but only live with it so i should be able to deal.  Each day I fill the water boiler as though it is a mechanism for my own sanity.  If I do not do this I do not know if reality will fall into place at all.  And when i say 'into place' I have no idea what I am talking about because nothing has its place anymore and it is all just a whimsical gesture towards some thing or the other; some desperate attempt at inspiration, at emotion, at desire or some human conviction or just something else that I cant understand.  The things that I want have become an esoteric and fluid standard that is as benign and meaningless as kicking a few stones into a pond.  They eventually settle and the act of it is fleeting, only worth something if I decide it is so.  And so in fact what I actually want is to not decide that certain things are worth anything at all.  So...  \n" +
@@ -378,7 +376,8 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       title: "A Capitalized Question Mark",
-      content:        '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; He handed me back my wallet.</p>\n' +
+      content:
+        '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; He handed me back my wallet.</p>\n' +
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "You can\'t have these on you when you cross the border."</p>' +
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; I looked at what he had in his hand, "What, stamp cards?"</p>' +
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Yeah that type of marketing technology doesn\'t exist there and they don\'t want the local businesses to get any ideas."</p>' +
@@ -386,8 +385,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; He looked at me with eyes that neither understood or saw through me. Just dead.<span class="Apple-converted-space">&nbsp; </span>Like a stool cushion.</p>' +
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "So they confiscate them, so what."</p>' +
         '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "No", he said, "they\'ll label you a terrorist.<span class="Apple-converted-space">&nbsp; </span>They\'ll think your trying to corrupt their system."</p>' +
-        '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; I handed him my stamp cards, relinquishing any hopeful attempt for future free pizza at P.C.C. and stepped through the gates of hell.</p>'
-
+        '<p class="p1">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; I handed him my stamp cards, relinquishing any hopeful attempt for future free pizza at P.C.C. and stepped through the gates of hell.</p>',
     },
     {
       title: "Problem Solvers!",
@@ -552,7 +550,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "otherwise I would be presenting this soliloquy:\n" +
         "\n" +
-        "\"Hey there hows it goin? really great, do you wanna play some jazz later in my basement?  More pitch?  I don't know the reference, is it him?\"\n" +
+        '"Hey there hows it goin? really great, do you wanna play some jazz later in my basement?  More pitch?  I don\'t know the reference, is it him?"\n' +
         "\n" +
         "Its just him\n" +
         "\n" +
@@ -578,7 +576,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       content:
         "My friend from Miami was in town for a few days around Christmas.  It was pretty cold so I was hesitant to go out but I was bored out of my mind and he was in town so I took him up on the offer.  We met up at some little coffee shop where the walls had pictures of African people sifting through beans.  They were in time lapse columns from top to bottom.  I sat there and waited for ten minutes.  I thought about the pictures a little and decided they were OK because Africa has good beans, or so I was being led to believe.  I considered asking the barista, some guy with a flailing pompadour who seemed like way too hip to be considered even a person, whether or not Africa had good beans because I'd never really thought of Africa as a being all about beans or whatever but decided not to ask because I didn't really care all that much and I didn't really want to talk to anybody.  A few seconds later I realized that maybe it was Costa Rica and that I'm probably a secret racist or that there is probably an ambiguous line between being oblivious and insensitive.  I seem to ride that line drunkenly on a unicycle with a flat tire.  \n" +
         "\n" +
-        "I drank three cups of coffee while I waited, heavy on the cream so that they would go down easier.  When I went up to ask for my first refill and the barista, now suddenly a woman with a crow face wearing a Freddy Kruger sweater, informed me that the only given refills were ones in cups that are not to-go cups and that it was protocol, and that this time since no one told me it was OK.  I said OK and thank you and she said it was 50 cents and pressed the button that makes the ding and I said I only have a card and I hope thats OK.  \"Wow, this transaction is just getting sadder and sadder,\" she said.  That was pretty funny so I laughed and didn't say anything witty in response like, \"You think thats bad, I only have 48 cents on my card so can I give you 2 cents and you put the rest on my card?\"  What I did say though, forgetting entirely that at this point in the game that she was doing me a favour was, \"can I put it into a for-here cup?\"  Stumbling with the proper way to describe a cup that is not “to-go”.  I don't know why I said this and she was like, \"well I guess so,\" and then, as she reached for the cup, the reality of the situation hit me and I said, \"no wait never mind.\" -gesturing awkwardly-  And then it was awkward and I laughed about this to myself several times throughout the night.  \n" +
+        'I drank three cups of coffee while I waited, heavy on the cream so that they would go down easier.  When I went up to ask for my first refill and the barista, now suddenly a woman with a crow face wearing a Freddy Kruger sweater, informed me that the only given refills were ones in cups that are not to-go cups and that it was protocol, and that this time since no one told me it was OK.  I said OK and thank you and she said it was 50 cents and pressed the button that makes the ding and I said I only have a card and I hope thats OK.  "Wow, this transaction is just getting sadder and sadder," she said.  That was pretty funny so I laughed and didn\'t say anything witty in response like, "You think thats bad, I only have 48 cents on my card so can I give you 2 cents and you put the rest on my card?"  What I did say though, forgetting entirely that at this point in the game that she was doing me a favour was, "can I put it into a for-here cup?"  Stumbling with the proper way to describe a cup that is not “to-go”.  I don\'t know why I said this and she was like, "well I guess so," and then, as she reached for the cup, the reality of the situation hit me and I said, "no wait never mind." -gesturing awkwardly-  And then it was awkward and I laughed about this to myself several times throughout the night.  \n' +
         "\n" +
         "After about and maybe around the third cup of 50 cent favours I found myself in a cripplingly manic state.   When I get into this state, however often it is, I do things like scream deeply inside, harsh meditation and contort my face in strange ways according to random firings of thoughts in my mind.  I also do crazy stare into space without blinking.  I dunno, I'm probably not as weird as I want to appear.  \n" +
         "\n" +
@@ -590,15 +588,15 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "\n" +
         "We talked about everything but myself and once the smiles and banter started to loose their fervency, it was Tim who said we should go to a bar.  He kind of looked around and smiled.  I thought that was a pretty good idea and laid out some suggestions.  I suggested Millie's, which I used to go to because they had a deck where you could smoke and drink at the same time or Jacko's where there was always a good show or the Madre Bistro.  There seemed, however, to be a mutual lack of enthusiasm between the two of them.  There was also Von's, I kept suggesting, a sports bar with an ethnic vibe right around the corner, and Laguna's Brewery and Tim's Tom Ding Dong and Fray the Eclipse and Fang Chia and the Mac Store had a bar and Ballet Shoes for Pets and I just kept going and getting nothing but apathy and sullen glances of distain from the other end of the table.  \n" +
         "\n" +
-        "\"Hmmm, I just really want to go to a bar.\"  He kept saying and I gave him a frustrated glance.\n" +
+        '"Hmmm, I just really want to go to a bar."  He kept saying and I gave him a frustrated glance.\n' +
         "\n" +
-        "\"Ok, well we could go to Fremont there's bars there...\"\n" +
+        '"Ok, well we could go to Fremont there\'s bars there..."\n' +
         "\n" +
-        "\"Yeah but I bet we could find a bar right around here that would be good.\"\n" +
+        '"Yeah but I bet we could find a bar right around here that would be good."\n' +
         "\n" +
-        "For godssake, I thought and kind of fell into the table, alright \"do you guys have something in mind?\"\n" +
+        'For godssake, I thought and kind of fell into the table, alright "do you guys have something in mind?"\n' +
         "\n" +
-        "Tim and my friend looked at each other and my friend said, \"yeah I have an idea of where we should go.\"\n" +
+        'Tim and my friend looked at each other and my friend said, "yeah I have an idea of where we should go."\n' +
         "\n" +
         "We all got up and left that silly coffee shop and went to a bar.",
     },
@@ -623,17 +621,17 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "We are inspired by what we see.  Do not think it juvenile to think spontaneously of what you are directly observing.  Creation is the cousin of observation.  Art is the WELL of life.  We read the patterns to desire and fathom.  \n" +
         "Semblance response - syntactical lighting, bring forth harmony and deceiving what is considered bland.  Misconstrue eternity to understand the time sand. \n" +
         "These fearless brigades deny a deliberation.  We sink into ourselves when one of us stands out.  Can we not break this incompatibility?  Why is the tolerance of our fathers a genetic trait?  Can we not synthesize our minds?  Why are we hidden from that which makes us great? Communication is the tabernacle of our existence.  For if it were to come to death, our species would die with it.  So why is it that we are forced into ourselves, and our reality as it stands:  Seperated from the macro cosm.  We no nothing.\n" +
-        "\"And there is nothing to know!\"  You might say.  Or me, what matter is who it is as long as it were said.  Shohuld we all feel as if we would be willing to die in order to save a more \"insert term for socially appropriate\"  individual?  Is this the social hive I require?  Must we sink to \"second level\", become one mind and sacrifice our individuality simply to communicate?  But what is communication?  Is it that which enables an appropriate act to be performed fluently to achieve a specific goal?  One that may be too much of a task for one person?  If this is the case than communication its self is selfish.  However, someone in the back speaks up, one must sacrifice a bit of their own motives and methods in order to achieve the desire of the group.  And to that I say, only to compromise, and that person will see to it that his portion of the rewards is not compromised.\n" +
+        '"And there is nothing to know!"  You might say.  Or me, what matter is who it is as long as it were said.  Shohuld we all feel as if we would be willing to die in order to save a more "insert term for socially appropriate"  individual?  Is this the social hive I require?  Must we sink to "second level", become one mind and sacrifice our individuality simply to communicate?  But what is communication?  Is it that which enables an appropriate act to be performed fluently to achieve a specific goal?  One that may be too much of a task for one person?  If this is the case than communication its self is selfish.  However, someone in the back speaks up, one must sacrifice a bit of their own motives and methods in order to achieve the desire of the group.  And to that I say, only to compromise, and that person will see to it that his portion of the rewards is not compromised.\n' +
         "This all seems evil, dark, sadistic.  Perhaps there are those that are fueled by light and will perform as Jesus supposedly did.  But, and here may be my point, would they if there very life were at risk?  When one is faced with this life threatening danger, one is exposed to the marrow.  A side of themselves they have never seen is shown.  They may not even see it.  In fact in the heat of the moment they will not see it, but it will be clearly visible to others.\n" +
         "Withering willows, the fire of an orchestra, the multiplication tables.  My organs control my mind.  I wish only to reproduce, and I have to deal with that everyday.  Its like a curse.  Its a burden.  But what if I could not?\n" +
         "Is this morning business a sonata of silence?  What if they were watching anyways.  Abandon this lucifer principle, only then can we begin to attach a semblance of meaning to work.  To be proud of what we have done, to bring forth a vision of art that allows a reverse transmission.  To teach, one must provide pride.  To teach we must learn.  And to learn we must teach. \n" +
-        "This will not ben encyclopedia of the deep or a twisted format for the wise.  Wisdom remains hidden in the eye inside my head.  Filtering her breath and proud of her words.  An illusion that is tamed by reality.  An illusion that this will become.  A scent, the aroma that encases, encapsulates.  This will not be an encyclopedia of delicious treats, snacks of the chamber.  It will not be what it is not.  What it is will not become a stream.  Not a stem that breeds proof of its fruits.  At the end of this branch a looming creature dwells.  \"But this is poetry!\"  you scream, a dying wail as you pass on into the thickness.  The heat is overwhelming as you awaken into your dream.  Are we approaching the flowering city?  To coincide with denial and bring into us a jewish melody.  Or is it Russian?  I trouble myself with thinking to know what I think and then applying it to itself.  Is that  all?  Is that that in which we are hazy?For which we trail-blazey?  I have shaven the unsaveables.  beaten the ideas into the ground to recreate and reproach.  We are sick of ranting and through with the disabilities of looking back and seeing our work as something that we did not do, which is barely seeing anything, as if it were someone else entirely!\n" +
+        'This will not ben encyclopedia of the deep or a twisted format for the wise.  Wisdom remains hidden in the eye inside my head.  Filtering her breath and proud of her words.  An illusion that is tamed by reality.  An illusion that this will become.  A scent, the aroma that encases, encapsulates.  This will not be an encyclopedia of delicious treats, snacks of the chamber.  It will not be what it is not.  What it is will not become a stream.  Not a stem that breeds proof of its fruits.  At the end of this branch a looming creature dwells.  "But this is poetry!"  you scream, a dying wail as you pass on into the thickness.  The heat is overwhelming as you awaken into your dream.  Are we approaching the flowering city?  To coincide with denial and bring into us a jewish melody.  Or is it Russian?  I trouble myself with thinking to know what I think and then applying it to itself.  Is that  all?  Is that that in which we are hazy?For which we trail-blazey?  I have shaven the unsaveables.  beaten the ideas into the ground to recreate and reproach.  We are sick of ranting and through with the disabilities of looking back and seeing our work as something that we did not do, which is barely seeing anything, as if it were someone else entirely!\n' +
         "Mainframe.  Sustain the shimmsham shamanism of silliness.   \n" +
         "This is not deep.  This is not beautiful.  This is not real.\n" +
         "The underground whispers desire the troubadours of hostility.  Yet, to be hospitable in its purest sense, one must be acting through pure vision.  This may not be likened to altruism for that term has become the saddest debate of psychology and philosophy, but rather to act kindly to one another human being is to see the universal need for action and to act accordingly.  Frequently it is the case that that which will grant fortune to those receiving the action of other people may not appear as immediately positive.  However, further down the road, that which one has experienced will reconcile into a montage of familiarity and bring them into that space which is there immediate life.  This granted, if one has been denied a negative experience, it may for example have taught them something that they otherwise would have lost to the sands. The reverse is also apparent.  It is often the case that people strive to be nice, which in itself has differing levels of purity.  It is not always the case that individuals even require that people be nice to them.  In fact, it may even be such that obviously false niceties will foster inside someone the hatred and spite necessary to create hanus actions within the universe. \n" +
         "Really the only choice we have is to act or not act.\n" +
         "We will act, however, regardless if we do or not.  Its simply the level of productivity that accompanies the action.  Doing nothing is an action but when faced with a stimulus it becomes non action due to the requirement of the action within the situation.\n" +
-        "What would be if Jesus Christ had not died for our sins, our precious sins.  Would we not have sinned as much?  Within the Jesus Paradigm, we are saved, protected.  Our sins are forgiven, therefore we have no responsibility for them.  Its simply, \"not our fault\".  However, without the Jesus paradigm, we are our own saviors and each of us is a child of God.  How is it to become that Jesus is the only one?  Did he hear the voice speak to him?  Or did he just decide one day to be the nicest guy ever?  I feel left out. And, otherwise, our sins are really all we have.\n" +
+        'What would be if Jesus Christ had not died for our sins, our precious sins.  Would we not have sinned as much?  Within the Jesus Paradigm, we are saved, protected.  Our sins are forgiven, therefore we have no responsibility for them.  Its simply, "not our fault".  However, without the Jesus paradigm, we are our own saviors and each of us is a child of God.  How is it to become that Jesus is the only one?  Did he hear the voice speak to him?  Or did he just decide one day to be the nicest guy ever?  I feel left out. And, otherwise, our sins are really all we have.\n' +
         "Its right here.  To hear and to see, up the right tree, to feel our significance.  The progressive similarity.\n" +
         "\n" +
         "\n" +
@@ -641,11 +639,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "Enough of the strings, only entrails bring things to sing before our dreams, lingering beneath the streets of Montagonu Calibu.  It is not me but a person of integrity. A seemingly soft denial of intensity.  A coward before immensity, but delusional, illusions of integrity.  Only deranged flames may tame the strange and bring blame to the insane.  Strike now before the shuddering lament of crimes intent ferment the sent of calypso cement.  In touch with it, as much.  But it may be a crutch so be wary.  Inside the bride is the false fairy.  Do not commit before you can admit. \n" +
         "We will all cause fits.  A bat in the layer.  It throbs with darkness, pierces the nerves with shallow needles",
     },
-
   ]
   writing.forEach(story => {
     const node = {
-      title:story.title,
+      title: story.title,
       content: story.content,
       id: createNodeId(`Project-${story.title}`),
       internal: {
@@ -655,6 +652,4 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     }
     actions.createNode(node)
   })
-
 }
-

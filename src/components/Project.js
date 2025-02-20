@@ -5,7 +5,7 @@ import FireStoreGif from "../images/fire-store-gif.gif"
 import GigZillaGif from "../images/Gigzilla.gif"
 import MadScienceGif from "../images/mad-science-gif.gif"
 import JobToastGif from "../images/job-toast.gif"
-import { Slide, Fade ,Flip  } from "react-awesome-reveal"
+import { Slide, Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
 
@@ -40,20 +40,22 @@ const Project = ({
               hover && name === "Hoop.It.App"
                 ? HoopItAppGif
                 : hover && name === "Job Toast"
-                ? JobToastGif
-                : hover && name === "Fire Store"
-                ? FireStoreGif
-                : hover && name === "Gigzilla"
-                ? GigZillaGif
-                : hover && name === "Mad Science"
-                ? MadScienceGif
-                : image
+                  ? JobToastGif
+                  : hover && name === "Fire Store"
+                    ? FireStoreGif
+                    : hover && name === "Gigzilla"
+                      ? GigZillaGif
+                      : hover && name === "Mad Science"
+                        ? MadScienceGif
+                        : image
             }
             className="project-images"
           />
         </Fade>
         <div className="description-container">
-          <Slide direction={index % 2 !== 0 ? "left" : "right"}>            <Spring>
+          <Slide direction={index % 2 !== 0 ? "left" : "right"}>
+            {" "}
+            <Spring>
               <a
                 href={link}
                 target="_blank"
@@ -68,37 +70,39 @@ const Project = ({
                   }
                 >
                   {name}
-
                 </h3>
-               <span> {name === "Gigzilla" && " (Deprecated)"}</span>
+                <span> {name === "Gigzilla" && " (Deprecated)"}</span>
               </a>
             </Spring>
             <p>{description}</p>
-
           </Slide>
           <Flip left opposite cascade collapse duration={500}>
             <div>
+              {github && (
+                <a
+                  href={github}
+                  target="_blank"
+                  onMouseEnter={() =>
+                    setLinkHover({ active: true, index: "github" })
+                  }
+                  onMouseLeave={() =>
+                    setLinkHover({ active: false, index: "" })
+                  }
+                >
+                  <Spring isTitle>
+                    <h2
+                      className={
+                        linkHover.active && linkHover.index === "github"
+                          ? "background-video"
+                          : ""
+                      }
+                    >
+                      Github
+                    </h2>
+                  </Spring>
+                </a>
+              )}
 
-              <a
-                href={github}
-                target="_blank"
-                onMouseEnter={() =>
-                  setLinkHover({ active: true, index: "github" })
-                }
-                onMouseLeave={() => setLinkHover({ active: false, index: "" })}
-              >
-                <Spring isTitle>
-                  <h2
-                    className={
-                      linkHover.active && linkHover.index === "github"
-                        ? "background-video"
-                        : ""
-                    }
-                  >
-                    Github
-                  </h2>
-                </Spring>
-              </a>
               <a
                 href={link}
                 target="_blank"
@@ -128,7 +132,7 @@ const Project = ({
         {techArray.map((image, i) => {
           return (
             // <Tada key={i}>
-              <img className="tech-image" src={image} />
+            <img className="tech-image" src={image} />
             // </Tada>
           )
         })}
@@ -160,7 +164,7 @@ const Project = ({
           }}
         />
       )} */}
-      {index !== 4?  <hr></hr> : null}
+      {index !== 4 ? <hr></hr> : null}
     </>
   )
 }
