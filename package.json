@@ -30,14 +30,20 @@
     "react-pdf": "^9.2.1",
     "react-placeholder": "^4.1.0",
     "react-spring": "^8.0.0",
+    "source-map": "^0.7.4",
     "styled-components": "^6.1.14"
   },
   "devDependencies": {
+    "ajv": "^7.2.4",
     "autoprefixer": "^10.4.20",
     "gatsby-plugin-postcss": "^6.14.0",
     "postcss": "^8.5.1",
     "prettier": "3.4.2",
     "tailwindcss": "^4.0.3"
+  },
+  "resolutions": {
+    "ajv": "6.12.6",
+    "ajv-keywords": "3.5.2"
   },
   "keywords": [
     "gatsby"
