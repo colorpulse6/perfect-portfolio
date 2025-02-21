@@ -27,6 +27,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     {
       name: "Swash Flag",
       link: "https://swash-flag.vercel.app/",
+      github: "https://github.com/colorpulse6/swash-flag-frontend",
       techArray: [21, 13, 24, 19, 10, 2, 12, 23, 14, 20, 25, 11],
       ref: "swashFlagRef",
       imgSrc:
