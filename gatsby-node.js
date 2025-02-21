@@ -17,12 +17,22 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     {
       name: "Job Toast",
       link: "https://jobtoast.io/",
-      techArray: [13, 10, 12, 2, 8, 1, 7, 6, 15, 16, 17],
+      techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],
       ref: "jobToastRef",
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/v1738562557/udeejdfdy0f9hpqvb0i2.jpg",
       description:
         "A tool to aid in the job search. Keep track of information for jobs found and applied, prepare for interviews and get the gig!",
+    },
+    {
+      name: "Swash Flag",
+      link: "https://swash-flag.vercel.app/",
+      techArray: [21, 13, 24, 19, 10, 2, 12, 23, 14, 20, 25, 11],
+      ref: "swashFlagRef",
+      imgSrc:
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1740145144/bb3iioasmg10aisavinb.jpg",
+      description:
+        "A feature flag management platform and SDK designed to help developers dynamically control features in their applications.",
     },
     {
       name: "Hoop.It.App",

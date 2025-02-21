@@ -16,6 +16,14 @@ import typescript from "../images/typescript.svg"
 import vscode from "../images/visualstudio-plain-wordmark.svg"
 import graphql from "../images/graph-ql.png"
 import gpt from "../images/gpt.jpg"
+import python from "../images/python.webp"
+import tailwind from "../images/tailwind.png"
+import railway from "../images/railway.webp"
+import vercel from "../images/vercel.webp"
+import vite from "../images/vite.jpeg"
+import turborepo from "../images/turborepo.png"
+import prisma from "../images/prisma.png"
+import tanstack from "../images/tanstack.png"
 
 export const techImages = [
   bootstrap,
@@ -35,10 +43,17 @@ export const techImages = [
   typescript,
   vscode,
   graphql,
-  gpt
+  gpt,
+  python,
+  tailwind,
+  railway,
+  vite,
+  turborepo,
+  prisma,
+  tanstack,
+  vercel,
 ]
 
-export const getImages = (array) => {
-return array.map(i=>techImages[i])
-
+export const getImages = array => {
+  return array.map(i => techImages[i])
 }
