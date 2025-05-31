@@ -25,6 +25,28 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "A tool to aid in the job search. Keep track of information for jobs found and applied, prepare for interviews and get the gig!",
     },
     {
+      name: "Bot Battle",
+      link: "https://www.botbattle.cc/",
+      github:
+        "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/bot-battle/web",
+      techArray: [22, 21, 13, 19, 6, 24, 25, 26],
+      ref: "regexplainRef",
+      imgSrc:
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1748705676/rwjnsdsjdvhndwgeottf.jpg",
+      description: "LLM API testing metrics testing.",
+    },
+    {
+      name: "Regexplain",
+      link: "https://www.regexplain.cc/",
+      github:
+        "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/regexplain/web",
+      techArray: [22, 21, 13, 19, 6, 24, 25, 26],
+      ref: "regexplainRef",
+      imgSrc:
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1748688159/d3owjpjjabibdgvgd6fc.jpg",
+      description: "Explain your regex in a way that is easy to understand.",
+    },
+    {
       name: "Swash Flag",
       link: "https://swash-flag.vercel.app/",
       github: "https://github.com/colorpulse6/swash-flag-frontend",

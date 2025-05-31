@@ -24,6 +24,9 @@ import vite from "../images/vite.jpeg"
 import turborepo from "../images/turborepo.png"
 import prisma from "../images/prisma.png"
 import tanstack from "../images/tanstack.png"
+import regex from "../images/regex.png"
+import next from "../images/nextjs.png"
+import cursor from "../images/cursor.png"
 
 // Type for image file paths (what Gatsby/Webpack returns for static imports)
 type ImagePath = string
@@ -56,6 +59,9 @@ export const techImages: readonly ImagePath[] = [
   prisma,
   tanstack,
   vercel,
+  regex,
+  next,
+  cursor,
 ] as const
 
 // Type for valid tech image indices
