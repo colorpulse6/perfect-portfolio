@@ -120,5 +120,3 @@ Distributed under the 0BSD License. See `LICENSE` file for more information.
 - All the amazing open-source libraries used in this project.
 
 ---
-
-_This README was generated with assistance from an AI pair programmer._
