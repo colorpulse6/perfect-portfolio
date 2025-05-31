@@ -94,21 +94,6 @@ To get a local copy up and running, follow these simple steps.
 - `npm run clean`: Clean the Gatsby cache and public directory.
 - `npm run type-check`: Run the TypeScript compiler to check for type errors.
 
-## 🌟 Modernization Journey (Recent Updates)
-
-This portfolio has recently undergone a significant modernization process, focusing on:
-
-1.  **TypeScript Implementation**: The entire application has been migrated from JavaScript to TypeScript, introducing strong typing, better code organization, and improved maintainability.
-2.  **Code Cleanup**: Refactoring components, improving accessibility, and adopting modern React patterns.
-3.  **Library Updates**: While not all libraries were updated to their absolute latest versions to maintain stability, key dependencies were reviewed and updated where feasible.
-
-Key achievements during this process:
-
-- Comprehensive TypeScript interfaces for components and GraphQL queries.
-- Enhanced accessibility features (e.g., alt attributes, ARIA roles where appropriate).
-- Improved code structure and JSDoc documentation.
-- Successful resolution of ESLint and Webpack configuration challenges.
-
 ## 📄 License
 
 Distributed under the 0BSD License. See `LICENSE` file for more information.
