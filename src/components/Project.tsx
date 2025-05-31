@@ -66,8 +66,8 @@ const Project: React.FC<ProjectProps> = ({
     switch (name) {
       case "Hoop.It.App":
         return HoopItAppGif
-      case "Job Toast":
-        return JobToastGif
+      //   case "Job Toast":
+      //     return JobToastGif
       case "Fire Store":
         return FireStoreGif
       case "Gigzilla":

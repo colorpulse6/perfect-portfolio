@@ -16,7 +16,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
       name: "Job Toast",
-      link: "https://jobtoast.io/",
+      link: "https://res.cloudinary.com/duzle7rzg/image/upload/v1748707801/ddgxgkxzbcr3g25kmbd5.jpg",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],
       ref: "jobToastRef",
       imgSrc:
@@ -29,8 +29,8 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       link: "https://www.botbattle.cc/",
       github:
         "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/bot-battle/web",
-      techArray: [22, 21, 13, 19, 6, 24, 25, 26],
-      ref: "regexplainRef",
+      techArray: [22, 21, 13, 19, 6, 24, 25, 27],
+      ref: "botBattleRef",
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/v1748705676/rwjnsdsjdvhndwgeottf.jpg",
       description: "LLM API testing metrics testing.",
