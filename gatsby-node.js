@@ -664,3 +664,21 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     actions.createNode(node)
   })
 }
+
+// Disable ESLint webpack plugin to prevent configuration conflicts
+exports.onCreateWebpackConfig = ({ actions, stage, getConfig }) => {
+  const config = getConfig()
+
+  // Remove ESLint plugin from webpack configuration
+  if (config.plugins) {
+    config.plugins = config.plugins.filter(plugin => {
+      return (
+        !plugin.constructor ||
+        !plugin.constructor.name ||
+        !plugin.constructor.name.includes("ESLint")
+      )
+    })
+  }
+
+  actions.replaceWebpackConfig(config)
+}

@@ -26,14 +26,14 @@ module.exports = {
         name: "writing",
         link: "/writing",
       },
-      
     ],
   },
   plugins: [
+    "gatsby-plugin-typescript",
     {
       resolve: "gatsby-plugin-transition-link",
       options: {
-        layout: require.resolve(`./src/components/layout.js`),
+        layout: require.resolve(`./src/components/layout.tsx`),
       },
     },
     `gatsby-plugin-react-helmet`,
