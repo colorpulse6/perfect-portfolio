@@ -54,7 +54,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       techArray: [22, 21, 13, 14, 19, 6, 24, 25, 26],
       ref: "regexplainRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/v1748688159/d3owjpjjabibdgvgd6fc.jpg",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751316854/fhnzrv0xm8tuaiglhqjd.jpg",
       description: "Explain your regex in a way that is easy to understand.",
     },
     {
@@ -97,7 +97,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       techArray: [5, 10, 2, 9, 8, 1, 7, 0, 6, 15],
       ref: "gigzillaRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1616362260/Portfolio/project-images/x1ivnv5gchqi4tiph0q6.png",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1616362260/Portfolio/project-images/x1ivnv5gchqi4tiph0q6.png",
       description:
         "Gigzilla offers a convenient platform for for musicians and venues to contact each other to make it easier for musicians to build tours and venues to book shows.",
     },
@@ -108,7 +108,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       techArray: [8, 1, 7, 15],
       ref: "madScienceRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1618133528/Portfolio/project-images/gdsjgsgl8bhkwbxonxcs.png",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1618133528/Portfolio/project-images/gdsjgsgl8bhkwbxonxcs.png",
       description:
         "Mad Science is a game where the player must click on the appropriate balls falling from the screen to fill his beakers with ingredients. Each beaker will hold 3 ingredients. If the player fills 4 beakers he will advance to the next level. The player starts with 10 lives and will loose a life if a target ball falls to the floor before he is able to catch it. He will also gain a life as well as score points if he clicks on a target ball.",
     },
