@@ -28,42 +28,44 @@ import regex from "../images/regex.png"
 import next from "../images/nextjs.png"
 import cursor from "../images/cursor.png"
 import AI from "../images/AI.jpg"
+import Github from "../images/github.png"
 
 // Type for image file paths (what Gatsby/Webpack returns for static imports)
 type ImagePath = string
 
 // Array of all available technology images
 export const techImages: readonly ImagePath[] = [
-  bootstrap,
-  css,
-  express,
-  firebase,
-  gatsby,
-  handlebars,
-  heroku,
-  html,
-  javascript,
-  mongodb,
-  nodejs,
-  npm,
-  postgres,
-  react,
-  typescript,
-  vscode,
-  graphql,
-  gpt,
-  python,
-  tailwind,
-  railway,
-  vite,
-  turborepo,
-  prisma,
-  tanstack,
-  vercel,
-  regex,
-  next,
-  cursor,
-  AI,
+  bootstrap, // 0 - Bootstrap
+  css, // 1 - CSS3
+  express, // 2 - Express.js
+  firebase, // 3 - Firebase
+  gatsby, // 4 - Gatsby
+  handlebars, // 5 - Handlebars
+  heroku, // 6 - Heroku
+  html, // 7 - HTML5
+  javascript, // 8 - JavaScript
+  mongodb, // 9 - MongoDB
+  nodejs, // 10 - Node.js
+  npm, // 11 - NPM
+  postgres, // 12 - PostgreSQL
+  react, // 13 - React
+  typescript, // 14 - TypeScript
+  vscode, // 15 - VS Code
+  graphql, // 16 - GraphQL
+  gpt, // 17 - GPT/AI
+  python, // 18 - Python
+  tailwind, // 19 - Tailwind CSS
+  railway, // 20 - Railway
+  vite, // 21 - Vite
+  turborepo, // 22 - Turborepo
+  prisma, // 23 - Prisma
+  tanstack, // 24 - TanStack
+  vercel, // 25 - Vercel
+  regex, // 26 - Regular Expressions
+  next, // 27 - Next.js
+  cursor, // 28 - Cursor
+  AI, // 29 - AI/Machine Learning,
+  Github, // 30 - Github
 ] as const
 
 // Type for valid tech image indices

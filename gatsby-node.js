@@ -16,11 +16,11 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
       name: "Job Toast",
-      link: "https://res.cloudinary.com/duzle7rzg/image/upload/v1748707801/ddgxgkxzbcr3g25kmbd5.jpg",
+      link: "https://jobtoast.io/",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],
       ref: "jobToastRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/v1738562557/udeejdfdy0f9hpqvb0i2.jpg",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751272460/qbihvcfzu7cyfamaokxv.jpg",
       description:
         "A tool to aid in the job search. Keep track of information for jobs found and applied, prepare for interviews and get the gig!",
     },
@@ -29,18 +29,29 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       link: "https://www.botbattle.cc/",
       github:
         "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/bot-battle/web",
-      techArray: [22, 21, 13, 19, 6, 24, 25, 27],
+      techArray: [22, 21, 13, 14, 19, 6, 24, 25, 27],
       ref: "botBattleRef",
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/v1748705676/rwjnsdsjdvhndwgeottf.jpg",
       description: "LLM API testing metrics testing.",
     },
     {
+      name: "El Form",
+      link: "https://colorpulse6.github.io/el-form/docs/intro",
+      github: "https://github.com/colorpulse6/el-form",
+      techArray: [21, 13, 14, 19, 11, 2, 10, 30],
+      ref: "elFormRef",
+      imgSrc:
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751264148/yoevk2ngg1xphwvmmheh.jpg",
+      description:
+        "Modern open source form library with AutoForm and hooks for maximum flexibility.",
+    },
+    {
       name: "Regexplain",
       link: "https://www.regexplain.cc/",
       github:
         "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/regexplain/web",
-      techArray: [22, 21, 13, 19, 6, 24, 25, 26],
+      techArray: [22, 21, 13, 14, 19, 6, 24, 25, 26],
       ref: "regexplainRef",
       imgSrc:
         "https://res.cloudinary.com/duzle7rzg/image/upload/v1748688159/d3owjpjjabibdgvgd6fc.jpg",
