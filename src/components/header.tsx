@@ -4,6 +4,8 @@ import Hamburger from "./Hamburger"
 import Spring from "../components/Spring"
 import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
+import MediumIcon from "../images/medium.webp"
+import NpmIcon from "../images/npm.png"
 import "./header.css"
 
 // Define the props interface for the Header component
@@ -72,6 +74,24 @@ const Header: React.FC<HeaderProps> = ({
                 src={LinkedinIcon}
                 alt="LinkedIn profile link"
               />
+            </a>
+          </Spring>
+          <Spring isTitle={false}>
+            <a
+              href="https://medium.com/@colorpulse_6839"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img className="icons" src={MediumIcon} alt="Medium link" />
+            </a>
+          </Spring>
+          <Spring isTitle={false}>
+            <a
+              href="https://www.npmjs.com/~colorpulse"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img className="icons" src={NpmIcon} alt="NPM link" />
             </a>
           </Spring>
         </div>
