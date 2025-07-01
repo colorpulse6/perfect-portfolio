@@ -79,23 +79,22 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
             to learn, grow, and tackle new challenges.
           </p>
           <p>
-            My journey into programming began in 2019 while working as a
-            musician, but it wasn't until the global pandemic in 2020 that I had
-            the opportunity to pursue coding full-time. I enrolled in the
-            Ironhack Full-stack Web Development Bootcamp, where I deepened my
-            skills in JavaScript, React, and Node.js/Express. This transition
-            was seamless for me—my background in music provided a perfect
-            foundation. Both music and programming require precision,
-            creativity, and an ability to break down complex systems into
-            manageable pieces.
+            For me, programming is a continuation of music by other means. After
+            the live music world went quiet in 2020, I poured my energy into
+            code and found the process was identical. I've always been an
+            architect - structuring songs, arranging parts, and piecing together
+            a final composition. In development, I do the same, just with a
+            different keyboard.
           </p>
           <p>
-            Before programming, I worked as an audio technician, bandleader,
-            composer, and manager. My diverse career in music shaped my approach
-            to development—emphasizing clear communication, collaboration,
-            leadership, and attention to detail. These soft skills, combined
-            with my technical expertise, allow me to tackle complex projects
-            with confidence and efficiency.
+            My experience before software comes from years of hands-on work in
+            music. In 2014, I moved to Berlin and built a band based around my
+            own compositions. As the bandleader, I managed our constant touring
+            schedule and oversaw the release of four albums, while also working
+            as an audio technician. This dual role of artist and technician
+            required leading a team, managing complex long-term projects, and
+            effective communication - skills that are directly transferable to
+            building and shipping software.
           </p>
           <p>
             I treat my code as I would my compositions—carefully crafted,
