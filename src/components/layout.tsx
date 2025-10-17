@@ -127,26 +127,14 @@ const Layout: React.FC<LayoutProps> = ({
         navOpen={navOpen}
         setNavOpen={setNavOpen}
         transitionStatus={transitionStatus}
+        currentPath={location?.pathname ?? "/"}
         key="sidebar"
       />
 
-      <div
-        style={{
-          margin: "0 auto",
-          // maxWidth: 960,
-          padding: "0 1.0875rem 1.45rem",
-        }}
-      >
-        <main>{children}</main>
-        <footer
-          style={{
-            color: "white",
-            marginTop: "150px",
-            bottom: 5,
-          }}
-        >
-          © {new Date().getFullYear()}, Built with{" "}
-          <a href="https://www.gatsbyjs.com">Gatsby</a>
+      <div className="layout-content">
+        <main className="layout-main">{children}</main>
+        <footer className="layout-footer">
+          © {new Date().getFullYear()}, Built with <a href="https://www.gatsbyjs.com">Gatsby</a>
         </footer>
       </div>
     </div>

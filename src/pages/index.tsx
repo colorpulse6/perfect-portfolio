@@ -60,14 +60,11 @@ const IndexPage: React.FC<IndexPageProps> = ({
   }, [transitionStatus])
 
   return (
-    <div>
-      {/* <Slide left>
-        <SideBarCollapsed currentWindow={location?.pathname} />
-      </Slide> */}
-      <div style={{ opacity: 0 }} className="hometex">
+    <div className="home">
+      <div className="hometex">
         <SEO title="Home" />
-        <div className="title">
-          <h1 className="background-video">
+        <div className="home__hero">
+          <h1 className="home__hero-title background-video">
             fullstack
             <br />
             developer

@@ -14,6 +14,12 @@ interface HamburgerProps {
  * @param props - The component props
  * @returns JSX element for the hamburger menu
  */
+type HamburgerSpinAttributes = React.ComponentProps<typeof HamburgerSpin> &
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+
+const AccessibleHamburgerSpin =
+  HamburgerSpin as React.ComponentType<HamburgerSpinAttributes>
+
 const Hamburger: React.FC<HamburgerProps> = ({ navOpen, setNavOpen }) => {
   const toggleButton = (): void => {
     setNavOpen(!navOpen)
@@ -21,11 +27,14 @@ const Hamburger: React.FC<HamburgerProps> = ({ navOpen, setNavOpen }) => {
 
   return (
     <>
-      <HamburgerSpin
+      <AccessibleHamburgerSpin
         buttonStyle={{ border: "none", outline: "none" }}
         barColor="white"
         isActive={navOpen}
         toggleButton={toggleButton}
+        aria-label="Toggle site navigation"
+        aria-controls="site-navigation"
+        aria-expanded={navOpen}
       />
     </>
   )

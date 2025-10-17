@@ -56,6 +56,9 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
     })
   }, [])
 
+  const pageTitle =
+    location.pathname.substring(1).replace(/\/$/, "") || "about"
+
   return (
     <>
       <SideBarCollapsed
@@ -64,66 +67,70 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
         menuLinks={[]}
       />
 
-      <div style={{ opacity: 0, position: "relative" }} className="about">
+      <section className="about">
         <SEO title="About" />
-        <p className="second-title background-video">
-          {location.pathname.substring(1).replace(/\/$/, "")}
-        </p>
-        <div className="about-content">
-          <p>
-            I'm a web developer originally from Seattle, now based in Madrid. My
-            passion for solving complex problems creatively drives everything I
-            do—whether it's building innovative web applications, composing
-            orchestral music, or experimenting with building corny video games.
-            I approach both programming and life with full commitment, seeking
-            to learn, grow, and tackle new challenges.
-          </p>
-          <p>
-            For me, programming is a continuation of music by other means. After
-            the live music world went quiet in 2020, I poured my energy into
-            code and found the process was identical. I've always been an
-            architect - structuring songs, arranging parts, and piecing together
-            a final composition. In development, I do the same, just with a
-            different keyboard.
-          </p>
-          <p>
-            My experience before software comes from years of hands-on work in
-            music. In 2014, I moved to Berlin and built a band based around my
-            own compositions. As the bandleader, I managed our constant touring
-            schedule and oversaw the release of four albums, while also working
-            as an audio technician. This dual role of artist and technician
-            required leading a team, managing complex long-term projects, and
-            effective communication - skills that are directly transferable to
-            building and shipping software.
-          </p>
-          <p>
-            I treat my code as I would my compositions—carefully crafted,
-            well-organized, and always striving for improvement. Whether working
-            on a challenging feature or an intricate piece of music, I enjoy the
-            process of pushing my limits and delivering something I can be proud
-            of. I'm always eager to learn and take on new challenges in the
-            world of web development.
-          </p>
+        <div className="about__container">
+          <div className="about__copy">
+            <h1 className="about__title background-video">{pageTitle}</h1>
+            <div className="about__content">
+              <p>
+                I'm a web developer originally from Seattle, now based in
+                Madrid. My passion for solving complex problems creatively
+                drives everything I do—whether it's building innovative web
+                applications, composing orchestral music, or experimenting with
+                building corny video games. I approach both programming and life
+                with full commitment, seeking to learn, grow, and tackle new
+                challenges.
+              </p>
+              <p>
+                For me, programming is a continuation of music by other means.
+                After the live music world went quiet in 2020, I poured my
+                energy into code and found the process was identical. I've
+                always been an architect - structuring songs, arranging parts,
+                and piecing together a final composition. In development, I do
+                the same, just with a different keyboard.
+              </p>
+              <p>
+                My experience before software comes from years of hands-on work
+                in music. In 2014, I moved to Berlin and built a band based
+                around my own compositions. As the bandleader, I managed our
+                constant touring schedule and oversaw the release of four
+                albums, while also working as an audio technician. This dual
+                role of artist and technician required leading a team, managing
+                complex long-term projects, and effective communication - skills
+                that are directly transferable to building and shipping
+                software.
+              </p>
+              <p>
+                I treat my code as I would my compositions—carefully crafted,
+                well-organized, and always striving for improvement. Whether
+                working on a challenging feature or an intricate piece of music,
+                I enjoy the process of pushing my limits and delivering
+                something I can be proud of. I'm always eager to learn and take
+                on new challenges in the world of web development.
+              </p>
+            </div>
+          </div>
+
+          <div className="about__links">
+            <Spring isTitle={false}>
+              <a
+                className="about__link background-video"
+                href="https://alexshand.bandcamp.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Music
+              </a>
+            </Spring>
+            <Spring isTitle={false}>
+              <Link className="about__link background-video" to="/writing/">
+                Writing
+              </Link>
+            </Spring>
+          </div>
         </div>
-      </div>
-      <div className="external-container">
-        <Spring isTitle={false}>
-          <a
-            href="https://alexshand.bandcamp.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h1 className="background-video">Music</h1>
-          </a>
-        </Spring>
-        <Spring isTitle={false}>
-          <h1>
-            <Link className="background-video" to="/writing/">
-              Writing
-            </Link>
-          </h1>
-        </Spring>
-      </div>
+      </section>
     </>
   )
 }
