@@ -1,28 +1,31 @@
-import React, { useRef, useEffect, useState } from "react"
+import React, { useRef } from "react"
 import { useTransition, useChain, animated, config } from "react-spring"
 import TransitionLink from "gatsby-plugin-transition-link"
 import Spring from "../components/Spring"
 
 import "./sidebar.css"
 
+const NAV_ITEMS = ["Home", "Projects", "About", "Contact"]
+const NAVIGATION_ID = "site-navigation"
+
 export default ({
   navOpen,
   setNavOpen,
   transitionStatus,
-
+  currentPath = "",
   // onAnimationStart,
   // onAnimationEnd
 }) => {
   const sidebarRef = useRef()
-  const transition = useTransition(navOpen, null, {
+  const sidebarTransition = useTransition(navOpen, null, {
     from: {
-      transform: "translateX(100vw)",
+      transform: "translateX(100%)",
     },
     enter: {
-      transform: "translateX(35vw)",
+      transform: "translateX(0%)",
     },
     leave: {
-      transform: "translateY(-100vw)",
+      transform: "translateX(100%)",
     },
     unique: true,
     config: config.stiff,
@@ -31,65 +34,98 @@ export default ({
     // onRest: onAnimationEnd
   })
 
-  const items = ["Home", "Projects", "About", "Contact"]
   const itemsRef = useRef()
-  const trail = useTransition(navOpen ? items : [], item => item, {
+  const trail = useTransition(navOpen ? NAV_ITEMS : [], item => item, {
     from: {
       opacity: 0,
-      transform: "translateY(50px)",
+      transform: "translateY(32px)",
     },
     enter: {
       opacity: 1,
-      transform: "translateY(0)",
+      transform: "translateY(0px)",
     },
     leave: {
       opacity: 0,
-      transform: "translateY(-25px)",
+      transform: "translateY(-24px)",
     },
     ref: itemsRef,
     config: config.wobbly,
-    trail: 100,
+    trail: 120,
     unique: true,
   })
 
   useChain(
     navOpen ? [sidebarRef, itemsRef] : [itemsRef, sidebarRef],
-    navOpen ? [0, 0.25] : [0, 0.6]
+    navOpen ? [0, 0.2] : [0, 0.4]
   )
 
-  const [isHover, setIsHover] = useState({ hover: false, index: null })
+  const normalizedPath =
+    (currentPath && currentPath !== "/"
+      ? currentPath.replace(/\/$/, "")
+      : "/") || "/"
 
-  return transition.map(({ item, key, props }) =>
+  return sidebarTransition.map(({ item, key, props }) =>
     item ? (
-      <animated.div key={key} style={props} className="sidebar">
-        {trail.map(({ item, key, props }) => (
-          <animated.div key={item} style={props} className="sidebar__item">
-            <Spring>
-              <TransitionLink
-                onMouseEnter={() => setIsHover({ hover: true, index: item })}
-                onMouseLeave={() => setIsHover(false)}
-                onClick={() => {
-                  setNavOpen(!navOpen)
-                }}
-                style={{
-                  textShadow:
-                    window.location.pathname === `/${item.toLowerCase()}` ||
-                    (window.location.pathname === "/" && item === "Home")
-                      ? "0 0 35px white"
-                      : "",
-                }}
-                exit={{
-                  length: 1,
-                }}
-                entry={{ length: 1 }}
-                to={item != "Home" ? `/${item.toLowerCase()}` : "/"}
+      <animated.nav
+        key={key}
+        id={NAVIGATION_ID}
+        aria-label="Primary"
+        aria-hidden={!navOpen}
+        style={props}
+        className="sidebar"
+      >
+        <div className="sidebar__list">
+          {trail.map(({ item: navItem, key: itemKey, props: itemProps }) => {
+            const targetPath =
+              navItem === "Home"
+                ? "/"
+                : `/${navItem.toLowerCase()}`.replace(/\/$/, "")
+            const sanitizedCurrent =
+              normalizedPath === "/"
+                ? "/"
+                : normalizedPath.replace(/\/$/, "")
+            const sanitizedTarget =
+              targetPath === "/"
+                ? "/"
+                : targetPath.replace(/\/$/, "")
+            const isActive =
+              sanitizedTarget === "/"
+                ? sanitizedCurrent === "/"
+                : sanitizedCurrent.startsWith(sanitizedTarget)
+
+            const linkClassName = isActive
+              ? "sidebar__link sidebar__link--active"
+              : "sidebar__link"
+            const linkTextClassName = isActive
+              ? "sidebar__link-text sidebar__link-text--active"
+              : "sidebar__link-text"
+
+            return (
+              <animated.div
+                key={itemKey || navItem}
+                style={itemProps}
+                className="sidebar__item"
               >
-                {item}
-              </TransitionLink>
-            </Spring>
-          </animated.div>
-        ))}
-      </animated.div>
+                <Spring>
+                  <TransitionLink
+                    className={linkClassName}
+                    onClick={() => {
+                      setNavOpen(!navOpen)
+                    }}
+                    exit={{
+                      length: 1,
+                    }}
+                    entry={{ length: 1 }}
+                    to={navItem !== "Home" ? targetPath : "/"}
+                  >
+                    <span className={linkTextClassName}>{navItem}</span>
+                  </TransitionLink>
+                </Spring>
+              </animated.div>
+            )
+          })}
+        </div>
+      </animated.nav>
     ) : null
   )
 }

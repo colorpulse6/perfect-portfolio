@@ -29,75 +29,84 @@ const Header: React.FC<HeaderProps> = ({
   setNavOpen,
 }) => {
   return (
-    <header>
+    <header className="site-header">
       <div className="header-container">
-        <div style={{ display: "flex" }}>
-          <Spring isTitle>
-            <div style={{ display: "flex", alignSelf: "center" }}>
-              <h1 className="header-text">
-                <Link
-                  to="/"
-                  style={{
-                    color: "white",
-                    textDecoration: "none",
-                    fontFamily: "Kano",
-                    fontSize: "20px",
-                    marginLeft: "150px",
-                  }}
-                >
-                  {siteTitle.toUpperCase()}
-                </Link>
-              </h1>
+        <Spring isTitle>
+          <div className="header-title">
+            <h1 className="header-text">
+              <Link className="header-link" to="/">
+                {siteTitle.toUpperCase()}
+              </Link>
+            </h1>
+          </div>
+        </Spring>
+
+        <div className="header-controls">
+          <div className="header-social">
+            <Spring isTitle={false}>
+              <a
+                className="header-social-link"
+                href="https://github.com/colorpulse6"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  className="header-social-icon"
+                  src={GithubIcon}
+                  alt="GitHub profile link"
+                />
+              </a>
+            </Spring>
+            <Spring isTitle={false}>
+              <a
+                className="header-social-link"
+                href="https://www.linkedin.com/in/nic-barnes-a3297217/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  className="header-social-icon"
+                  src={LinkedinIcon}
+                  alt="LinkedIn profile link"
+                />
+              </a>
+            </Spring>
+            <Spring isTitle={false}>
+              <a
+                className="header-social-link"
+                href="https://medium.com/@colorpulse_6839"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  className="header-social-icon"
+                  src={MediumIcon}
+                  alt="Medium link"
+                />
+              </a>
+            </Spring>
+            <Spring isTitle={false}>
+              <a
+                className="header-social-link"
+                href="https://www.npmjs.com/~colorpulse"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  className="header-social-icon"
+                  src={NpmIcon}
+                  alt="NPM link"
+                />
+              </a>
+            </Spring>
+          </div>
+
+          <Spring isTitle={false}>
+            <div className="header-menu-toggle">
+              <Hamburger navOpen={navOpen} setNavOpen={setNavOpen} />
             </div>
           </Spring>
-          <Spring isTitle={false}>
-            <a
-              href="https://github.com/colorpulse6"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                className="icons"
-                src={GithubIcon}
-                alt="GitHub profile link"
-              />
-            </a>
-          </Spring>
-          <Spring isTitle={false}>
-            <a
-              href="https://www.linkedin.com/in/nic-barnes-a3297217/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                className="icons"
-                src={LinkedinIcon}
-                alt="LinkedIn profile link"
-              />
-            </a>
-          </Spring>
-          <Spring isTitle={false}>
-            <a
-              href="https://medium.com/@colorpulse_6839"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img className="icons" src={MediumIcon} alt="Medium link" />
-            </a>
-          </Spring>
-          <Spring isTitle={false}>
-            <a
-              href="https://www.npmjs.com/~colorpulse"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img className="icons" src={NpmIcon} alt="NPM link" />
-            </a>
-          </Spring>
         </div>
-        <Spring isTitle={false}>
-          <Hamburger navOpen={navOpen} setNavOpen={setNavOpen} />
-        </Spring>
       </div>
     </header>
   )

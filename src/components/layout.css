@@ -6,6 +6,32 @@
   font-family: "Kano";
   src: url("../images/Kano.otf") format("truetype");
 }
+:root {
+  /* Breakpoints */
+  --bp-xl: 1200px;
+  --bp-lg: 1024px;
+  --bp-md: 768px;
+  --bp-sm: 640px;
+  --bp-xs: 420px;
+
+  /* Typography */
+  --font-body: "Georgia", serif;
+  --font-heading: "Kano", "Montserrat", sans-serif;
+
+  /* Spacing scale */
+  --space-xxs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+  --space-xxxl: 4.5rem;
+
+  /* Layout */
+  --container-max: 1200px;
+  --content-padding-inline: clamp(var(--space-md), 4vw, var(--space-xl));
+}
 /* * {
   cursor: none !important;
 }
@@ -24,7 +50,9 @@
 html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-  font: 112.5%/1.45em georgia, serif, sans-serif;
+  font-size: 112.5%;
+  line-height: 1.45;
+  font-family: var(--font-body);
   box-sizing: border-box;
   overflow-y: scroll;
 }
@@ -33,7 +61,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: hsla(0, 0%, 0%, 0.8);
-  font-family: georgia, serif;
+  font-family: var(--font-body);
   font-weight: normal;
   word-wrap: break-word;
   font-kerning: normal;
@@ -107,8 +135,9 @@ h1 {
   padding-top: 0;
   margin-bottom: 1.45rem;
   color: inherit;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: var(--font-heading), -apple-system, BlinkMacSystemFont, Segoe UI,
+    Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
+    sans-serif;
   font-weight: bold;
   text-rendering: optimizeLegibility;
   font-size: 2.25rem;
@@ -616,15 +645,45 @@ pre tt:before,
 pre tt:after {
   content: "";
 }
+
+/* Layout wrappers */
+.layout-content {
+  width: min(100%, var(--container-max));
+  margin: 0 auto;
+  padding-inline: var(--content-padding-inline);
+  padding-bottom: var(--space-xxl);
+}
+
+.layout-main {
+  min-height: 0;
+}
+
+.layout-footer {
+  color: white;
+  margin-top: var(--space-xxxl);
+  padding-block: var(--space-lg);
+  text-align: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media only screen and (max-width: 480px) {
   .layout-container {
-    width:100vw;
+    width: 100vw;
   }
   html {
     font-size: 100%;
-    
   }
-  
 }
-
-

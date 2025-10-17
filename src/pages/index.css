@@ -1,61 +1,73 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat");
-
-.title {
-  font-family: "Montserrat", serif;
-  text-align: center;
-  color: #fff;
+.home {
+  position: relative;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  letter-spacing: 1px;
-  margin-left: -250px;
-  margin-top: -50px;
-  /* text-shadow:  0px 0px rgba(214, 204, 204, 0.3) */
+  padding-inline: var(--content-padding-inline);
 }
 
-p {
-  font-family: "Montserrat", serif;
-}
-
-h1 {
-  color: white;
-  font-size: 120px;
-  line-height: 0.75;
-  margin: 10px 0;
-  text-transform: uppercase;
-}
-.background-video {
-  background-image: url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif);
-  background-size: cover;
-  color: transparent !important;
-  -moz-background-clip: initial;
-  -webkit-background-clip: text;
-  /* -webkit-text-stroke: .3px grey; */
-}
-
-.second-title {
-  font-family: "Montserrat", serif;
+.hometex {
+  opacity: 0;
   width: 100%;
-  /* margin: 0 auto; */
-  margin-bottom: 250px;
-  font-size: 60px;
-  color: white;
-  text-transform: uppercase;
-  padding: 8px 0;
 }
 
+.home__hero {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 12rem);
+  padding-block: clamp(var(--space-xxl), 20vh, var(--space-xxxl));
+}
 
-@media only screen and (max-width: 550px) {
- h1 {
-  font-size:70px !important;
-  margin-left:60vw;
+.home__hero-title {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: clamp(0.4rem, 1vw, 1.2rem);
+  text-align: center;
+}
 
-   
+.background-video {
+  background-image: url("https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif");
+  background-size: cover;
+  background-position: center;
+  color: transparent !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@media (max-width: var(--bp-md)) {
+  .home {
+    padding-inline: clamp(var(--space-md), 8vw, var(--space-xl));
   }
 
+  .home__hero {
+    min-height: calc(100vh - 16rem);
+    padding-block: clamp(var(--space-xl), 18vh, var(--space-xxl));
+  }
 
+  .home__hero-title {
+    letter-spacing: clamp(0.3rem, 2vw, 0.8rem);
+  }
 }
 
+@media (max-width: var(--bp-sm)) {
+  .home__hero {
+    min-height: auto;
+  }
 
+  .home__hero-title {
+    font-size: clamp(2.5rem, 14vw, 4.5rem);
+    letter-spacing: clamp(0.2rem, 4vw, 0.6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background-video {
+    background-image: none;
+    color: inherit !important;
+  }
+}
