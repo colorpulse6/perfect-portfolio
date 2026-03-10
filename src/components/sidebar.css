@@ -44,15 +44,45 @@
 
 
 
-@media only screen and (max-width: 550px) {
-  .sidebar__item {
-    font-size:50px !important;
-    margin:0 auto;
-    text-align:center;
-    margin-left:-40vw
+/* Tablet breakpoint */
+@media only screen and (max-width: 768px) {
+  .sidebar {
+    width: 100vw;
+    border-radius: 0;
+    box-shadow: 0 0 50px 50px #111;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
   }
 
+  .sidebar__item {
+    font-size: 60px;
+    margin: 0 auto;
+    text-align: center;
+  }
 
+  .sidebar-collapsed {
+    display: none !important;
+  }
+}
+
+/* Mobile breakpoint */
+@media only screen and (max-width: 550px) {
+  .sidebar {
+    width: 100vw;
+    gap: 40px;
+  }
+
+  .sidebar__item {
+    font-size: 44px !important;
+    margin: 0 auto;
+    text-align: center;
+    padding: 15px 0;
+  }
+
+  .sidebar-collapsed {
+    display: none !important;
+  }
 }
 
 

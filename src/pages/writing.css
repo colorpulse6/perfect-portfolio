@@ -129,3 +129,43 @@
     line-height: 1.5;
   }
 }
+
+/* Mobile breakpoint */
+@media (max-width: 550px) {
+  .writing h1 {
+    font-size: 24px !important;
+    margin-left: 0 !important;
+    padding: 0 10px;
+  }
+
+  .title-container {
+    padding: 0 10px;
+  }
+
+  .story-card {
+    margin: 5px;
+  }
+
+  .story-item {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .story-container {
+    margin: 10px 5px;
+    padding: 12px;
+  }
+
+  .rendered-title {
+    font-size: 20px;
+  }
+
+  .story-content {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .dialogue-paragraph {
+    padding-left: 12px;
+  }
+}

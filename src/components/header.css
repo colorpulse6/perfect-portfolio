@@ -18,12 +18,45 @@
   margin: -50px 0 0 -80px;
 }
 
-@media only screen and (max-width: 550px) {
- 
-  .header-container{
-    margin-right:-40vw
+/* Tablet breakpoint */
+@media only screen and (max-width: 768px) {
+  .header-container {
+    padding: 15px 10px;
   }
+
   .header-text {
-   
+    margin: -50px 0 0 0 !important;
+  }
+
+  .header-text a {
+    margin-left: 20px !important;
+  }
+
+  .icons {
+    width: 24px;
+    margin-left: 12px;
+  }
+}
+
+/* Mobile breakpoint */
+@media only screen and (max-width: 550px) {
+  .header-container {
+    padding: 10px;
+    margin-right: 0;
+  }
+
+  .header-text {
+    margin: -50px 0 0 0 !important;
+  }
+
+  .header-text a {
+    margin-left: 10px !important;
+    font-size: 16px !important;
+  }
+
+  .icons {
+    width: 22px;
+    margin-left: 8px;
+    margin-top: 14px;
   }
 }

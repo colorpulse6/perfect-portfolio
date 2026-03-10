@@ -118,3 +118,43 @@ textarea {
   -webkit-transform: rotate(40deg);
   transform: rotate(40deg);
 }
+
+/* Tablet breakpoint */
+@media only screen and (max-width: 768px) {
+  .container h1 {
+    font-size: 45px;
+  }
+
+  .main input,
+  textarea {
+    width: 70%;
+  }
+}
+
+/* Mobile breakpoint */
+@media only screen and (max-width: 550px) {
+  .container h1 {
+    font-size: 32px;
+  }
+
+  .contact-title {
+    margin-bottom: 40px !important;
+    padding-top: 20px !important;
+  }
+
+  .main {
+    margin-top: 20px;
+    padding: 10px;
+  }
+
+  .main input,
+  textarea {
+    width: 90%;
+    font-size: 14px;
+  }
+
+  .main label {
+    width: 100%;
+    font-size: 14px;
+  }
+}

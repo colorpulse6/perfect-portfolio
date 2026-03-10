@@ -616,15 +616,33 @@ pre tt:before,
 pre tt:after {
   content: "";
 }
-@media only screen and (max-width: 480px) {
+/* Tablet breakpoint */
+@media only screen and (max-width: 768px) {
   .layout-container {
-    width:100vw;
+    width: 100vw;
+    overflow-x: hidden;
   }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Mobile breakpoint */
+@media only screen and (max-width: 550px) {
+  .layout-container {
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
   html {
     font-size: 100%;
-    
+    overflow-x: hidden;
   }
-  
+
+  body {
+    overflow-x: hidden;
+  }
 }
 
 

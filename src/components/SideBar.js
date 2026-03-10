@@ -13,13 +13,15 @@ export default ({
   // onAnimationStart,
   // onAnimationEnd
 }) => {
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768
+
   const sidebarRef = useRef()
   const transition = useTransition(navOpen, null, {
     from: {
       transform: "translateX(100vw)",
     },
     enter: {
-      transform: "translateX(35vw)",
+      transform: isMobile ? "translateX(0vw)" : "translateX(35vw)",
     },
     leave: {
       transform: "translateY(-100vw)",
