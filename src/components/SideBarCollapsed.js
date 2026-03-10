@@ -4,10 +4,10 @@ import TransitionLink from "gatsby-plugin-transition-link"
 import Spring from "../components/Spring"
 import Link from "gatsby"
 import "./sidebar.css"
-import HomeIcon from "../images/home-icon.png"
-import ProjectsIcon from "../images/suitcase-icon.png"
-import AboutIcon from "../images/about-icon.png"
-import ContactIcon from "../images/letter-icon.png"
+import { AiOutlineHome } from "react-icons/ai"
+import { GoProjectRoadmap } from "react-icons/go"
+import { BsPersonVcard } from "react-icons/bs"
+import { HiOutlineMail } from "react-icons/hi"
 import { useStaticQuery, graphql } from "gatsby"
 
 export default ({
@@ -36,10 +36,10 @@ export default ({
   // })
 
   const items = [
-    { name: "Home", icon: HomeIcon },
-    { name: "Projects", icon: ProjectsIcon },
-    { name: "About", icon: AboutIcon },
-    { name: "Contact", icon: ContactIcon },
+    { name: "Home", icon: AiOutlineHome },
+    { name: "Projects", icon: GoProjectRoadmap },
+    { name: "About", icon: BsPersonVcard },
+    { name: "Contact", icon: HiOutlineMail },
   ]
   // const itemsRef = useRef()
   // const trail = useTransition(navOpen ? items : [], item => item, {
@@ -89,31 +89,28 @@ export default ({
                         : "/"
                     }
                   >
-                    <img
+                    <item.icon
                       style={{
                         opacity:
                           `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
                           (item.name === "Home" && isHome)
-                            ? "100%"
-                            : "20%",
-                        width:"40px",
-                        backgroundImage:
-                          (isHover.hover && isHover.index.name == item.name) ||
-                          `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
-                          (item.name === "Home" && isHome)
-                            ? "url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif)"
-                            : "",
-
+                            ? "1"
+                            : "0.2",
+                        fontSize: "32px",
+                        color: "white",
                         marginLeft:
                           `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
                           (item.name === "Home" && isHome)
                             ? "35px"
                             : "25px",
-
                         marginTop: "-40px",
+                        filter:
+                          (isHover.hover && isHover.index.name == item.name) ||
+                          `/${item.name.toLowerCase()}` === currentWindow.replace(/\/$/, "") ||
+                          (item.name === "Home" && isHome)
+                            ? "drop-shadow(0 0 8px white)"
+                            : "",
                       }}
-                      className="icons"
-                      src={item.icon}
                     />
                   </TransitionLink>
                 </Spring>
