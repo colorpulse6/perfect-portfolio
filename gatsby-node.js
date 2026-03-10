@@ -25,6 +25,17 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "A tool to aid in the job search. Keep track of information for jobs found and applied, prepare for interviews and get the gig!",
     },
     {
+      name: "El Form",
+      link: "https://colorpulse6.github.io/el-form/docs/intro",
+      github: "https://github.com/colorpulse6/el-form",
+      techArray: [21, 13, 14, 19, 11, 2, 10, 30],
+      ref: "elFormRef",
+      imgSrc:
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751264148/yoevk2ngg1xphwvmmheh.jpg",
+      description:
+        "Modern open source form library with AutoForm and hooks for maximum flexibility.",
+    },
+    {
       name: "Bot Battle",
       link: "https://www.botbattle.cc/",
       github:
@@ -36,15 +47,15 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       description: "LLM API testing metrics testing.",
     },
     {
-      name: "El Form",
-      link: "https://colorpulse6.github.io/el-form/docs/intro",
-      github: "https://github.com/colorpulse6/el-form",
-      techArray: [21, 13, 14, 19, 11, 2, 10, 30],
-      ref: "elFormRef",
+      name: "Knicks Knacks",
+      link: "https://colorpulse6.github.io/knicks-knacks/",
+      github: "https://github.com/colorpulse6/knicks-knacks",
+      techArray: [22, 27, 13, 14, 8, 1, 30],
+      ref: "knicksKnacksRef",
       imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751264148/yoevk2ngg1xphwvmmheh.jpg",
+        "https://res.cloudinary.com/duzle7rzg/image/upload/v1773122109/rlkw8gprb915joi9jspn.jpg",
       description:
-        "Modern open source form library with AutoForm and hooks for maximum flexibility.",
+        "A browser-based arcade platform featuring classic and modern games with player profiles and persistent stat tracking.",
     },
     {
       name: "Regexplain",
