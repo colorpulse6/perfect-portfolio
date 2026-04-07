@@ -37,12 +37,16 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
   const cycleTimer = useRef<NodeJS.Timeout | null>(null)
   const typeTimer = useRef<NodeJS.Timeout | null>(null)
   const isPaused = useRef(false)
+  const isQuerying = useRef(false)
+  const typingId = useRef(0)
 
   const typeText = useCallback(
     (text: string, onComplete?: () => void) => {
+      const id = ++typingId.current
       let i = 0
       setDisplayText("")
       const tick = () => {
+        if (id !== typingId.current) return
         if (i < text.length) {
           setDisplayText(text.substring(0, i + 1))
           const char = text[i]
@@ -62,7 +66,7 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
   )
 
   const startCycle = useCallback(() => {
-    if (isPaused.current) return
+    if (isPaused.current || isQuerying.current) return
 
     const quote = CYCLING_QUOTES[cycleIndex.current % CYCLING_QUOTES.length]
     setExploreLink(null)
@@ -79,13 +83,16 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
     if (isHome) {
       setCollapsed(false)
       const showTimer = setTimeout(() => {
+        if (isQuerying.current) return
         setVisible(true)
         startCycle()
       }, 500)
       return () => {
         clearTimeout(showTimer)
-        if (cycleTimer.current) clearTimeout(cycleTimer.current)
-        if (typeTimer.current) clearTimeout(typeTimer.current)
+        if (!isQuerying.current) {
+          if (cycleTimer.current) clearTimeout(cycleTimer.current)
+          if (typeTimer.current) clearTimeout(typeTimer.current)
+        }
       }
     } else {
       setCollapsed(true)
@@ -129,6 +136,7 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
   const askTerminal = useCallback(
     async (input: string) => {
       isPaused.current = true
+      isQuerying.current = true
       if (cycleTimer.current) clearTimeout(cycleTimer.current)
       if (typeTimer.current) clearTimeout(typeTimer.current)
 
@@ -164,8 +172,10 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
       } catch {
         reply = getRandomFallback()
       }
+      if (!isQuerying.current) return
       typeText(reply, () => {
         setTimeout(() => {
+          isQuerying.current = false
           isPaused.current = false
           if (isHome) {
             cycleIndex.current++

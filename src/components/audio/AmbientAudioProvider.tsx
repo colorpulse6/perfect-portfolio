@@ -22,10 +22,12 @@ export const AmbientAudioProvider: React.FC<Props> = ({ pagePath, children }) =>
   const engineRef = useRef<AmbientEngine | null>(null)
   const [muted, setMuted] = useState(true)
 
-  if (!engineRef.current && typeof window !== "undefined") {
-    engineRef.current = new AmbientEngine()
-    setMuted(engineRef.current.muted)
-  }
+  useEffect(() => {
+    if (!engineRef.current && typeof window !== "undefined") {
+      engineRef.current = new AmbientEngine()
+      setMuted(engineRef.current.muted)
+    }
+  }, [])
 
   useEffect(() => {
     const engine = engineRef.current
