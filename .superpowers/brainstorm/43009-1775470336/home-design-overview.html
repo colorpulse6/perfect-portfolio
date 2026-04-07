@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Page — Full Design Overview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e0e0e0; font-family: -apple-system, 'Segoe UI', sans-serif; }
+
+  .page-header {
+    text-align: center;
+    padding: 30px 20px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 40px;
+  }
+  .page-header h1 { color: #fff; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; }
+  .page-header p { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 30px 80px; }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .arch-label {
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+  }
+
+  .layer-stack { padding: 20px; }
+
+  .layer {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 60px;
+  }
+  .layer-tag {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    flex-shrink: 0;
+  }
+  .layer-content {
+    flex: 1;
+    padding: 14px 18px;
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+  .layer-content h3 { font-size: 14px; color: #fff; margin-bottom: 4px; }
+  .layer-content p { font-size: 12px; color: #888; line-height: 1.6; }
+
+  .layer-r3f { background: rgba(100, 140, 255, 0.06); }
+  .layer-r3f .layer-tag { color: #6888ff; }
+  .layer-title { background: rgba(255, 255, 255, 0.04); }
+  .layer-console { background: rgba(100, 255, 140, 0.06); }
+  .layer-console .layer-tag { color: #66cc88; }
+  .layer-sidebar { background: rgba(255, 255, 255, 0.02); }
+
+  /* Mockup */
+  .mockup-frame {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: #080810;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  /* Fake particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 0 6px rgba(255,255,255,0.3);
+    animation: drift 20s infinite linear;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(30px, -20px); }
+    50% { transform: translate(-10px, -40px); }
+    75% { transform: translate(20px, -10px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Fake artifacts */
+  .artifact {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.6;
+    animation: float 12s infinite ease-in-out;
+    cursor: pointer;
+    transition: opacity 0.3s, text-shadow 0.3s;
+  }
+  .artifact:hover {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  /* Hello text */
+  .hello-overlay {
+    position: absolute;
+    top: 28%;
+    left: 15%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 72px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d423);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradient-shift 8s ease infinite;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Terminal console */
+  .terminal {
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    background: rgba(0,0,0,0.88);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px;
+    font-family: 'Courier New', monospace;
+  }
+  .terminal-line {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #88cc88;
+  }
+  .terminal-line.quote { color: #ccc; }
+  .terminal-line .prompt { color: #666; }
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: #88cc88;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Sidebar mock */
+  .sidebar-mock {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .sidebar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 36px;
+  }
+  .section h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .section p, .section li {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #aaa;
+  }
+  .section ul {
+    list-style: none;
+    padding: 0;
+  }
+  .section li {
+    padding: 6px 0 6px 16px;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 4px;
+  }
+  .section li strong { color: #ddd; }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .tech-tag {
+    font-size: 11px;
+    color: #999;
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+  }
+  .tech-tag.primary { border-color: rgba(100,140,255,0.3); color: #8899dd; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Home Page — Full Design Overview</h1>
+  <p>Architecture, mockup, and component breakdown</p>
+</div>
+
+<div class="container">
+
+  <!-- Architecture -->
+  <div class="arch-diagram">
+    <div class="arch-label">Layer Architecture</div>
+    <div class="layer-stack">
+      <div class="layer layer-console">
+        <div class="layer-tag">Layer 3</div>
+        <div class="layer-content">
+          <h3>Terminal Console (DOM)</h3>
+          <p>GSAP-animated overlay at bottom of viewport. Shows typed artifact quotes and accepts visitor commands. Monospace, semi-transparent.</p>
+        </div>
+      </div>
+      <div class="layer layer-title">
+        <div class="layer-tag">Layer 2</div>
+        <div class="layer-content">
+          <h3>"Hello..." Title (DOM)</h3>
+          <p>Existing animated text, positioned above canvas. Untouched from current implementation.</p>
+        </div>
+      </div>
+      <div class="layer layer-r3f">
+        <div class="layer-tag">Layer 1</div>
+        <div class="layer-content">
+          <h3>R3F Particle World (WebGL Canvas)</h3>
+          <p>Fullscreen fixed canvas. 200-300 instanced particles with bloom. 5-7 floating artifacts. Cursor repulsion physics. GPU-rendered.</p>
+        </div>
+      </div>
+      <div class="layer layer-sidebar">
+        <div class="layer-tag">Layer 0</div>
+        <div class="layer-content">
+          <h3>Sidebar Navigation (DOM)</h3>
+          <p>Existing collapsed sidebar. Completely untouched — dual path navigation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mockup -->
+  <div class="mockup-frame">
+    <!-- Fake particles -->
+    <div class="particle" style="width:3px;height:3px;top:15%;left:25%;animation-delay:-2s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:35%;left:55%;animation-delay:-5s;"></div>
+    <div class="particle" style="width:4px;height:4px;top:60%;left:20%;animation-delay:-8s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:25%;left:75%;animation-delay:-1s;"></div>
+    <div class="particle" style="width:3px;height:3px;top:70%;left:60%;animation-delay:-4s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:45%;left:85%;animation-delay:-7s;"></div>
+    <div class="particle" style="width:3px;height:3px;top:80%;left:40%;animation-delay:-3s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:12%;left:65%;animation-delay:-6s;"></div>
+    <div class="particle" style="width:4px;height:4px;top:50%;left:35%;animation-delay:-9s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:38%;left:12%;animation-delay:-11s;"></div>
+    <div class="particle" style="width:3px;height:3px;top:72%;left:78%;animation-delay:-13s;"></div>
+    <div class="particle" style="width:2px;height:2px;top:88%;left:22%;animation-delay:-15s;"></div>
+
+    <!-- Floating artifacts -->
+    <div class="artifact" style="top:20%;left:70%;animation-delay:-2s;">♪</div>
+    <div class="artifact" style="top:55%;left:30%;animation-delay:-5s;font-family:monospace;font-size:22px;">&lt;/&gt;</div>
+    <div class="artifact" style="top:40%;left:80%;animation-delay:-8s;">🎮</div>
+    <div class="artifact" style="top:75%;left:65%;animation-delay:-3s;font-size:22px;">〜</div>
+
+    <!-- Hello text -->
+    <div class="hello-overlay">Hello...</div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-mock">
+      <div class="sidebar-dot"></div>
+      <div class="sidebar-dot"></div>
+      <div class="sidebar-dot"></div>
+      <div class="sidebar-dot"></div>
+    </div>
+
+    <!-- Terminal -->
+    <div class="terminal">
+      <div class="terminal-line quote">"10 years. 4 albums. 3 countries."</div>
+      <div class="terminal-line"><span class="prompt">&gt;</span> <span class="terminal-cursor"></span></div>
+    </div>
+  </div>
+
+  <!-- Components breakdown -->
+  <div class="section">
+    <h2>Components</h2>
+    <ul>
+      <li><strong>ParticleField</strong> — R3F instanced mesh, 200-300 points, cursor repulsion physics, bloom post-processing</li>
+      <li><strong>FloatingArtifact</strong> — R3F sprite, drifts across scene, glows on proximity, bursts into particles on click, triggers console</li>
+      <li><strong>ArtifactManager</strong> — Manages artifact pool: spawns from edges, staggers timing, handles respawn after burst</li>
+      <li><strong>TerminalConsole</strong> — DOM overlay, GSAP slide-in, character-by-character typing, command input with recognized commands</li>
+      <li><strong>HomeScene</strong> — R3F Canvas wrapper, composes ParticleField + ArtifactManager, handles pointer events</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Tech Stack</h2>
+    <div class="tech-tags">
+      <span class="tech-tag primary">@react-three/fiber</span>
+      <span class="tech-tag primary">@react-three/drei</span>
+      <span class="tech-tag primary">@react-three/postprocessing</span>
+      <span class="tech-tag">three.js</span>
+      <span class="tech-tag">GSAP (existing)</span>
+      <span class="tech-tag">React (existing)</span>
+      <span class="tech-tag">TypeScript (existing)</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Mobile Behavior</h2>
+    <ul>
+      <li><strong>Particles:</strong> Reduced to ~100, no bloom</li>
+      <li><strong>Artifacts:</strong> Same behavior, touch = cursor</li>
+      <li><strong>Console:</strong> Full-width, display-only (no keyboard input), dismiss button</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Artifacts & Content</h2>
+    <ul>
+      <li><strong>♪ Musical note</strong> — "10 years. 4 albums. 3 countries." → links to /about</li>
+      <li><strong>&lt;/&gt; Code brackets</strong> — "TypeScript, React, Remix — the new instrument." → links to /projects</li>
+      <li><strong>▋ Terminal cursor</strong> — "The bootcamp was the beginning. The obsession was the education." → no link</li>
+      <li><strong>🎮 Game controller</strong> — "I've been building worlds since before I could code." → no link</li>
+      <li><strong>✎ Pen</strong> — "Sometimes the best debugging happens in prose." → links to /writing</li>
+      <li><strong>〜 Waveform</strong> — "Signal flow. Troubleshooting. Precision. Sound familiar?" → no link</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

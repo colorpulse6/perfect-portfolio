@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Section — Style Options</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e0e0e0; font-family: 'Georgia', serif; }
+
+  .page-header {
+    text-align: center;
+    padding: 30px 20px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 30px;
+  }
+  .page-header h1 { color: #fff; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; }
+  .page-header p { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .options-row {
+    display: flex;
+    gap: 30px;
+    padding: 0 30px 60px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .option-col {
+    flex: 1;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .option-col:hover { border-color: rgba(255,255,255,0.25); }
+  .option-col.selected { border-color: #fff; }
+
+  .option-label {
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .option-label .letter {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: bold; color: #fff;
+    font-family: sans-serif;
+  }
+  .option-label h2 { font-size: 15px; color: #fff; font-family: sans-serif; letter-spacing: 0.5px; }
+  .option-label p { font-size: 12px; color: #888; font-family: sans-serif; }
+
+  .preview { padding: 30px 24px; min-height: 600px; }
+
+  /* ============ OPTION A: Editorial / Magazine ============ */
+  .style-a .headline {
+    font-size: 28px;
+    font-weight: 400;
+    font-style: italic;
+    color: #fff;
+    margin-bottom: 24px;
+    line-height: 1.3;
+  }
+  .style-a .intro {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #bbb;
+    margin-bottom: 30px;
+    max-width: 580px;
+  }
+  .style-a .section-head {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #666;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-family: sans-serif;
+  }
+  .style-a .body-text {
+    font-size: 14px;
+    line-height: 1.85;
+    color: #aaa;
+    margin-bottom: 14px;
+  }
+  .style-a .accent-line {
+    font-size: 20px;
+    font-style: italic;
+    color: #fff;
+    margin: 28px 0;
+    padding-left: 20px;
+    border-left: 2px solid rgba(255,255,255,0.2);
+  }
+  .style-a .highlight-list {
+    list-style: none; padding: 0; margin: 16px 0;
+  }
+  .style-a .highlight-list li {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #aaa;
+    padding: 8px 0 8px 16px;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 6px;
+  }
+  .style-a .highlight-list li strong { color: #ddd; }
+  .style-a .closing {
+    font-size: 18px;
+    font-style: italic;
+    color: #fff;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ============ OPTION B: Structured / Card-based ============ */
+  .style-b { font-family: -apple-system, 'Segoe UI', sans-serif; }
+  .style-b .headline {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .style-b .intro {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #999;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .style-b .section-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .style-b .section-card .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .style-b .section-card .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .style-b .section-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .style-b .section-card p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #999;
+  }
+  .style-b .accent-break {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    padding: 20px 0;
+    letter-spacing: 0.5px;
+  }
+  .style-b .toolkit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .style-b .toolkit-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+  }
+  .style-b .toolkit-item .tk-label {
+    color: #666;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .style-b .toolkit-item .tk-value { color: #ccc; line-height: 1.5; }
+  .style-b .closing {
+    font-size: 15px;
+    font-style: italic;
+    color: #ccc;
+    margin-top: 24px;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ============ OPTION C: Typographic / Minimal ============ */
+  .style-c .container {
+    max-width: 520px;
+  }
+  .style-c .headline {
+    font-size: 32px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 6px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  .style-c .rule {
+    width: 50px;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+    margin: 24px 0;
+  }
+  .style-c .intro {
+    font-size: 16px;
+    line-height: 1.9;
+    color: #bbb;
+    margin-bottom: 10px;
+  }
+  .style-c .section-head {
+    font-size: 16px;
+    color: #fff;
+    margin-top: 36px;
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .style-c .section-sub {
+    font-size: 12px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    font-family: sans-serif;
+  }
+  .style-c .body-text {
+    font-size: 14px;
+    line-height: 1.9;
+    color: #999;
+    margin-bottom: 12px;
+  }
+  .style-c .accent-line {
+    font-size: 22px;
+    color: #fff;
+    margin: 32px 0;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+  .style-c .highlight-list {
+    list-style: none; padding: 0; margin: 20px 0;
+  }
+  .style-c .highlight-list li {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #888;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .style-c .highlight-list li strong { color: #ccc; font-weight: 400; }
+  .style-c .closing {
+    font-size: 20px;
+    color: #fff;
+    margin-top: 40px;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .style-c .cta {
+    font-size: 13px;
+    color: #666;
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+
+  /* Selection indicator */
+  .selected .option-label .letter { background: #fff; color: #000; }
+</style>
+<script>
+function toggleSelect(el) {
+  document.querySelectorAll('.option-col').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const choice = el.dataset.choice;
+  const text = el.querySelector('h2').textContent;
+  fetch('/.events', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({type:'click', choice, text, timestamp: Math.floor(Date.now()/1000)})
+  }).catch(()=>{});
+}
+</script>
+</head>
+<body>
+<div class="page-header">
+  <h1>About Section — Visual Direction</h1>
+  <p>Click the option that feels right. You can mix elements from different options.</p>
+</div>
+
+<div class="options-row">
+
+  <!-- OPTION A: Editorial -->
+  <div class="option-col" data-choice="a" onclick="toggleSelect(this)">
+    <div class="option-label">
+      <div class="letter">A</div>
+      <div><h2>Editorial</h2><p>Magazine-style, serif typography, refined dividers</p></div>
+    </div>
+    <div class="preview style-a">
+      <div class="headline">The Medium Changed.<br>The Discipline Didn't.</div>
+      <p class="intro">I am a software engineer who spent the first decade of my professional life as a composer, bandleader, and audio technician.</p>
+
+      <div class="section-head">The Seattle Foundation &mdash; Building Worlds</div>
+      <p class="body-text">My journey started in Seattle&mdash;not just playing in bands, but building systems. Long before I touched a terminal, I was obsessed with the architecture of creativity.</p>
+
+      <div class="section-head">The Berlin Transition &mdash; From Stage to Script</div>
+      <p class="body-text">I moved to Berlin to push my musical career to its logical conclusion. I reached a level of professional maturity where I was leading international tours across Europe and Japan.</p>
+
+      <div class="accent-line">Then came March 2020.</div>
+
+      <div class="section-head">The Madrid Integration &mdash; The AI Renaissance</div>
+      <p class="body-text">Today, based in Madrid, my work has entered a new phase. We've moved past the era of manual boilerplate and into the era of AI-native engineering.</p>
+
+      <ul class="highlight-list">
+        <li><strong>Orchestrating Agents:</strong> Just as I once coordinated a 10-piece band, I now coordinate AI agents for testing, refactoring, and scaffolding.</li>
+        <li><strong>Focus on Composition:</strong> With AI handling the "rhythm section," I focus on the "melody"&mdash;UX, product logic, architecture.</li>
+      </ul>
+
+      <div class="closing">The artist didn't disappear. He just found a more powerful instrument.</div>
+    </div>
+  </div>
+
+  <!-- OPTION B: Structured Cards -->
+  <div class="option-col" data-choice="b" onclick="toggleSelect(this)">
+    <div class="option-label">
+      <div class="letter">B</div>
+      <div><h2>Structured Cards</h2><p>Card-based sections, clean sans-serif, modern dev portfolio</p></div>
+    </div>
+    <div class="preview style-b">
+      <div class="headline">The Medium Changed. The Discipline Didn't.</div>
+      <p class="intro">I am a software engineer who spent the first decade of my professional life as a composer, bandleader, and audio technician. To me, it was simply moving from one form of system design to another.</p>
+
+      <div class="section-card">
+        <div class="card-head">
+          <div class="card-icon">&#127927;</div>
+          <h3>The Seattle Foundation: Building Worlds</h3>
+        </div>
+        <p>My journey started in Seattle&mdash;not just playing in bands, but building systems. I spent my youth designing tabletop RPGs, drawing comics, and making home recordings in rain-soaked basements.</p>
+      </div>
+
+      <div class="section-card">
+        <div class="card-head">
+          <div class="card-icon">&#9992;</div>
+          <h3>The Berlin Transition: From Stage to Script</h3>
+        </div>
+        <p>I moved to Berlin and reached a level of professional maturity where I was leading international tours across Europe and Japan, eventually receiving state funding in Germany.</p>
+      </div>
+
+      <div class="accent-break">Then came March 2020.</div>
+
+      <div class="section-card">
+        <div class="card-head">
+          <div class="card-icon">&#9889;</div>
+          <h3>The Madrid Integration: The AI Renaissance</h3>
+        </div>
+        <p>Today, based in Madrid, my work has entered a new phase. I use AI not to replace my thinking, but to execute at a scale previously impossible for a single developer.</p>
+      </div>
+
+      <div class="toolkit-grid">
+        <div class="toolkit-item">
+          <div class="tk-label">Frontend</div>
+          <div class="tk-value">React, TypeScript, Remix, Vite, Tailwind</div>
+        </div>
+        <div class="toolkit-item">
+          <div class="tk-label">Infrastructure</div>
+          <div class="tk-value">Terraform, AWS, Postgres, GraphQL</div>
+        </div>
+        <div class="toolkit-item">
+          <div class="tk-label">AI Workflow</div>
+          <div class="tk-value">Agentic workflows, LLM-integrated dev</div>
+        </div>
+      </div>
+
+      <div class="closing">The artist didn't disappear. He just found a more powerful instrument.</div>
+    </div>
+  </div>
+
+  <!-- OPTION C: Typographic Minimal -->
+  <div class="option-col" data-choice="c" onclick="toggleSelect(this)">
+    <div class="option-label">
+      <div class="letter">C</div>
+      <div><h2>Typographic Minimal</h2><p>Generous whitespace, focused reading column, quiet elegance</p></div>
+    </div>
+    <div class="preview style-c">
+      <div class="container">
+        <div class="headline">The Medium Changed.<br>The Discipline Didn't.</div>
+        <div class="rule"></div>
+        <p class="intro">I am a software engineer who spent the first decade of my professional life as a composer, bandleader, and audio technician.</p>
+        <p class="intro">Whether writing a score for a chamber group or building a custom component library in TypeScript, the core objective is the same: managing complexity to create a seamless experience.</p>
+
+        <div class="section-head">The Seattle Foundation</div>
+        <div class="section-sub">Building Worlds</div>
+        <p class="body-text">My journey started in Seattle&mdash;not just playing in bands, but building systems. Long before I touched a terminal, I was obsessed with the architecture of creativity.</p>
+
+        <div class="section-head">The Berlin Transition</div>
+        <div class="section-sub">From Stage to Script</div>
+        <p class="body-text">I reached a level of professional maturity where I was leading international tours across Europe and Japan, eventually receiving state funding in Germany.</p>
+
+        <div class="accent-line">Then came March 2020.</div>
+
+        <div class="section-head">The Madrid Integration</div>
+        <div class="section-sub">The AI Renaissance</div>
+        <p class="body-text">We've moved past the era of manual boilerplate and into the era of AI-native engineering. I use AI not to replace my thinking, but to execute at a scale previously impossible.</p>
+
+        <ul class="highlight-list">
+          <li><strong>Orchestrating Agents</strong> &mdash; Just as I once coordinated a 10-piece band, I now coordinate AI agents for testing, refactoring, and scaffolding.</li>
+          <li><strong>Focus on Composition</strong> &mdash; AI handles the "rhythm section"; I focus on the "melody"&mdash;UX, product logic, architecture.</li>
+          <li><strong>Creative Velocity</strong> &mdash; Building more complex systems with more precision and less friction than ever before.</li>
+        </ul>
+
+        <div class="closing">The artist didn't disappear.<br>He just found a more powerful instrument.</div>
+        <div class="cta">I am always looking to collaborate with teams that value craft, taste, and the kind of perspective that only comes from a life spent building things from scratch.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

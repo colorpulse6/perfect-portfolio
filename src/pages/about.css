@@ -4,26 +4,137 @@
 }
 
 .about-content {
-  color: white;
-  font-size: 23px;
+  color: #bbb;
+  font-size: 17px;
+  line-height: 1.85;
   margin-top: -180px;
   text-align: left;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .about .second-title {
   margin-top: -100px;
 }
 
-.external-container {
-  margin-top: 75px;
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
+/* Headline */
+.about-headline {
+  color: white;
+  font-size: 36px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: 28px;
+  text-align: left;
 }
 
-.external-container h1 {
-  font-size: 50px;
+/* Collapsible sections */
+.about-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 8px;
 }
+
+.about-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 20px 0;
+  text-align: left;
+}
+
+.about-section-toggle:hover .about-section-label {
+  color: #999;
+}
+
+.about-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #555;
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  transition: color 0.3s;
+}
+
+.about-section-arrow {
+  font-size: 18px;
+  color: #444;
+  transition: transform 0.35s ease, color 0.3s;
+  font-family: sans-serif;
+}
+
+.about-section.open .about-section-arrow {
+  transform: rotate(180deg);
+  color: #888;
+}
+
+.about-section-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s ease, opacity 0.35s ease;
+  opacity: 0;
+}
+
+.about-section.open .about-section-body {
+  opacity: 1;
+}
+
+.about-section-inner {
+  padding: 0 0 28px 0;
+}
+
+.about-section-inner p {
+  margin-bottom: 14px;
+}
+
+/* Accent line (e.g. "Then came March 2020.") */
+.about-accent {
+  font-size: 22px;
+  font-style: italic;
+  color: #fff;
+  margin: 24px 0;
+  padding-left: 20px;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Highlight lists */
+.about-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+.about-highlights li {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #aaa;
+  padding: 10px 0 10px 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 4px;
+}
+
+.about-highlights li strong {
+  color: #ddd;
+}
+
+/* Closing section */
+.about-closing-section {
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.about-closing {
+  font-size: 20px;
+  font-style: italic;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
 
 /* Tablet breakpoint */
 @media only screen and (max-width: 768px) {
@@ -32,7 +143,7 @@
   }
 
   .about-content {
-    font-size: 19px;
+    font-size: 16px;
     margin-top: -120px;
   }
 
@@ -40,9 +151,23 @@
     margin-top: -60px;
   }
 
-  .external-container h1 {
-    font-size: 40px;
+  .about-headline {
+    font-size: 30px;
   }
+
+  .about-section-label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+  }
+
+  .about-accent {
+    font-size: 19px;
+  }
+
+  .about-closing {
+    font-size: 18px;
+  }
+
 }
 
 /* Mobile breakpoint */
@@ -52,7 +177,7 @@
   }
 
   .about-content {
-    font-size: 16px;
+    font-size: 15px;
     margin-top: -60px;
   }
 
@@ -62,14 +187,23 @@
     margin-bottom: 100px;
   }
 
-  .external-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: 40px;
+  .about-headline {
+    font-size: 24px;
   }
 
-  .external-container h1 {
-    font-size: 36px;
+  .about-section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
   }
+
+  .about-accent {
+    font-size: 17px;
+    margin: 18px 0;
+    padding-left: 14px;
+  }
+
+  .about-closing {
+    font-size: 17px;
+  }
+
 }

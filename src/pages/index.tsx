@@ -1,9 +1,11 @@
 import React from "react"
+import { graphql } from "gatsby"
 import gsap from "gsap"
 import SEO from "../components/seo"
+import HomeScene from "../components/nebula/HomeScene"
+import { FeaturedEntry } from "../components/nebula/DomArtifacts"
 import "./index.css"
 
-// Type for location object from Gatsby
 interface GatsbyLocation {
   pathname: string
   search?: string
@@ -18,64 +20,105 @@ interface GatsbyLocation {
   key?: string
 }
 
-// Define the props interface for the Index page
-interface IndexPageProps {
-  /** Transition status from gatsby-plugin-transition-link */
-  transitionStatus?: string
-  /** Location object from Gatsby router */
-  location?: GatsbyLocation
+interface MarkdownNode {
+  frontmatter: {
+    title: string
+    date: string
+    type: string
+    link: string | null
+    status: string | null
+    project: string | null
+    featured: boolean | null
+  }
+  excerpt: string
 }
 
-/**
- * Index page component (home page) with animated title
- * @param props - The component props
- * @returns JSX element for the home page
- */
+interface IndexPageProps {
+  transitionStatus?: string
+  location?: GatsbyLocation
+  data: {
+    allMarkdownRemark: {
+      nodes: MarkdownNode[]
+    }
+  }
+}
+
 const IndexPage: React.FC<IndexPageProps> = ({
   transitionStatus,
   location,
+  data,
 }) => {
-  // Initial page load animation
   React.useEffect(() => {
     gsap.to(".hometex", {
       autoAlpha: 1,
       duration: 1,
     })
-  }, []) // THIS IS RUN THE FIRST TIME THE SITE IS OPENED
+  }, [])
 
-  // Handle page transition animations
   React.useEffect(() => {
     if (transitionStatus === "entering") {
       gsap.to(".hometex", {
         autoAlpha: 1,
-        duration: 3.5, // if we are entering the page, make the div visible
+        duration: 3.5,
       })
     }
     if (transitionStatus === "exiting") {
       gsap.to(".hometex", {
         autoAlpha: 0,
         duration: 1,
-      }) // if we are exiting the page, make the div transparent
+      })
     }
   }, [transitionStatus])
 
+  const featuredEntries: FeaturedEntry[] = (data?.allMarkdownRemark?.nodes || [])
+    .map((n) => ({
+      title: n.frontmatter.title,
+      date: n.frontmatter.date,
+      type: n.frontmatter.type as FeaturedEntry["type"],
+      link: n.frontmatter.link,
+      status: n.frontmatter.status,
+      project: n.frontmatter.project,
+      excerpt: n.excerpt,
+      featured: true,
+    }))
+
   return (
-    <div>
-      {/* <Slide left>
-        <SideBarCollapsed currentWindow={location?.pathname} />
-      </Slide> */}
-      <div style={{ opacity: 0 }} className="hometex">
+    <div className="home-root">
+      <HomeScene featuredEntries={featuredEntries} />
+      <div
+        style={{ opacity: 0, position: "relative", zIndex: 2 }}
+        className="hometex"
+      >
         <SEO title="Home" />
         <div className="title">
-          <h1 className="background-video">
-            fullstack
-            <br />
-            developer
+          <h1 className="glitch-text" data-text="Welcome to Nichalas Barnes">
+            Welcome to Nichalas Barnes
           </h1>
         </div>
       </div>
     </div>
   )
 }
+
+export const query = graphql`
+  query FeaturedChangelog {
+    allMarkdownRemark(
+      sort: { frontmatter: { date: DESC } }
+    ) {
+      nodes {
+        frontmatter {
+          title
+          date
+          type
+          link
+          status
+          project
+          featured
+        }
+        excerpt(pruneLength: 160)
+      }
+    }
+  }
+`
 
 export default IndexPage

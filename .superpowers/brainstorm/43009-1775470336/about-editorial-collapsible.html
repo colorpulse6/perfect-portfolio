@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Editorial with Collapsibles</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e0e0e0; font-family: 'Georgia', serif; }
+
+  .page-header {
+    text-align: center;
+    padding: 30px 20px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 40px;
+  }
+  .page-header h1 { color: #fff; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; font-family: sans-serif; }
+  .page-header p { color: #888; font-size: 13px; margin-top: 6px; font-family: sans-serif; }
+
+  .about-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 30px 80px;
+  }
+
+  .headline {
+    font-size: 36px;
+    font-weight: 400;
+    font-style: italic;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 28px;
+  }
+
+  .intro {
+    font-size: 17px;
+    line-height: 1.85;
+    color: #bbb;
+    margin-bottom: 16px;
+  }
+
+  /* Collapsible sections */
+  .section {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-top: 8px;
+  }
+
+  .section-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 20px 0;
+    text-align: left;
+  }
+
+  .section-toggle:hover .section-label { color: #888; }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #555;
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    transition: color 0.3s;
+  }
+
+  .section-arrow {
+    font-size: 18px;
+    color: #444;
+    transition: transform 0.35s ease, color 0.3s;
+    font-family: sans-serif;
+  }
+
+  .section.open .section-arrow {
+    transform: rotate(180deg);
+    color: #888;
+  }
+
+  .section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity 0.35s ease;
+    opacity: 0;
+  }
+
+  .section.open .section-body {
+    max-height: 800px;
+    opacity: 1;
+  }
+
+  .section-inner {
+    padding: 0 0 28px 0;
+  }
+
+  .body-text {
+    font-size: 15px;
+    line-height: 1.85;
+    color: #aaa;
+    margin-bottom: 14px;
+  }
+
+  .accent-line {
+    font-size: 22px;
+    font-style: italic;
+    color: #fff;
+    margin: 24px 0;
+    padding-left: 20px;
+    border-left: 2px solid rgba(255,255,255,0.2);
+  }
+
+  .highlight-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+  }
+
+  .highlight-list li {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #aaa;
+    padding: 10px 0 10px 18px;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 4px;
+  }
+
+  .highlight-list li strong {
+    color: #ddd;
+  }
+
+  .toolkit-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .toolkit-tag {
+    font-size: 12px;
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    color: #999;
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .closing-section {
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .closing {
+    font-size: 20px;
+    font-style: italic;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .cta {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #888;
+  }
+</style>
+<script>
+function toggleSection(el) {
+  const section = el.closest('.section');
+  const wasOpen = section.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('open'));
+  // Toggle clicked
+  if (!wasOpen) section.classList.add('open');
+}
+</script>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Option A — Editorial + Collapsible Sections</h1>
+  <p>Click any section header to expand it. Only one section open at a time (accordion). Try it out.</p>
+</div>
+
+<div class="about-container">
+
+  <div class="headline">The Medium Changed.<br>The Discipline Didn't.</div>
+
+  <p class="intro">I am a software engineer who spent the first decade of my professional life as a composer, bandleader, and audio technician.</p>
+
+  <p class="intro">To some, the jump from leading a 10-piece ensemble to architecting frontend systems seems like a pivot. To me, it was simply moving from one form of system design to another. Whether writing a score for a chamber group or building a custom component library in TypeScript, the core objective is the same: managing complexity to create a seamless experience.</p>
+
+  <!-- Seattle -->
+  <div class="section">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span class="section-label">The Seattle Foundation &mdash; Building Worlds</span>
+      <span class="section-arrow">&#9662;</span>
+    </button>
+    <div class="section-body">
+      <div class="section-inner">
+        <p class="body-text">My journey started in Seattle&mdash;not just playing in bands, but building systems. Long before I touched a terminal, I was obsessed with the architecture of creativity. I spent my youth designing tabletop RPGs, drawing comics, and making home recordings in rain-soaked basements.</p>
+        <p class="body-text">This wasn't just a hobby; it was an education in grit and iteration. Seattle taught me how to handle the "starving artist" grind&mdash;not for the sake of the struggle, but to develop the discipline required to master a craft.</p>
+        <p class="body-text" style="color:#666; font-style:italic;">[You could expand here with more stories&mdash;specific bands, venues, projects, the RPG systems you designed, etc.]</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Berlin -->
+  <div class="section">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span class="section-label">The Berlin Transition &mdash; From Stage to Script</span>
+      <span class="section-arrow">&#9662;</span>
+    </button>
+    <div class="section-body">
+      <div class="section-inner">
+        <p class="body-text">I moved to Berlin to push my musical career to its logical conclusion. I reached a level of professional maturity where I was leading international tours across Europe and Japan, eventually receiving state funding in Germany to compose and record with a 10-piece ensemble.</p>
+        <div class="accent-line">Then came March 2020.</div>
+        <p class="body-text">When the pandemic halted live performance, I didn't just look for a new job&mdash;I looked for a new medium. The hours I'd spent in audio engineering&mdash;managing signal flow, troubleshooting hardware, obsessing over precision&mdash;turned out to be the perfect precursor to software engineering. I completed a full-stack bootcamp, but the real growth happened in the thousands of hours of self-teaching that followed. I didn't want to build "pages"; I wanted to understand the infrastructure.</p>
+        <p class="body-text" style="color:#666; font-style:italic;">[Room for tour stories, what the state funding meant, the ensemble's music, the emotional shift of 2020, etc.]</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Madrid -->
+  <div class="section">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span class="section-label">The Madrid Integration &mdash; The AI Renaissance</span>
+      <span class="section-arrow">&#9662;</span>
+    </button>
+    <div class="section-body">
+      <div class="section-inner">
+        <p class="body-text">Today, based in Madrid, my work has entered a new phase. We've moved past the era of manual boilerplate and into the era of AI-native engineering. For many, the rise of AI assistants and autonomous agents is a threat. For me, it is the ultimate creative multiplier. It has removed the "manual notation" of coding&mdash;the syntax struggles, the boilerplate&mdash;allowing me to return to my roots as an arranger and orchestrator.</p>
+        <p class="body-text">In 2026, being a great engineer is about system taste and architectural rigor. I use AI not to replace my thinking, but to execute at a scale that was previously impossible for a single developer.</p>
+        <ul class="highlight-list">
+          <li><strong>Orchestrating Agents:</strong> Just as I once coordinated a 10-piece band, I now coordinate AI agents to handle unit tests, refactoring, and infrastructure scaffolding.</li>
+          <li><strong>Focus on Composition:</strong> With AI handling the "rhythm section" of routine tasks, I focus on the "melody"&mdash;the UX-minded engineering, the product logic, and the high-level architecture.</li>
+          <li><strong>Creative Velocity:</strong> I am building more complex systems with more precision and less friction than ever before.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolkit -->
+  <div class="section">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span class="section-label">Technical Toolkit</span>
+      <span class="section-arrow">&#9662;</span>
+    </button>
+    <div class="section-body">
+      <div class="section-inner">
+        <p class="body-text">I build with an artist's eye for taste and an engineer's requirement for rigor.</p>
+        <ul class="highlight-list">
+          <li><strong>Frontend Architecture:</strong> React, TypeScript, Remix, Vite, Tailwind, Storybook</li>
+          <li><strong>Infrastructure &amp; Data:</strong> Terraform, AWS, Postgres, GraphQL</li>
+          <li><strong>AI-Native Workflow:</strong> Agentic workflows and LLM-integrated development to maximize build velocity without sacrificing code quality</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why it matters -->
+  <div class="section">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span class="section-label">Why the Artistic Background Matters</span>
+      <span class="section-arrow">&#9662;</span>
+    </button>
+    <div class="section-body">
+      <div class="section-inner">
+        <p class="body-text">I believe non-traditional backgrounds produce the most resilient engineers. My years in music gave me a toolkit that a CS degree cannot replicate:</p>
+        <ul class="highlight-list">
+          <li><strong>Arrangement is Architecture:</strong> Arranging music for a large ensemble is exactly like designing a distributed system&mdash;managing many interdependent parts so they function as a cohesive whole.</li>
+          <li><strong>The Discipline of the Rehearsal:</strong> I treat a sprint like a rehearsal&mdash;deliberate repetition, patience, and the understanding that "done" is better than "perfect," but "excellent" is the goal.</li>
+          <li><strong>Ego Management:</strong> Leading a band through a high-pressure tour teaches you how to collaborate, communicate, and solve problems when things go wrong.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Closing -->
+  <div class="closing-section">
+    <div class="closing">The artist didn't disappear. He just found a more powerful instrument.</div>
+    <p class="cta">I am always looking to collaborate with teams that value craft, taste, and the kind of perspective that only comes from a life spent building things from scratch.</p>
+  </div>
+
+</div>
+</body>
+</html>
