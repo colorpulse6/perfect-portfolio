@@ -12,6 +12,8 @@
   padding: 20px;
   display: flex;
   justify-content: space-between;
+  position: relative;
+  z-index: 50;
 }
 
 .header-text{

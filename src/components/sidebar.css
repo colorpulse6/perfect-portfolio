@@ -10,15 +10,15 @@
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 120px;
+  gap: 80px;
 }
 
 .sidebar__item {
   text-align: center;
-  padding: 25px 0;
+  padding: 20px 0;
   text-transform: uppercase;
   cursor: pointer;
-  font-size: 80px;
+  font-size: 64px;
   font-family: Kano;
   font-weight: bold;
   opacity: 100%;
@@ -56,7 +56,7 @@
   }
 
   .sidebar__item {
-    font-size: 60px;
+    font-size: 48px;
     margin: 0 auto;
     text-align: center;
   }
@@ -74,10 +74,10 @@
   }
 
   .sidebar__item {
-    font-size: 44px !important;
+    font-size: 36px !important;
     margin: 0 auto;
     text-align: center;
-    padding: 15px 0;
+    padding: 12px 0;
   }
 
   .sidebar-collapsed {

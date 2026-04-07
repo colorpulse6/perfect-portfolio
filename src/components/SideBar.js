@@ -33,7 +33,7 @@ export default ({
     // onRest: onAnimationEnd
   })
 
-  const items = ["Home", "Projects", "About", "Contact"]
+  const items = ["Home", "Projects", "Changelog", "About", "Contact"]
   const itemsRef = useRef()
   const trail = useTransition(navOpen ? items : [], item => item, {
     from: {

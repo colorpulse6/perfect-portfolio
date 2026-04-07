@@ -6,20 +6,46 @@
   font-family: "Kano";
   src: url("../images/Kano.otf") format("truetype");
 }
-/* * {
+body.custom-cursor,
+body.custom-cursor * {
   cursor: none !important;
 }
-.cursor {
-  position: absolute;
+
+.cursor-dot {
+  position: fixed;
   left: 0;
   top: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 16px;
-  background-color: white;
-  mix-blend-mode: difference;
-  background-color: white;
-} */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: screen;
+  box-shadow:
+    0 0 6px 2px currentColor,
+    0 0 20px 4px currentColor;
+}
+
+.cursor-trail {
+  position: fixed;
+  left: -18px;
+  top: -18px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  filter: blur(2px);
+}
+
+@media only screen and (max-width: 550px) {
+  .cursor-dot,
+  .cursor-trail {
+    display: none !important;
+  }
+}
 
 html {
   -ms-text-size-adjust: 100%;
@@ -616,6 +642,50 @@ pre tt:before,
 pre tt:after {
   content: "";
 }
+/* Audio toggle */
+.audio-toggle {
+  position: fixed;
+  bottom: 16px;
+  right: 60px;
+  background: rgba(8, 8, 16, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.25);
+  padding: 6px 8px;
+  cursor: pointer;
+  z-index: 20;
+  transition: color 0.3s, border-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-toggle:hover {
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Footer - hover reveal */
+.site-footer {
+  position: fixed;
+  bottom: 16px;
+  right: 20px;
+  color: rgba(255, 255, 255, 0);
+  font-size: 11px;
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.5px;
+  transition: color 0.4s;
+  z-index: 15;
+  pointer-events: auto;
+  margin: 0;
+}
+
+.site-footer:hover {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 /* Tablet breakpoint */
 @media only screen and (max-width: 768px) {
   .layout-container {

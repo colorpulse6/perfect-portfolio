@@ -2,13 +2,12 @@ import React, { useRef, useEffect, useState } from "react"
 import { useTransition, useChain, animated, config } from "react-spring"
 import TransitionLink from "gatsby-plugin-transition-link"
 import Spring from "../components/Spring"
-import Link from "gatsby"
 import "./sidebar.css"
 import { AiOutlineHome } from "react-icons/ai"
 import { GoProjectRoadmap } from "react-icons/go"
 import { BsPersonVcard } from "react-icons/bs"
 import { HiOutlineMail } from "react-icons/hi"
-import { useStaticQuery, graphql } from "gatsby"
+import { VscHistory } from "react-icons/vsc"
 
 export default ({
   currentWindow,
@@ -38,6 +37,7 @@ export default ({
   const items = [
     { name: "Home", icon: AiOutlineHome },
     { name: "Projects", icon: GoProjectRoadmap },
+    { name: "Changelog", icon: VscHistory },
     { name: "About", icon: BsPersonVcard },
     { name: "Contact", icon: HiOutlineMail },
   ]
@@ -65,9 +65,7 @@ export default ({
 
   const [isHover, setIsHover] = useState({ hover: false, index: null })
 
-  useEffect(() => {
-    console.log(currentWindow)
-  }, [])
+
 
   const isHome = currentWindow === "/"
 

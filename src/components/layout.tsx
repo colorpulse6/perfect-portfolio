@@ -5,15 +5,15 @@
  * See: https://www.gatsbyjs.com/docs/use-static-query/
  */
 
-import React from "react"
+import React, { useMemo } from "react"
 import { useStaticQuery, graphql } from "gatsby"
 import { motion, useMotionValue, useSpring } from "framer-motion"
-import gsap from "gsap"
-
 import Header from "./header"
 import SideBar from "../components/SideBar"
 import SideBarCollapsed from "../components/SideBarCollapsed"
-
+import ParticleBackground from "./nebula/ParticleBackground"
+import TerminalConsole from "./nebula/TerminalConsole"
+import { resolveTheme } from "./nebula/particleThemes"
 import "./layout.css"
 
 // Type for the GraphQL query result
@@ -55,11 +55,6 @@ interface LayoutProps {
   location?: GatsbyLocation
 }
 
-/**
- * Layout component that provides the main site structure and navigation
- * @param props - The component props
- * @returns JSX element for the site layout
- */
 const Layout: React.FC<LayoutProps> = ({
   children,
   transitionStatus,
@@ -81,18 +76,36 @@ const Layout: React.FC<LayoutProps> = ({
   `)
 
   const [navOpen, setNavOpen] = React.useState<boolean>(false)
+  const [isTouch, setIsTouch] = React.useState(false)
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
   const springConfig = { damping: 25, stiffness: 700 }
+  const trailConfig = { damping: 40, stiffness: 200 }
   const cursorXSpring = useSpring(cursorX, springConfig)
   const cursorYSpring = useSpring(cursorY, springConfig)
+  const trailXSpring = useSpring(cursorX, trailConfig)
+  const trailYSpring = useSpring(cursorY, trailConfig)
+
+  const cursorTheme = useMemo(() => {
+    const theme = resolveTheme(location?.pathname || "/")
+    const c = theme.colors[0]
+    return `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, 0.9)`
+  }, [location?.pathname])
 
   React.useEffect(() => {
     setNavOpen(false)
 
+    if (typeof window !== "undefined") {
+      const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
+      setIsTouch(hasTouch)
+      if (!hasTouch && window.innerWidth > 550) {
+        document.body.classList.add("custom-cursor")
+      }
+    }
+
     const moveCursor = (e: MouseEvent): void => {
-      cursorX.set(e.clientX - 16)
-      cursorY.set(e.clientY - 16)
+      cursorX.set(e.clientX - 7)
+      cursorY.set(e.clientY - 7)
     }
 
     if (typeof window !== "undefined") {
@@ -102,21 +115,36 @@ const Layout: React.FC<LayoutProps> = ({
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("mousemove", moveCursor)
+        document.body.classList.remove("custom-cursor")
       }
     }
   }, [cursorX, cursorY])
 
+  const pagePath = location?.pathname || "/"
+
   return (
     <div className="layout-container">
-      {/* <p>Path is {location?.pathname}</p> */}
-      {/* <motion.div
-        id="cursor"
-        className="cursor"
-        style={{
-          translateX: cursorXSpring,
-          translateY: cursorYSpring,
-        }}
-      /> */}
+      <ParticleBackground pagePath={pagePath} />
+      {!isTouch && (
+        <>
+          <motion.div
+            className="cursor-trail"
+            style={{
+              translateX: trailXSpring,
+              translateY: trailYSpring,
+              background: `radial-gradient(circle, ${cursorTheme} 0%, transparent 70%)`,
+            }}
+          />
+          <motion.div
+            className="cursor-dot"
+            style={{
+              translateX: cursorXSpring,
+              translateY: cursorYSpring,
+              background: cursorTheme,
+            }}
+          />
+        </>
+      )}
       <Header
         navOpen={navOpen}
         setNavOpen={setNavOpen}
@@ -133,22 +161,17 @@ const Layout: React.FC<LayoutProps> = ({
       <div
         style={{
           margin: "0 auto",
-          // maxWidth: 960,
           padding: "0 1.0875rem 1.45rem",
         }}
       >
         <main>{children}</main>
-        <footer
-          style={{
-            color: "white",
-            marginTop: "150px",
-            bottom: 5,
-          }}
-        >
-          © {new Date().getFullYear()}, Built with{" "}
-          <a href="https://www.gatsbyjs.com">Gatsby</a>
+        <footer className="site-footer">
+          &copy; Nichalas Barnes {new Date().getFullYear()}
         </footer>
       </div>
+      {pagePath !== "/writing/" && pagePath !== "/writing" && (
+        <TerminalConsole pagePath={pagePath} />
+      )}
     </div>
   )
 }

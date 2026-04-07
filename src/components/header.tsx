@@ -24,7 +24,6 @@ interface HeaderProps {
  * @returns JSX element for the header
  */
 const Header: React.FC<HeaderProps> = ({
-  siteTitle = "",
   navOpen,
   setNavOpen,
 }) => {
@@ -34,20 +33,16 @@ const Header: React.FC<HeaderProps> = ({
         <div style={{ display: "flex" }}>
           <Spring isTitle>
             <div style={{ display: "flex", alignSelf: "center" }}>
-              <h1 className="header-text">
-                <Link
-                  to="/"
-                  style={{
-                    color: "white",
-                    textDecoration: "none",
-                    fontFamily: "Kano",
-                    fontSize: "20px",
-                    marginLeft: "150px",
-                  }}
-                >
-                  {siteTitle.toUpperCase()}
-                </Link>
-              </h1>
+              <Link
+                to="/"
+                style={{
+                  marginLeft: "150px",
+                  display: "block",
+                  width: "20px",
+                  height: "20px",
+                }}
+                aria-label="Home"
+              />
             </div>
           </Spring>
           <Spring isTitle={false}>
