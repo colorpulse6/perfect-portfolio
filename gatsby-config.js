@@ -15,11 +15,11 @@ module.exports = {
         link: "/projects",
       },
       {
-        name: "projects",
+        name: "about",
         link: "/about",
       },
       {
-        name: "projects",
+        name: "contact",
         link: "/contact",
       },
       {
@@ -43,6 +43,26 @@ module.exports = {
       options: {
         name: `images`,
         path: `${__dirname}/src/images`,
+      },
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `changelog`,
+        path: `${__dirname}/content/changelog`,
+      },
+    },
+    {
+      resolve: `gatsby-transformer-remark`,
+      options: {
+        plugins: [
+          {
+            resolve: `gatsby-remark-images`,
+            options: {
+              maxWidth: 720,
+            },
+          },
+        ],
       },
     },
     `gatsby-transformer-sharp`,
