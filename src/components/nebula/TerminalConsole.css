@@ -1,0 +1,156 @@
+.terminal-console {
+  position: fixed;
+  bottom: 16px;
+  left: 10%;
+  right: 10%;
+  max-height: 200px;
+  background: rgba(8, 8, 16, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+  z-index: 20;
+  transform: translateY(120%);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.terminal-console.visible {
+  transform: translateY(0);
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.terminal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.terminal-line {
+  font-size: 13px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.5);
+  min-height: 1.8em;
+  text-shadow: 0 0 8px rgba(180, 160, 255, 0.25);
+  animation: terminal-breathe 4s ease-in-out infinite;
+}
+
+@keyframes terminal-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.terminal-line .explore-link {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.terminal-line .explore-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.terminal-prompt {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 13px;
+}
+
+.terminal-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  font-size: 13px;
+  flex: 1;
+  caret-color: rgba(255, 255, 255, 0.5);
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  animation: terminal-blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes terminal-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.terminal-collapsed {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  padding: 6px 14px;
+  background: rgba(8, 8, 16, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  z-index: 20;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.terminal-collapsed:hover {
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.terminal-dismiss {
+  display: none;
+}
+
+/* Mobile */
+@media only screen and (max-width: 550px) {
+  .terminal-console {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 10px 14px;
+  }
+
+  .terminal-line {
+    font-size: 11px;
+  }
+
+  .terminal-input-line {
+    display: none;
+  }
+
+  .terminal-dismiss {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 16px;
+    cursor: pointer;
+  }
+}
