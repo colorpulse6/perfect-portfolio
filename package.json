@@ -74,7 +74,7 @@
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "type-check": "tsc --noEmit",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+    "test": "node --test test/*.test.mjs"
   },
   "repository": {
     "type": "git",

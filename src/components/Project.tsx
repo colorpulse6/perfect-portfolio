@@ -5,7 +5,8 @@ import FireStoreGif from "../images/fire-store-gif.gif"
 import GigZillaGif from "../images/Gigzilla.gif"
 import MadScienceGif from "../images/mad-science-gif.gif"
 import JobToastGif from "../images/job-toast.gif"
-import { Slide, Fade, Flip } from "react-awesome-reveal"
+import BrainAtlasGif from "../images/brain-atlas-spin.gif"
+import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
 
@@ -61,6 +62,7 @@ const Project: React.FC<ProjectProps> = ({
 
   // Get the appropriate image source based on hover state and project name
   const getImageSource = (): string => {
+    if (name === "Brain Atlas") return BrainAtlasGif
     if (!hover) return image
 
     switch (name) {
@@ -109,29 +111,31 @@ const Project: React.FC<ProjectProps> = ({
           />
         </Fade>
         <div className="description-container">
-          <Slide direction={index % 2 !== 0 ? "left" : "right"}>
-            <Spring isTitle={false}>
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                onMouseEnter={() => handleLinkMouseEnter(name)}
-                onMouseLeave={handleLinkMouseLeave}
-              >
-                <h3
-                  className={
-                    linkHover.active && linkHover.index === name
-                      ? "background-video project-title"
-                      : "project-title"
-                  }
+          <Fade>
+            <div className="project-copy-reveal">
+              <Spring isTitle={false}>
+                <a
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={() => handleLinkMouseEnter(name)}
+                  onMouseLeave={handleLinkMouseLeave}
                 >
-                  {name}
-                </h3>
-                <span>{name === "Gigzilla" && " (Deprecated)"}</span>
-              </a>
-            </Spring>
-            <p>{description}</p>
-          </Slide>
+                  <h3
+                    className={
+                      linkHover.active && linkHover.index === name
+                        ? "background-video project-title"
+                        : "project-title"
+                    }
+                  >
+                    {name}
+                  </h3>
+                  <span>{name === "Gigzilla" && " (Deprecated)"}</span>
+                </a>
+              </Spring>
+              <p>{description}</p>
+            </div>
+          </Fade>
           <Flip direction="horizontal" cascade duration={500}>
             <div>
               {github && (

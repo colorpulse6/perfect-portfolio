@@ -15,6 +15,16 @@ SourceMapConsumer.initialize({
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
+      name: "Brain Atlas",
+      link: "https://community.obsidian.md/plugins/brain-atlas",
+      github: "https://github.com/colorpulse6/brain-atlas",
+      techArray: [14, 8, 10, 11, 30],
+      ref: "brainAtlasRef",
+      imgSrc: "brain-atlas-spin.gif",
+      description:
+        "An Obsidian community plugin that renders your vault as an animated 3D anatomical brain. Notes become nodes, links become neural pathways, and note types cluster into brain regions.",
+    },
+    {
       name: "Job Toast",
       link: "https://jobtoast.io/",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],

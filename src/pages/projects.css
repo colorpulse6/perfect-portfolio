@@ -57,6 +57,10 @@
   padding: 20px;
 }
 
+.project-copy-reveal {
+  width: 100%;
+}
+
 .description-container h1 {
   margin-top: -50px;
 }
