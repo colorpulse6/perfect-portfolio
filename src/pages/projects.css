@@ -47,6 +47,14 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+.project-images--portrait {
+  width: min(420px, 42vw);
+  height: auto;
+  aspect-ratio: 546 / 962;
+  object-fit: contain;
+  background: #171328;
+}
+
 .description-container {
   display: flex;
   flex-direction: column;
@@ -133,6 +141,12 @@ h2 {
     aspect-ratio: 16/9;
   }
 
+  .project-images--portrait {
+    width: min(420px, 80vw);
+    max-width: min(420px, 80vw);
+    aspect-ratio: 546 / 962;
+  }
+
   .description-container {
     width: 100%;
     max-width: 600px;
@@ -148,6 +162,11 @@ h2 {
 @media only screen and (max-width: 768px) {
   .project-images {
     max-width: 90vw;
+  }
+
+  .project-images--portrait {
+    width: min(380px, 80vw);
+    max-width: min(380px, 80vw);
   }
 
   .description-container {
@@ -182,6 +201,12 @@ h2 {
     width: 95vw;
     height: auto;
     aspect-ratio: 16/9;
+  }
+
+  .project-images--portrait {
+    width: min(340px, 82vw);
+    max-width: min(340px, 82vw);
+    aspect-ratio: 546 / 962;
   }
 
   .description-container {

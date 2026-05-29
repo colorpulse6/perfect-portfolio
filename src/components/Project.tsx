@@ -6,6 +6,7 @@ import GigZillaGif from "../images/Gigzilla.gif"
 import MadScienceGif from "../images/mad-science-gif.gif"
 import JobToastGif from "../images/job-toast.gif"
 import BrainAtlasGif from "../images/brain-atlas-spin.gif"
+import ThrottleDashboard from "../images/throttle-dashboard.png"
 import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
@@ -63,6 +64,7 @@ const Project: React.FC<ProjectProps> = ({
   // Get the appropriate image source based on hover state and project name
   const getImageSource = (): string => {
     if (name === "Brain Atlas") return BrainAtlasGif
+    if (name === "Throttle") return ThrottleDashboard
     if (!hover) return image
 
     switch (name) {
@@ -92,6 +94,11 @@ const Project: React.FC<ProjectProps> = ({
     setLinkHover({ active: false, index: "" })
   }
 
+  const isPortraitProject = name === "Throttle"
+  const imageClassName = isPortraitProject
+    ? "project-images project-images--portrait"
+    : "project-images"
+
   return (
     <>
       <div
@@ -107,7 +114,7 @@ const Project: React.FC<ProjectProps> = ({
             onMouseLeave={handleMouseLeave}
             src={getImageSource()}
             alt={`${name} project screenshot`}
-            className="project-images"
+            className={imageClassName}
           />
         </Fade>
         <div className="description-container">

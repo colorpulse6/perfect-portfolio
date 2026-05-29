@@ -18,10 +18,11 @@ function frontmatterValue(markdown, key) {
   return match?.[1]?.replace(/^"|"$/g, "")
 }
 
-function assertFeaturedPluginEntry({ slug, title, link, media, bodyPattern }) {
+function assertFeaturedPluginEntry({ slug, title, link, media, bodyPattern, cta = "Install", date }) {
   const markdown = readChangelogEntry(slug)
 
   assert.equal(frontmatterValue(markdown, "title"), title)
+  if (date) assert.equal(frontmatterValue(markdown, "date"), date)
   assert.equal(
     frontmatterValue(markdown, "link"),
     link
@@ -29,7 +30,7 @@ function assertFeaturedPluginEntry({ slug, title, link, media, bodyPattern }) {
   assert.equal(frontmatterValue(markdown, "status"), "released")
   assert.equal(frontmatterValue(markdown, "featured"), "true")
   assert.equal(frontmatterValue(markdown, "media"), media)
-  assert.equal(frontmatterValue(markdown, "cta"), "Install")
+  assert.equal(frontmatterValue(markdown, "cta"), cta)
   assert.equal(
     fs.existsSync(path.join(rootDir, "src", "images", frontmatterValue(markdown, "media"))),
     true
@@ -44,6 +45,18 @@ test("Brain Atlas changelog entry is featured for floating project cards", () =>
     link: "https://community.obsidian.md/plugins/brain-atlas",
     media: "brain-atlas-spin.gif",
     bodyPattern: /native inside Obsidian/i,
+  })
+})
+
+test("Throttle changelog entry uses the actual release date and dashboard screenshot", () => {
+  assertFeaturedPluginEntry({
+    slug: "throttle",
+    title: "Throttle v1.0.0",
+    date: "2026-05-18",
+    link: "https://github.com/colorpulse6/throttle/releases/tag/v1.0.0",
+    media: "throttle-dashboard.png",
+    cta: "Download",
+    bodyPattern: /Claude Max and Codex Pro usage limits/i,
   })
 })
 

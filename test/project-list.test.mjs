@@ -28,3 +28,17 @@ test("Brain Atlas is the first portfolio project", () => {
   assert.equal(brainAtlas.github, "https://github.com/colorpulse6/brain-atlas")
   assert.equal(brainAtlas.imgSrc, "brain-atlas-spin.gif")
 })
+
+test("Throttle appears above Job Toast in the portfolio project list", () => {
+  const projects = loadProjects()
+  const throttleIndex = projects.findIndex(project => project.name === "Throttle")
+  const jobToastIndex = projects.findIndex(project => project.name === "Job Toast")
+  const throttle = projects[throttleIndex]
+
+  assert.ok(throttleIndex >= 0)
+  assert.ok(jobToastIndex >= 0)
+  assert.ok(throttleIndex < jobToastIndex)
+  assert.equal(throttle.link, "https://github.com/colorpulse6/throttle/releases/tag/v1.0.0")
+  assert.equal(throttle.github, "https://github.com/colorpulse6/throttle")
+  assert.equal(throttle.imgSrc, "throttle-dashboard.png")
+})

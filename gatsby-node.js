@@ -25,6 +25,16 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "An Obsidian community plugin that renders your vault as an animated 3D anatomical brain. Notes become nodes, links become neural pathways, and note types cluster into brain regions.",
     },
     {
+      name: "Throttle",
+      link: "https://github.com/colorpulse6/throttle/releases/tag/v1.0.0",
+      github: "https://github.com/colorpulse6/throttle",
+      techArray: [29, 30],
+      ref: "throttleRef",
+      imgSrc: "throttle-dashboard.png",
+      description:
+        "A macOS menu bar app and WidgetKit widget that tracks Claude Max and Codex Pro usage limits, refresh windows, and model-specific quota bars.",
+    },
+    {
       name: "Job Toast",
       link: "https://jobtoast.io/",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],

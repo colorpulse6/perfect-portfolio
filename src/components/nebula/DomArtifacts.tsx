@@ -4,6 +4,7 @@ import { ARTIFACTS, ArtifactDef } from "./artifacts"
 import { useInteractionSounds } from "../audio/useInteractionSounds"
 import BrainAtlasGif from "../../images/brain-atlas-spin.gif"
 import CerebroMyceliumGif from "../../images/cerebro-mycelium.gif"
+import ThrottleDashboard from "../../images/throttle-dashboard.png"
 
 export interface FeaturedEntry {
   title: string
@@ -97,6 +98,28 @@ const STATUS_LABELS: Record<string, string> = {
 const MEDIA_ASSETS: Record<string, string> = {
   "brain-atlas-spin.gif": BrainAtlasGif,
   "cerebro-mycelium.gif": CerebroMyceliumGif,
+  "throttle-dashboard.png": ThrottleDashboard,
+}
+
+const PORTRAIT_MEDIA = new Set(["throttle-dashboard.png"])
+
+function isPortraitMedia(media: string | null): boolean {
+  return media !== null && PORTRAIT_MEDIA.has(media)
+}
+
+function getCardMediaStyle(media: string | null): React.CSSProperties {
+  return {
+    display: "block",
+    width: "100%",
+    height: isPortraitMedia(media) ? 220 : 88,
+    objectFit: isPortraitMedia(media) ? "contain" : "cover",
+    objectPosition: "center",
+    background: isPortraitMedia(media) ? "rgba(10,8,20,0.8)" : "transparent",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.1)",
+    marginBottom: 12,
+    opacity: 0.9,
+  }
 }
 
 const glassStyle: React.CSSProperties = {
@@ -573,17 +596,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                   <img
                     src={mediaSrc}
                     alt={entry.title}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      height: 88,
-                      objectFit: "cover",
-                      objectPosition: "center",
-                      borderRadius: 10,
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      marginBottom: 12,
-                      opacity: 0.9,
-                    }}
+                    style={getCardMediaStyle(entry.media)}
                   />
                 )}
 
