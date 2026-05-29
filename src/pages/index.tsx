@@ -29,6 +29,8 @@ interface MarkdownNode {
     status: string | null
     project: string | null
     featured: boolean | null
+    media: string | null
+    cta: string | null
   }
   excerpt: string
 }
@@ -71,6 +73,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
   }, [transitionStatus])
 
   const featuredEntries: FeaturedEntry[] = (data?.allMarkdownRemark?.nodes || [])
+    .filter((n) => n.frontmatter.featured === true)
     .map((n) => ({
       title: n.frontmatter.title,
       date: n.frontmatter.date,
@@ -80,6 +83,8 @@ const IndexPage: React.FC<IndexPageProps> = ({
       project: n.frontmatter.project,
       excerpt: n.excerpt,
       featured: true,
+      media: n.frontmatter.media,
+      cta: n.frontmatter.cta,
     }))
 
   return (
@@ -114,6 +119,8 @@ export const query = graphql`
           status
           project
           featured
+          media
+          cta
         }
         excerpt(pruneLength: 160)
       }

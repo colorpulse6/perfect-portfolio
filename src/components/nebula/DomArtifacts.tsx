@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import { navigate } from "gatsby"
 import { ARTIFACTS, ArtifactDef } from "./artifacts"
 import { useInteractionSounds } from "../audio/useInteractionSounds"
+import BrainAtlasGif from "../../images/brain-atlas-spin.gif"
+import CerebroMyceliumGif from "../../images/cerebro-mycelium.gif"
 
 export interface FeaturedEntry {
   title: string
@@ -12,6 +14,8 @@ export interface FeaturedEntry {
   project: string | null
   excerpt: string
   featured: boolean
+  media: string | null
+  cta: string | null
 }
 
 interface DomArtifactsProps {
@@ -88,6 +92,11 @@ const STATUS_LABELS: Record<string, string> = {
   "in-progress": "In Progress",
   released: "Released",
   published: "Published",
+}
+
+const MEDIA_ASSETS: Record<string, string> = {
+  "brain-atlas-spin.gif": BrainAtlasGif,
+  "cerebro-mycelium.gif": CerebroMyceliumGif,
 }
 
 const glassStyle: React.CSSProperties = {
@@ -498,6 +507,10 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
 
           const entry = item.entry
           const typeColor = TYPE_COLORS[entry.type] || "#888"
+          const mediaSrc = entry.media ? MEDIA_ASSETS[entry.media] : null
+          const ctaLabel =
+            entry.cta ||
+            (entry.type === "writing" ? "Read" : entry.type === "update" ? "View" : "Play")
 
           return (
             <div
@@ -555,6 +568,24 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                     </span>
                   )}
                 </div>
+
+                {mediaSrc && (
+                  <img
+                    src={mediaSrc}
+                    alt={entry.title}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: 88,
+                      objectFit: "cover",
+                      objectPosition: "center",
+                      borderRadius: 10,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      marginBottom: 12,
+                      opacity: 0.9,
+                    }}
+                  />
+                )}
 
                 {entry.project && (
                   <div
@@ -615,7 +646,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                         e.currentTarget.style.color = "rgba(255,255,255,0.5)"
                       }}
                     >
-                      {entry.type === "writing" ? "Read" : entry.type === "update" ? "View" : "Play"} &#x2192;
+                      {ctaLabel} &#x2192;
                     </a>
                   )}
                   <a
