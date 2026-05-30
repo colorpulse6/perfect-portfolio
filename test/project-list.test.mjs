@@ -42,3 +42,13 @@ test("Throttle appears above Job Toast in the portfolio project list", () => {
   assert.equal(throttle.github, "https://github.com/colorpulse6/throttle")
   assert.equal(throttle.imgSrc, "throttle-dashboard.png")
 })
+
+test("El Form uses the current docs URL and dark-mode docs GIF", () => {
+  const projects = loadProjects()
+  const elForm = projects.find(project => project.name === "El Form")
+
+  assert.ok(elForm)
+  assert.equal(elForm.link, "https://elform.dev/docs/intro")
+  assert.equal(elForm.github, "https://github.com/colorpulse6/el-form")
+  assert.equal(elForm.imgSrc, "elform-docs-dark.gif")
+})

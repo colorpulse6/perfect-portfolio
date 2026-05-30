@@ -46,12 +46,11 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "El Form",
-      link: "https://colorpulse6.github.io/el-form/docs/intro",
+      link: "https://elform.dev/docs/intro",
       github: "https://github.com/colorpulse6/el-form",
       techArray: [21, 13, 14, 19, 11, 2, 10, 30],
       ref: "elFormRef",
-      imgSrc:
-        "https://res.cloudinary.com/duzle7rzg/image/upload/v1751264148/yoevk2ngg1xphwvmmheh.jpg",
+      imgSrc: "elform-docs-dark.gif",
       description:
         "Modern open source form library with AutoForm and hooks for maximum flexibility.",
     },

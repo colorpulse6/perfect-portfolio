@@ -7,6 +7,7 @@ import MadScienceGif from "../images/mad-science-gif.gif"
 import JobToastGif from "../images/job-toast.gif"
 import BrainAtlasGif from "../images/brain-atlas-spin.gif"
 import ThrottleDashboard from "../images/throttle-dashboard.png"
+import ElFormDocsGif from "../images/elform-docs-dark.gif"
 import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
@@ -65,6 +66,7 @@ const Project: React.FC<ProjectProps> = ({
   const getImageSource = (): string => {
     if (name === "Brain Atlas") return BrainAtlasGif
     if (name === "Throttle") return ThrottleDashboard
+    if (name === "El Form") return ElFormDocsGif
     if (!hover) return image
 
     switch (name) {
