@@ -35,6 +35,16 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "A macOS menu bar app and WidgetKit widget that tracks Claude Max and Codex Pro usage limits, refresh windows, and model-specific quota bars.",
     },
     {
+      name: "Cerebro",
+      link: "https://github.com/colorpulse6/cerebro-orchestra",
+      github: "https://github.com/colorpulse6/cerebro-orchestra",
+      techArray: [14, 17, 29, 30],
+      ref: "cerebroRef",
+      imgSrc: "cerebro-dashboard.png",
+      description:
+        "A work-in-progress native macOS multi-agent workspace for coordinating provider-backed coding agents through a galaxy-style command surface.",
+    },
+    {
       name: "Job Toast",
       link: "https://jobtoast.io/",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],

@@ -5,6 +5,7 @@ import { useInteractionSounds } from "../audio/useInteractionSounds"
 import BrainAtlasGif from "../../images/brain-atlas-spin.gif"
 import CerebroMyceliumGif from "../../images/cerebro-mycelium.gif"
 import ThrottleDashboard from "../../images/throttle-dashboard.png"
+import CerebroDashboard from "../../images/cerebro-dashboard.png"
 
 export interface FeaturedEntry {
   title: string
@@ -99,22 +100,32 @@ const MEDIA_ASSETS: Record<string, string> = {
   "brain-atlas-spin.gif": BrainAtlasGif,
   "cerebro-mycelium.gif": CerebroMyceliumGif,
   "throttle-dashboard.png": ThrottleDashboard,
+  "cerebro-dashboard.png": CerebroDashboard,
 }
 
-const PORTRAIT_MEDIA = new Set(["throttle-dashboard.png"])
+const CONTAIN_MEDIA = new Set(["throttle-dashboard.png", "cerebro-dashboard.png"])
+const MEDIA_HEIGHTS: Record<string, number> = {
+  "throttle-dashboard.png": 220,
+  "cerebro-dashboard.png": 150,
+}
 
-function isPortraitMedia(media: string | null): boolean {
-  return media !== null && PORTRAIT_MEDIA.has(media)
+function isContainMedia(media: string | null): boolean {
+  return media !== null && CONTAIN_MEDIA.has(media)
+}
+
+function getCardMediaHeight(media: string | null): number {
+  return media !== null && MEDIA_HEIGHTS[media] ? MEDIA_HEIGHTS[media] : 88
 }
 
 function getCardMediaStyle(media: string | null): React.CSSProperties {
+  const contained = isContainMedia(media)
   return {
     display: "block",
     width: "100%",
-    height: isPortraitMedia(media) ? 220 : 88,
-    objectFit: isPortraitMedia(media) ? "contain" : "cover",
+    height: getCardMediaHeight(media),
+    objectFit: contained ? "contain" : "cover",
     objectPosition: "center",
-    background: isPortraitMedia(media) ? "rgba(10,8,20,0.8)" : "transparent",
+    background: contained ? "rgba(10,8,20,0.8)" : "transparent",
     borderRadius: 10,
     border: "1px solid rgba(255,255,255,0.1)",
     marginBottom: 12,

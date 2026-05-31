@@ -34,12 +34,13 @@
   z-index: 5;
   position: absolute;
   width: 100%;
+  pointer-events: none;
 }
 
 .sidebar-collapsed__item {
   cursor: pointer;
   padding-bottom: 25px;
-
+  pointer-events: auto;
 }
 
 
@@ -84,7 +85,6 @@
     display: none !important;
   }
 }
-
 
 
 

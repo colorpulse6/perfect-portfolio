@@ -52,3 +52,18 @@ test("El Form uses the current docs URL and dark-mode docs GIF", () => {
   assert.equal(elForm.github, "https://github.com/colorpulse6/el-form")
   assert.equal(elForm.imgSrc, "elform-docs-dark.gif")
 })
+
+test("Cerebro appears in the portfolio as a work-in-progress macOS app", () => {
+  const projects = loadProjects()
+  const cerebroIndex = projects.findIndex(project => project.name === "Cerebro")
+  const jobToastIndex = projects.findIndex(project => project.name === "Job Toast")
+  const cerebro = projects[cerebroIndex]
+
+  assert.ok(cerebroIndex >= 0)
+  assert.ok(jobToastIndex >= 0)
+  assert.ok(cerebroIndex < jobToastIndex)
+  assert.equal(cerebro.link, "https://github.com/colorpulse6/cerebro-orchestra")
+  assert.equal(cerebro.github, "https://github.com/colorpulse6/cerebro-orchestra")
+  assert.equal(cerebro.imgSrc, "cerebro-dashboard.png")
+  assert.match(cerebro.description, /work-in-progress native macOS/i)
+})

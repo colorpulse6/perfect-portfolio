@@ -55,6 +55,12 @@
   background: #171328;
 }
 
+.project-images--contain {
+  object-fit: contain;
+  object-position: center;
+  background: #070914;
+}
+
 .description-container {
   display: flex;
   flex-direction: column;

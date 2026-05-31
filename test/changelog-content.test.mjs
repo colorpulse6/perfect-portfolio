@@ -42,9 +42,10 @@ test("Brain Atlas changelog entry is featured for floating project cards", () =>
   assertFeaturedPluginEntry({
     slug: "brain-atlas",
     title: "Brain Atlas: Obsidian Plugin",
+    date: "2026-05-31",
     link: "https://community.obsidian.md/plugins/brain-atlas",
     media: "brain-atlas-spin.gif",
-    bodyPattern: /native inside Obsidian/i,
+    bodyPattern: /frontmatter value mappings/i,
   })
 })
 
@@ -68,4 +69,22 @@ test("Cerebro Mycelium changelog entry is featured for floating project cards", 
     media: "cerebro-mycelium.gif",
     bodyPattern: /living fungal network/i,
   })
+})
+
+test("Cerebro changelog entry is featured as an in-progress macOS project", () => {
+  const markdown = readChangelogEntry("cerebro")
+
+  assert.equal(frontmatterValue(markdown, "title"), "Cerebro: macOS Agent Workspace")
+  assert.equal(frontmatterValue(markdown, "date"), "2026-05-30")
+  assert.equal(frontmatterValue(markdown, "link"), "https://github.com/colorpulse6/cerebro-orchestra")
+  assert.equal(frontmatterValue(markdown, "status"), "in-progress")
+  assert.equal(frontmatterValue(markdown, "featured"), "true")
+  assert.equal(frontmatterValue(markdown, "project"), "macOS")
+  assert.equal(frontmatterValue(markdown, "media"), "cerebro-dashboard.png")
+  assert.equal(frontmatterValue(markdown, "cta"), "View")
+  assert.equal(
+    fs.existsSync(path.join(rootDir, "src", "images", frontmatterValue(markdown, "media"))),
+    true
+  )
+  assert.match(markdown, /native macOS multi-agent workspace/i)
 })

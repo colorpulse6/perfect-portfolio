@@ -17,7 +17,20 @@ test("floating changelog cards support custom media and CTA labels", () => {
   assert.match(source, /brain-atlas-spin\.gif/)
   assert.match(source, /cerebro-mycelium\.gif/)
   assert.match(source, /throttle-dashboard\.png/)
+  assert.match(source, /cerebro-dashboard\.png/)
   assert.match(source, /entry\.cta \|\|/)
-  assert.match(source, /isPortraitMedia/)
-  assert.match(source, /objectFit:\s*isPortraitMedia\(media\)\s*\?\s*"contain"\s*:\s*"cover"/)
+  assert.match(source, /isContainMedia/)
+  assert.match(source, /const contained = isContainMedia\(media\)/)
+  assert.match(source, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
+})
+
+test("Cerebro floating card media preserves the full screenshot", () => {
+  const source = fs.readFileSync(
+    path.join(rootDir, "src", "components", "nebula", "DomArtifacts.tsx"),
+    "utf8"
+  )
+
+  assert.match(source, /CONTAIN_MEDIA[\s\S]*cerebro-dashboard\.png/)
+  assert.match(source, /height:\s*getCardMediaHeight\(media\)/)
+  assert.match(source, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
 })

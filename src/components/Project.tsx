@@ -8,6 +8,7 @@ import JobToastGif from "../images/job-toast.gif"
 import BrainAtlasGif from "../images/brain-atlas-spin.gif"
 import ThrottleDashboard from "../images/throttle-dashboard.png"
 import ElFormDocsGif from "../images/elform-docs-dark.gif"
+import CerebroDashboard from "../images/cerebro-dashboard.png"
 import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
@@ -67,6 +68,7 @@ const Project: React.FC<ProjectProps> = ({
     if (name === "Brain Atlas") return BrainAtlasGif
     if (name === "Throttle") return ThrottleDashboard
     if (name === "El Form") return ElFormDocsGif
+    if (name === "Cerebro") return CerebroDashboard
     if (!hover) return image
 
     switch (name) {
@@ -97,8 +99,11 @@ const Project: React.FC<ProjectProps> = ({
   }
 
   const isPortraitProject = name === "Throttle"
+  const isContainProject = name === "Cerebro"
   const imageClassName = isPortraitProject
     ? "project-images project-images--portrait"
+    : isContainProject
+      ? "project-images project-images--contain"
     : "project-images"
 
   return (
