@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect } from "react"
 import SEO from "../components/seo"
 import gsap from "gsap"
 import Project from "../components/Project"
@@ -68,15 +68,6 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
     }
   `)
 
-  const inputRef = useRef<Array<HTMLElement | null>>([])
-
-  const handler = (idx: number) => (e: React.ChangeEvent) => {
-    const next = inputRef.current[idx + 1]
-    if (next) {
-      next.focus()
-    }
-  }
-
   // Handle page transition animations
   useEffect(() => {
     if (transitionStatus === "entering") {
@@ -101,10 +92,6 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
     })
   }, [])
 
-  const scrollToDiv = (ref: string): void => {
-    console.log(ref)
-  }
-
   return (
     <>
       <SideBarCollapsed
@@ -128,10 +115,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
                 index={i}
                 link={project.link}
                 github={project.github}
-                // ref={el => (inputRef.current[i] = el)}
-                // onChange={handler(i)}
                 key={project.id}
-                scrollToDiv={() => scrollToDiv(project.ref)}
                 firestore={project.name === "Fire Store"}
               />
             )
