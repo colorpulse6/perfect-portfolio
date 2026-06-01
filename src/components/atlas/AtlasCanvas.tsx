@@ -359,9 +359,9 @@ export default function AtlasCanvas({
         sy = Math.sin(ry),
         cx = Math.cos(rx),
         sx = Math.sin(rx)
-      let x = w[0] * cy + w[2] * sy
+      const x = w[0] * cy + w[2] * sy
       let z = -w[0] * sy + w[2] * cy
-      let y = w[1] * cx - z * sx
+      const y = w[1] * cx - z * sx
       z = w[1] * sx + z * cx
       const scale = (FOCAL / (FOCAL + z)) * s.zoom
       const px = s.pan ? s.pan.x : 0,
@@ -808,7 +808,7 @@ export default function AtlasCanvas({
           const pr = proj(pw, s)
           const hovd = s.hoverPlanet === pi
           const rad = Math.max(6, pl.size * pr.scale * 1.9 * (hovd ? 1.25 : 1))
-          let ldx = cpr.sx - pr.sx,
+          const ldx = cpr.sx - pr.sx,
             ldy = cpr.sy - pr.sy
           const lm = Math.hypot(ldx, ldy) || 1
           drawOrb(ctx, pr.sx, pr.sy, rad, pl.rgb, { x: ldx / lm, y: ldy / lm }, ep, hovd, now + pl.seed, pl)

@@ -3,7 +3,7 @@ module.exports = {
     html: { useGatsbyImage: false },
     title: `Nichalas Barnes`,
     description: `Nichalas Barnes Portfolio`,
-    author: `Nicholas Barnes`,
+    author: `Nichalas Barnes`,
     siteURL: "https://nichalasbarnes.com/",
     menuLinks: [
       {
@@ -70,19 +70,15 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `gatsby-starter-default`,
-        short_name: `starter`,
+        name: `Nichalas Barnes`,
+        short_name: `Nichalas Barnes`,
         start_url: `/`,
-        background_color: `#663399`,
-        theme_color: `#663399`,
+        background_color: `#06070e`,
+        theme_color: `#06070e`,
         display: `minimal-ui`,
         icon: `src/images/nic-barnes-logo.png`, // This path is relative to the root of the site.
       },
     },
-    `gatsby-plugin-gatsby-cloud`,
-    // this (optional) plugin enables Progressive Web App + Offline functionality
-    // To learn more, visit: https://gatsby.dev/offline
-    // `gatsby-plugin-offline`,
     "gatsby-plugin-postcss",
   ],
 }

@@ -222,7 +222,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
           const speedThreshold = isCard ? 15 : 20
 
           switch (next.phase) {
-            case "shooting":
+            case "shooting": {
               next.x += next.vx * delta
               next.y += next.vy * delta
               const friction = Math.pow(frictionBase, delta)
@@ -238,6 +238,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                 next.vy = (Math.random() - 0.5) * 10 * driftScale
               }
               break
+            }
             case "materializing": {
               next.opacity = 0.7 + Math.min(0.3, next.phaseTime / MATERIALIZE_DURATION * 0.3)
               next.x += next.vx * delta
