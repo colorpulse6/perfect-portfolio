@@ -1135,7 +1135,15 @@ export default function AtlasCanvas({
     cv.addEventListener("touchend", onTouchEnd)
     cv.style.cursor = "grab"
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "`" || e.key === "t" || e.key === "T") {
+      // Don't hijack typing: the T / backtick shortcut must not fire while the
+      // user is in the terminal input or a form field (contact panel, etc.).
+      const tgt = e.target as HTMLElement | null
+      const typing =
+        !!tgt &&
+        (tgt.tagName === "INPUT" ||
+          tgt.tagName === "TEXTAREA" ||
+          tgt.isContentEditable)
+      if (!typing && (e.key === "`" || e.key === "t" || e.key === "T")) {
         e.preventDefault()
         setTerm(v => !v)
       }
