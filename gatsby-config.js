@@ -4,7 +4,7 @@ module.exports = {
     title: `Nichalas Barnes`,
     description: `Nichalas Barnes Portfolio`,
     author: `Nicholas Barnes`,
-    siteURL: "http://localhost:8000/",
+    siteURL: "https://nichalasbarnes.com/",
     menuLinks: [
       {
         name: "home",

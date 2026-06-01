@@ -27,8 +27,6 @@ interface ProjectProps {
   techArray: string[]
   /** Index position for layout alternation */
   index: number
-  /** Function to scroll to a specific div (optional) */
-  scrollToDiv?: () => void
   /** Whether this is a firestore project (optional) */
   firestore?: boolean
 }
@@ -46,7 +44,6 @@ const Project: React.FC<ProjectProps> = ({
   description,
   techArray,
   index,
-  scrollToDiv,
   firestore,
 }) => {
   const [hover, setHover] = useState<boolean>(false)
