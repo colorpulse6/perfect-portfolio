@@ -136,15 +136,16 @@ const Layout: React.FC<LayoutProps> = ({
     return `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, 0.9)`
   }, [location?.pathname])
 
+  const pagePath = location?.pathname || "/"
+  // The atlas is a full-bleed standalone view: suppress all global chrome on it.
+  const isAtlas = pagePath === "/atlas" || pagePath === "/atlas/"
+
   React.useEffect(() => {
     setNavOpen(false)
 
     if (typeof window !== "undefined") {
       const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
       setIsTouch(hasTouch)
-      if (!hasTouch && window.innerWidth > 550) {
-        document.body.classList.add("custom-cursor")
-      }
     }
 
     const moveCursor = (e: MouseEvent): void => {
@@ -164,7 +165,30 @@ const Layout: React.FC<LayoutProps> = ({
     }
   }, [cursorX, cursorY])
 
-  const pagePath = location?.pathname || "/"
+  // Toggle the site's custom cursor off on the full-bleed atlas (and on touch).
+  React.useEffect(() => {
+    if (typeof document === "undefined" || typeof window === "undefined") return
+    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
+    if (!isAtlas && !hasTouch && window.innerWidth > 550) {
+      document.body.classList.add("custom-cursor")
+    } else {
+      document.body.classList.remove("custom-cursor")
+    }
+  }, [isAtlas])
+
+  if (isAtlas) {
+    // Full-bleed: only the atlas page renders (no nebula, header, sidebar,
+    // footer, cursor, audio toggle, or global terminal). The audio context and
+    // the transition whoosh stay so navigation still feels continuous.
+    return (
+      <AmbientAudioProvider pagePath={pagePath}>
+        <div className="layout-container">
+          <main>{children}</main>
+          <TransitionSound transitionStatus={transitionStatus} />
+        </div>
+      </AmbientAudioProvider>
+    )
+  }
 
   return (
     <AmbientAudioProvider pagePath={pagePath}>

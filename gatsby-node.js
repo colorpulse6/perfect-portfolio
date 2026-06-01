@@ -16,6 +16,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
       name: "Brain Atlas",
+      cluster: "obsidian",
+      status: "released",
+      medium: "OBSIDIAN PLUGIN",
+      tech: ["TypeScript", "Canvas 2D", "Obsidian API"],
       link: "https://community.obsidian.md/plugins/brain-atlas",
       github: "https://github.com/colorpulse6/brain-atlas",
       techArray: [14, 8, 10, 11, 30],
@@ -26,6 +30,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Throttle",
+      cluster: "tools",
+      status: "released",
+      medium: "macOS APP",
+      tech: ["Swift", "WidgetKit"],
       link: "https://github.com/colorpulse6/throttle/releases/tag/v1.0.0",
       github: "https://github.com/colorpulse6/throttle",
       techArray: [29, 30],
@@ -36,6 +44,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Cerebro",
+      cluster: "ai",
+      status: "in-progress",
+      medium: "macOS APP",
+      tech: ["Swift", "SwiftUI", "Multi-agent"],
       link: "https://github.com/colorpulse6/cerebro-orchestra",
       github: "https://github.com/colorpulse6/cerebro-orchestra",
       techArray: [14, 17, 29, 30],
@@ -46,6 +58,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Job Toast",
+      cluster: "web",
+      status: "live",
+      medium: "WEB APP",
+      tech: ["React", "TypeScript"],
       link: "https://jobtoast.io/",
       techArray: [22, 21, 13, 16, 17, 19, 10, 2, 12, 23, 18, 14, 6, 15],
       ref: "jobToastRef",
@@ -56,6 +72,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "El Form",
+      cluster: "tools",
+      status: "released",
+      medium: "REACT LIBRARY",
+      tech: ["React", "TypeScript", "Zustand"],
       link: "https://elform.dev/docs/intro",
       github: "https://github.com/colorpulse6/el-form",
       techArray: [21, 13, 14, 19, 11, 2, 10, 30],
@@ -66,6 +86,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Bot Battle",
+      cluster: "tools",
+      status: "live",
+      medium: "LLM TOOL",
+      tech: ["React", "TypeScript"],
       link: "https://www.botbattle.cc/",
       github:
         "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/bot-battle/web",
@@ -77,6 +101,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Knicks Knacks",
+      cluster: "games",
+      status: "live",
+      medium: "GAME ARCADE",
+      tech: ["React", "Turborepo"],
       link: "https://colorpulse6.github.io/knicks-knacks/",
       github: "https://github.com/colorpulse6/knicks-knacks",
       techArray: [22, 27, 13, 14, 8, 1, 30],
@@ -88,6 +116,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Regexplain",
+      cluster: "tools",
+      status: "live",
+      medium: "WEB TOOL",
+      tech: ["React", "TypeScript"],
       link: "https://www.regexplain.cc/",
       github:
         "https://github.com/colorpulse6/knicks-knacks/tree/main/apps/regexplain/web",
@@ -99,6 +131,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Swash Flag",
+      cluster: "tools",
+      status: "live",
+      medium: "PLATFORM + SDK",
+      tech: ["React", "TypeScript", "Postgres"],
       link: "https://swash-flag.vercel.app/",
       github: "https://github.com/colorpulse6/swash-flag-frontend",
       techArray: [21, 13, 24, 19, 10, 2, 12, 23, 14, 20, 25, 11],
@@ -110,6 +146,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Hoop.It.App",
+      cluster: "web",
+      status: "archive",
+      medium: "WEB + MOBILE",
+      tech: ["React", "Node", "Maps"],
       link: "https://hoopitapp.herokuapp.com/",
       github: "https://github.com/colorpulse6/hoopitapp",
       techArray: [13, 10, 2, 9, 8, 1, 7, 0, 16, 6, 15],
@@ -122,6 +162,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
 
     {
       name: "Fire Store",
+      cluster: "web",
+      status: "archive",
+      medium: "WEB APP",
+      tech: ["React", "Firebase"],
       link: "https://fire-store.netlify.app/",
       github: "https://github.com/colorpulse6/fire-store",
       techArray: [13, 10, 2, 3, 9, 8, 1, 7, 0, 15],
@@ -132,6 +176,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Gigzilla",
+      cluster: "web",
+      status: "archive",
+      medium: "WEB APP",
+      tech: ["Rails", "JavaScript"],
       link: "https://gig-zilla.herokuapp.com/",
       github: "https://github.com/colorpulse6/gigzilla",
       techArray: [5, 10, 2, 9, 8, 1, 7, 0, 6, 15],
@@ -143,6 +191,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Mad Science",
+      cluster: "games",
+      status: "live",
+      medium: "BROWSER GAME",
+      tech: ["JavaScript", "Canvas"],
       link: "https://colorpulse6.github.io/mad-science/",
       github: "https://github.com/colorpulse6/mad-science",
       techArray: [8, 1, 7, 15],
@@ -162,6 +214,10 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       github: project.github,
       imgSrc: project.imgSrc,
       ref: project.ref,
+      cluster: project.cluster,
+      status: project.status,
+      medium: project.medium,
+      tech: project.tech,
       id: createNodeId(`Project-${project.name}`),
       internal: {
         type: "Project",

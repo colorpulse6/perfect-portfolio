@@ -4,6 +4,7 @@ import gsap from "gsap"
 import SEO from "../components/seo"
 import HomeScene from "../components/nebula/HomeScene"
 import { FeaturedEntry } from "../components/nebula/DomArtifacts"
+import AtlasDive from "../components/atlas/AtlasDive"
 import "./index.css"
 
 interface GatsbyLocation {
@@ -50,6 +51,16 @@ const IndexPage: React.FC<IndexPageProps> = ({
   location,
   data,
 }) => {
+  const [diving, setDiving] = React.useState(false)
+
+  // Hyperspace dive into /atlas: fade the title, play the warp overlay, navigate.
+  const diveToAtlas = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (diving) return
+    setDiving(true)
+    gsap.to(".hometex", { autoAlpha: 0, duration: 0.5 })
+  }
+
   React.useEffect(() => {
     gsap.to(".hometex", {
       autoAlpha: 1,
@@ -99,8 +110,24 @@ const IndexPage: React.FC<IndexPageProps> = ({
           <h1 className="glitch-text" data-text="Welcome to Nichalas Barnes">
             Welcome to Nichalas Barnes
           </h1>
+          <div className="atlas-cta">
+            <button className="atlas-enter" onClick={diveToAtlas}>
+              <span>Explore the Atlas</span>
+              <span className="atlas-arrow">↗</span>
+            </button>
+            <div className="atlas-hint">A LIVING MAP OF EVERY MEDIUM · NEW</div>
+          </div>
         </div>
       </div>
+      {diving && <AtlasDive />}
+      <style>{`
+        .atlas-cta { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
+        .atlas-enter { display: inline-flex; align-items: center; gap: 12px; padding: 14px 28px; border: 1px solid rgba(54,230,219,0.35); border-radius: 999px; white-space: nowrap; color: rgba(238,242,255,0.92); font-family: "Courier New", "Lucida Console", monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; background: rgba(54,230,219,0.04); box-shadow: 0 0 30px rgba(54,230,219,0.08); transition: all .25s; backdrop-filter: blur(4px); }
+        .atlas-enter:hover { background: rgba(54,230,219,0.12); box-shadow: 0 0 50px rgba(54,230,219,0.22); transform: translateY(-2px); }
+        .atlas-arrow { color: #36e6db; transition: transform .25s; }
+        .atlas-enter:hover .atlas-arrow { transform: translateX(4px); }
+        .atlas-hint { font-family: "Courier New", "Lucida Console", monospace; font-size: 9px; letter-spacing: 2px; color: rgba(150,165,210,0.5); }
+      `}</style>
     </div>
   )
 }

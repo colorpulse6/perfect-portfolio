@@ -3,6 +3,11 @@ import "./writing.css"
 import { graphql, useStaticQuery } from "gatsby"
 import gsap from "gsap"
 import SEO from "../components/seo"
+import {
+  formatTextContent,
+  wrapWordsInSpans,
+  revealDelay,
+} from "../helpers/wordReveal"
 
 interface WritingItem {
   title: string
@@ -24,79 +29,8 @@ interface WritingProps {
   location?: GatsbyLocation
 }
 
-const formatTextContent = (text: string): string => {
-  const paragraphs = text.split("\n\n")
-
-  return paragraphs
-    .map(paragraph => {
-      let formattedParagraph = paragraph.replace(/\n/g, "<br />").trim()
-
-      if (!formattedParagraph) {
-        return "<br />"
-      }
-
-      formattedParagraph = formattedParagraph
-        .replace(/--/g, "\u2013")
-        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-
-      const leadingSpaces = paragraph.match(/^(\s+)/)
-      const indentation = leadingSpaces
-        ? leadingSpaces[1].replace(/ /g, "&nbsp;")
-        : ""
-
-      const isDialogue =
-        formattedParagraph.includes("\u201c") ||
-        (formattedParagraph.startsWith('"') && formattedParagraph.includes('"'))
-
-      const paragraphClass = isDialogue
-        ? "story-paragraph dialogue-paragraph"
-        : "story-paragraph"
-
-      return `<p class="${paragraphClass}">${indentation}${formattedParagraph}</p>`
-    })
-    .join("")
-}
-
-function wrapWordsInSpans(container: HTMLElement): HTMLElement[] {
-  const allSpans: HTMLElement[] = []
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT)
-  const textNodes: Text[] = []
-  let current: Node | null
-  while ((current = walker.nextNode())) {
-    textNodes.push(current as Text)
-  }
-
-  for (const textNode of textNodes) {
-    const text = textNode.textContent || ""
-    if (!text.trim()) continue
-
-    const parts = text.split(/(\s+)/)
-    const frag = document.createDocumentFragment()
-
-    for (const part of parts) {
-      if (/^\s+$/.test(part)) {
-        frag.appendChild(document.createTextNode(part))
-      } else if (part) {
-        const span = document.createElement("span")
-        span.className = "word-reveal"
-        span.textContent = part
-        span.style.setProperty("--w-seed", String(Math.random() * 4))
-        frag.appendChild(span)
-        allSpans.push(span)
-      }
-    }
-
-    textNode.parentNode?.replaceChild(frag, textNode)
-  }
-
-  return allSpans
-}
-
-const WORD_SPEED_BASE = 35
-const WORD_SPEED_JITTER = 20
-const WORD_PUNCT_PAUSE = 110
-const WORD_PARA_PAUSE = 300
+// Reveal mechanics (formatter, tree-walker, per-word timing) live in
+// helpers/wordReveal.ts and are shared with the atlas fiction reader.
 
 const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
   const data: WritingQueryData = useStaticQuery(graphql`
@@ -186,15 +120,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
           wi++
 
           const word = span.textContent || ""
-          const isPunct = /[.!?,;:\u2013]$/.test(word)
-          let delay: number
-          if (isParaEnd) {
-            delay = WORD_PARA_PAUSE + Math.random() * 100
-          } else if (isPunct) {
-            delay = WORD_PUNCT_PAUSE + Math.random() * 60
-          } else {
-            delay = WORD_SPEED_BASE + (Math.random() - 0.5) * WORD_SPEED_JITTER * 2
-          }
+          const delay = revealDelay(word, isParaEnd)
 
           revealTimer.current = window.setTimeout(revealContent, delay)
         }

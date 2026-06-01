@@ -1,14 +1,6 @@
 import React, { useState } from "react"
 import "../../src/pages/projects.css"
-import HoopItAppGif from "../images/hoop.it.app.gif"
-import FireStoreGif from "../images/fire-store-gif.gif"
-import GigZillaGif from "../images/Gigzilla.gif"
-import MadScienceGif from "../images/mad-science-gif.gif"
-import JobToastGif from "../images/job-toast.gif"
-import BrainAtlasGif from "../images/brain-atlas-spin.gif"
-import ThrottleDashboard from "../images/throttle-dashboard.png"
-import ElFormDocsGif from "../images/elform-docs-dark.gif"
-import CerebroDashboard from "../images/cerebro-dashboard.png"
+import { LOCAL_PRIMARY_IMAGES, HOVER_IMAGES } from "../helpers/projectImages"
 import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
@@ -63,28 +55,13 @@ const Project: React.FC<ProjectProps> = ({
     index: "",
   })
 
-  // Get the appropriate image source based on hover state and project name
+  // Get the appropriate image source based on hover state and project name.
+  // Primary screenshot resolution is shared with the atlas (see projectImages.ts);
+  // the hover GIF swap stays page-specific here.
   const getImageSource = (): string => {
-    if (name === "Brain Atlas") return BrainAtlasGif
-    if (name === "Throttle") return ThrottleDashboard
-    if (name === "El Form") return ElFormDocsGif
-    if (name === "Cerebro") return CerebroDashboard
+    if (LOCAL_PRIMARY_IMAGES[name]) return LOCAL_PRIMARY_IMAGES[name]
     if (!hover) return image
-
-    switch (name) {
-      case "Hoop.It.App":
-        return HoopItAppGif
-      //   case "Job Toast":
-      //     return JobToastGif
-      case "Fire Store":
-        return FireStoreGif
-      case "Gigzilla":
-        return GigZillaGif
-      case "Mad Science":
-        return MadScienceGif
-      default:
-        return image
-    }
+    return HOVER_IMAGES[name] || image
   }
 
   const handleMouseEnter = (): void => setHover(true)

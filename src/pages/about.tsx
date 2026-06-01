@@ -135,7 +135,7 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
             <p>
               I moved to Berlin to push my musical career to its logical
               conclusion. I reached a level of professional maturity where I was
-              leading international tours across Europe and Japan, eventually
+              leading international tours across the US and Europe, eventually
               receiving state funding in Germany to compose and record with a
               10-piece ensemble.
             </p>
