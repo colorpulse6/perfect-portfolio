@@ -11,17 +11,21 @@ test("floating changelog cards support custom media and CTA labels", () => {
     path.join(rootDir, "src", "components", "nebula", "DomArtifacts.tsx"),
     "utf8"
   )
+  const cardSource = fs.readFileSync(
+    path.join(rootDir, "src", "components", "nebula", "cardRendering.ts"),
+    "utf8"
+  )
 
   assert.match(source, /media: string \| null/)
   assert.match(source, /cta: string \| null/)
-  assert.match(source, /brain-atlas-spin\.mp4/)
-  assert.match(source, /cerebro-mycelium\.mp4/)
-  assert.match(source, /throttle-dashboard\.png/)
-  assert.match(source, /cerebro-dashboard\.png/)
+  assert.match(cardSource, /brain-atlas-spin\.mp4/)
+  assert.match(cardSource, /cerebro-mycelium\.mp4/)
+  assert.match(cardSource, /throttle-dashboard\.png/)
+  assert.match(cardSource, /cerebro-dashboard\.png/)
   assert.match(source, /entry\.cta \|\|/)
-  assert.match(source, /isContainMedia/)
-  assert.match(source, /const contained = isContainMedia\(media\)/)
-  assert.match(source, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
+  assert.match(cardSource, /isContainMedia/)
+  assert.match(cardSource, /const contained = isContainMedia\(media\)/)
+  assert.match(cardSource, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
 })
 
 test("Cerebro floating card media preserves the full screenshot", () => {
@@ -29,8 +33,12 @@ test("Cerebro floating card media preserves the full screenshot", () => {
     path.join(rootDir, "src", "components", "nebula", "DomArtifacts.tsx"),
     "utf8"
   )
+  const cardSource = fs.readFileSync(
+    path.join(rootDir, "src", "components", "nebula", "cardRendering.ts"),
+    "utf8"
+  )
 
-  assert.match(source, /CONTAIN_MEDIA[\s\S]*cerebro-dashboard\.png/)
-  assert.match(source, /height:\s*getCardMediaHeight\(media\)/)
-  assert.match(source, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
+  assert.match(cardSource, /CONTAIN_MEDIA[\s\S]*cerebro-dashboard\.png/)
+  assert.match(cardSource, /height:\s*getCardMediaHeight\(media\)/)
+  assert.match(cardSource, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
 })
