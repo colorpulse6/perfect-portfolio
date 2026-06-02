@@ -17,11 +17,11 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "What does Nichalas Barnes build?",
-    a: "He builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. Recent work includes Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a CLI usage tracker).",
+    a: "He builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. Recent work includes Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a macOS usage tracker).",
   },
   {
     q: "What is Brain Atlas?",
-    a: "Brain Atlas is an Obsidian plugin by Nichalas Barnes that renders a vault as a navigable 3D galaxy, turning notes and the links between them into an explorable star map.",
+    a: "Brain Atlas is an Obsidian plugin by Nichalas Barnes that renders an Obsidian vault as an animated 3D anatomical brain: notes become nodes, links become neural pathways, and note types are grouped into brain regions.",
   },
   {
     q: "What technologies does Nichalas Barnes work with?",
