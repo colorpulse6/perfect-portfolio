@@ -313,7 +313,7 @@ function WProject({
           <a
             href={link}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             style={{ ...linkS(accent), display: "inline-block" }}
           >
             {cta.toUpperCase()} →
@@ -322,7 +322,7 @@ function WProject({
             <a
               href={github}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{ ...linkS("rgba(150,180,200,0.6)"), fontWeight: 400 }}
             >
               GITHUB
@@ -377,7 +377,7 @@ function WWriting({ essays, onClose }: { essays?: EssayItem[]; onClose: () => vo
         <a
           href={hero.link}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           style={{ ...linkS(accent), display: "inline-block", marginTop: 22 }}
         >
           {readLabel}
@@ -400,7 +400,7 @@ function WWriting({ essays, onClose }: { essays?: EssayItem[]; onClose: () => vo
               key={i}
               href={e.link || "#"}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{
                 display: "flex",
                 alignItems: "baseline",
@@ -632,7 +632,7 @@ function WContact({ onClose }: { onClose: () => void }) {
             <a
               href="https://github.com/colorpulse6"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{ ...linkS("rgba(150,180,200,0.6)"), fontWeight: 400 }}
             >
               GITHUB
@@ -640,7 +640,7 @@ function WContact({ onClose }: { onClose: () => void }) {
             <a
               href="https://alexshand.bandcamp.com/"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{ ...linkS("rgba(150,180,200,0.6)"), fontWeight: 400 }}
             >
               BANDCAMP

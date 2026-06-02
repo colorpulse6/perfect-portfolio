@@ -18,6 +18,6 @@
       "@/*": ["*"]
     }
   },
-  "include": ["src/**/*", "gatsby-*.js", "gatsby-*.ts", "plugins/**/*"],
+  "include": ["src/**/*", "gatsby-*.js", "gatsby-*.ts", "plugins/**/*", "netlify/**/*.ts"],
   "exclude": ["node_modules", "public", ".cache"]
 }
