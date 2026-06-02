@@ -1,23 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { graphql } from "gatsby"
-import gsap from "gsap"
 import SEO from "../components/seo"
 import SideBarCollapsed from "../components/SideBarCollapsed"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 import "./changelog.css"
-
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
-}
 
 interface ChangelogNode {
   frontmatter: {
@@ -77,18 +64,7 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({
 }) => {
   const [filter, setFilter] = useState("all")
 
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".changelog", { autoAlpha: 1, duration: 1 })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".changelog", { autoAlpha: 0, duration: 0.3 })
-    }
-  }, [transitionStatus])
-
-  useEffect(() => {
-    gsap.to(".changelog", { autoAlpha: 1, duration: 1 })
-  }, [])
+  usePageTransition(transitionStatus, ".changelog", { enter: 1, exit: 0.3, mount: 1 })
 
   const entries = (data?.allMarkdownRemark?.nodes || []).filter(
     (n) => filter === "all" || n.frontmatter.type === filter

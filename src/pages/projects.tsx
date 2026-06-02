@@ -1,10 +1,11 @@
-import React, { useEffect } from "react"
+import React from "react"
 import SEO from "../components/seo"
-import gsap from "gsap"
 import Project from "../components/Project"
 import { getImages } from "../helpers/techImages"
 import { useStaticQuery, graphql } from "gatsby"
 import SideBarCollapsed from "../components/SideBarCollapsed"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 
 // Type for GraphQL query result
 interface ProjectQueryData {
@@ -20,21 +21,6 @@ interface ProjectQueryData {
       id: string
     }>
   }
-}
-
-// Type for location object from Gatsby
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
 }
 
 // Define the props interface for the Projects page
@@ -68,29 +54,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
     }
   `)
 
-  // Handle page transition animations
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".projects", {
-        autoAlpha: 1,
-        duration: 1, // if we are entering the page, make the div visible in one second
-      })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".projects", {
-        autoAlpha: 0,
-        duration: 0.3,
-      }) // if we are exiting the page, make the div transparent
-    }
-  }, [transitionStatus])
-
-  // Initial page load animation
-  useEffect(() => {
-    gsap.to(".projects", {
-      autoAlpha: 1,
-      duration: 1,
-    })
-  }, [])
+  usePageTransition(transitionStatus, ".projects", { enter: 1, exit: 0.3, mount: 1 })
 
   return (
     <>

@@ -1,25 +1,11 @@
-import React, { useEffect, useState, useRef, useMemo } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import SEO from "../components/seo"
-import gsap from "gsap"
 import SideBarCollapsed from "../components/SideBarCollapsed"
 import FloatingPageIcons from "../components/nebula/FloatingPageIcons"
 import { ARTIFACTS } from "../components/nebula/artifacts"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 import "./about.css"
-
-// Type for location object from Gatsby
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
-}
 
 // Define the props interface for the About page
 interface AboutProps {
@@ -65,25 +51,7 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
     []
   )
 
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".about", {
-        autoAlpha: 1,
-        duration: 1,
-      })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".about", { autoAlpha: 0, duration: 0.3 })
-    }
-  }, [transitionStatus])
-
-  // Initial page load animation
-  useEffect(() => {
-    gsap.to(".about", {
-      autoAlpha: 1,
-      duration: 1,
-    })
-  }, [])
+  usePageTransition(transitionStatus, ".about", { enter: 1, exit: 0.3, mount: 1 })
 
   return (
     <>

@@ -5,21 +5,9 @@ import SEO from "../components/seo"
 import HomeScene from "../components/nebula/HomeScene"
 import { FeaturedEntry } from "../components/nebula/DomArtifacts"
 import AtlasDive from "../components/atlas/AtlasDive"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 import "./index.css"
-
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
-}
 
 interface MarkdownNode {
   frontmatter: {
@@ -61,27 +49,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
     gsap.to(".hometex", { autoAlpha: 0, duration: 0.5 })
   }
 
-  React.useEffect(() => {
-    gsap.to(".hometex", {
-      autoAlpha: 1,
-      duration: 1,
-    })
-  }, [])
-
-  React.useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".hometex", {
-        autoAlpha: 1,
-        duration: 3.5,
-      })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".hometex", {
-        autoAlpha: 0,
-        duration: 1,
-      })
-    }
-  }, [transitionStatus])
+  usePageTransition(transitionStatus, ".hometex", { enter: 3.5, exit: 1, mount: 1 })
 
   const featuredEntries: FeaturedEntry[] = (data?.allMarkdownRemark?.nodes || [])
     .filter((n) => n.frontmatter.featured === true)

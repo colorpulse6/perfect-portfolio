@@ -1,24 +1,11 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import SEO from "../components/seo"
-import gsap from "gsap"
 import { Slide, Flip } from "react-awesome-reveal"
 import "./contact.css"
 import SideBarCollapsed from "../components/SideBarCollapsed"
-
-// Type for location object from Gatsby
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
-}
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
+import { useNetlifyForm } from "../helpers/useNetlifyForm"
 
 // Define the props interface for the Contact page
 interface ContactProps {
@@ -34,57 +21,16 @@ interface ContactProps {
  * @returns JSX element for the contact page
  */
 const Contact: React.FC<ContactProps> = ({ transitionStatus, location }) => {
-  const [form, setForm] = useState({ name: "", email: "", message: "" })
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle"
-  )
-
-  const encode = (data: Record<string, string>) =>
-    Object.keys(data)
-      .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-      .join("&")
+  const { form, setForm, status, submit } = useNetlifyForm()
 
   // Submit via AJAX to the Netlify "contact" form (no redirect to a success
   // page); show an inline confirmation instead.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (status === "sending" || status === "sent") return
-    setStatus("sending")
-    try {
-      const res = await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({ "form-name": "contact", "bot-field": "", ...form }),
-      })
-      setStatus(res.ok ? "sent" : "error")
-    } catch {
-      setStatus("error")
-    }
+    await submit()
   }
 
-  // Handle page transition animations
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".contact", {
-        autoAlpha: 1,
-        duration: 1, // if we are entering the page, make the div visible
-      })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".contact", {
-        autoAlpha: 0,
-        duration: 0.3,
-      }) // if we are exiting the page, make the div transparent
-    }
-  }, [transitionStatus])
-
-  // Initial page load animation
-  useEffect(() => {
-    gsap.to(".contact", {
-      autoAlpha: 1,
-      duration: 1,
-    })
-  }, [])
+  usePageTransition(transitionStatus, ".contact", { enter: 1, exit: 0.3, mount: 1 })
 
   return (
     <>

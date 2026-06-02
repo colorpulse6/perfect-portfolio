@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 import { graphql } from "gatsby"
-import gsap from "gsap"
 import SEO from "../components/seo"
 import AtlasCanvas from "../components/atlas/AtlasCanvas"
 import { NB } from "../components/atlas/atlasShared"
@@ -12,6 +11,8 @@ import type {
   ChangelogItem,
 } from "../components/atlas/atlasShared"
 import { resolveProjectMedia } from "../helpers/projectImages"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 import "./atlas.css"
 
 interface ProjectNode {
@@ -42,10 +43,6 @@ interface MarkdownNode {
     media: string | null
   }
   excerpt: string
-}
-
-interface GatsbyLocation {
-  pathname: string
 }
 
 interface AtlasPageProps {
@@ -117,18 +114,7 @@ const CURATED: Record<string, AtlasWork[]> = {
 }
 
 const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data }) => {
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".atlas-page", { autoAlpha: 1, duration: 1 })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".atlas-page", { autoAlpha: 0, duration: 0.4 })
-    }
-  }, [transitionStatus])
-
-  useEffect(() => {
-    gsap.to(".atlas-page", { autoAlpha: 1, duration: 1 })
-  }, [])
+  usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1 })
 
   const { domains, fiction, essays, changelog } = useMemo(() => {
     const projects = data.allProject.nodes

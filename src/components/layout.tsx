@@ -16,6 +16,7 @@ import TerminalConsole from "./nebula/TerminalConsole"
 import { resolveTheme } from "./nebula/particleThemes"
 import { AmbientAudioProvider, useAmbientAudio } from "./audio/AmbientAudioProvider"
 import { useInteractionSounds } from "./audio/useInteractionSounds"
+import { GatsbyLocation } from "../types/gatsby"
 import "./layout.css"
 
 // Type for the GraphQL query result
@@ -29,21 +30,6 @@ interface SiteMetadataQuery {
       }>
     }
   }
-}
-
-// Type for location object from Gatsby
-interface GatsbyLocation {
-  pathname: string
-  search?: string
-  hash?: string
-  href?: string
-  origin?: string
-  protocol?: string
-  host?: string
-  hostname?: string
-  port?: string
-  state?: any
-  key?: string
 }
 
 // Define the props interface for the Layout component
