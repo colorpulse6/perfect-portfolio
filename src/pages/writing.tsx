@@ -8,6 +8,8 @@ import {
   wrapWordsInSpans,
   revealDelay,
 } from "../helpers/wordReveal"
+import { GatsbyLocation } from "../types/gatsby"
+import { usePageTransition } from "../helpers/usePageTransition"
 
 interface WritingItem {
   title: string
@@ -18,10 +20,6 @@ interface WritingQueryData {
   allWriting: {
     nodes: WritingItem[]
   }
-}
-
-interface GatsbyLocation {
-  pathname: string
 }
 
 interface WritingProps {
@@ -51,18 +49,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
   const revealTimer = useRef<number>(0)
   const storiesData = data.allWriting.nodes
 
-  useEffect(() => {
-    if (transitionStatus === "entering") {
-      gsap.to(".writings", { autoAlpha: 1, duration: 1 })
-    }
-    if (transitionStatus === "exiting") {
-      gsap.to(".writings", { autoAlpha: 0, duration: 0.03 })
-    }
-  }, [transitionStatus])
-
-  useEffect(() => {
-    gsap.to(".writings", { autoAlpha: 1, duration: 0.5 })
-  }, [])
+  usePageTransition(transitionStatus, ".writings", { enter: 1, exit: 0.03, mount: 0.5 })
 
   const stopReveal = useCallback(() => {
     if (revealTimer.current) {
