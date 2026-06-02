@@ -16,12 +16,28 @@ import TransitionLink from "gatsby-plugin-transition-link"
 import { NB as A, NB_MONO as MONO, NB_DISP as DISP, hx } from "./atlasShared"
 import type {
   AtlasDomain,
+  AtlasWork,
   FictionStory,
   EssayItem,
   ChangelogItem,
+  RGB,
 } from "./atlasShared"
 import { AtlasPanelRouter } from "./AtlasPanels"
 import type { AtlasPanelState } from "./AtlasPanels"
+import type {
+  SceneState,
+  Scene,
+  Vec3,
+  HubWithWorld,
+  SceneNode,
+  SceneStar,
+  SceneOrbit,
+  OrbHive,
+  Signal,
+  PlanetHit,
+  Projected,
+  ProjFn,
+} from "./sceneTypes"
 
 const R = 250
 
@@ -45,7 +61,7 @@ function drawOrb(
   ep: number,
   hov: boolean,
   t: number,
-  store: any
+  store: OrbHive
 ) {
   const [r, g, b] = rgb
   if (!store.hive) {
@@ -157,7 +173,7 @@ const EDGES: [number, number][] = [
   [7, 2],
 ]
 
-function buildScene(domains: AtlasDomain[]) {
+function buildScene(domains: AtlasDomain[]): Scene {
   let seed = 7
   const rnd = () => {
     seed = (seed * 16807) % 2147483647
@@ -165,16 +181,19 @@ function buildScene(domains: AtlasDomain[]) {
   }
   const gauss = () => (rnd() + rnd() + rnd() - 1.5) * 1.4
 
-  const hubs = domains.map(c => ({ ...c, w: [c.p[0] * R, c.p[1] * R, c.p[2] * R] }))
-  const nodes: any[] = []
-  hubs.forEach((h: any, ci: number) => {
+  const hubs: HubWithWorld[] = domains.map(c => ({
+    ...c,
+    w: [c.p[0] * R, c.p[1] * R, c.p[2] * R] as Vec3,
+  }))
+  const nodes: SceneNode[] = []
+  hubs.forEach((h: HubWithWorld, ci: number) => {
     const spread = h.core ? 26 : 42
     const bright = h.core ? 6 : h.count || (h.works ? h.works.length : 3)
     const dust = h.core ? 16 : 20 + bright * 5
     for (let i = 0; i < bright; i++) {
       nodes.push({
         ci,
-        w: [h.w[0] + gauss() * spread, h.w[1] + gauss() * spread, h.w[2] + gauss() * spread],
+        w: [h.w[0] + gauss() * spread, h.w[1] + gauss() * spread, h.w[2] + gauss() * spread] as Vec3,
         r: 1.8 + rnd() * 1.4,
         c: h.c,
         warm: h.warm,
@@ -189,7 +208,7 @@ function buildScene(domains: AtlasDomain[]) {
           h.w[0] + gauss() * spread * 1.5,
           h.w[1] + gauss() * spread * 1.5,
           h.w[2] + gauss() * spread * 1.5,
-        ],
+        ] as Vec3,
         r: 0.5 + rnd() * 0.8,
         c: h.c,
         warm: h.warm,
@@ -198,24 +217,24 @@ function buildScene(domains: AtlasDomain[]) {
         dust: true,
       })
     }
-    nodes.push({ ci, w: [...h.w], r: h.core ? 4.6 : 3.2, c: h.c, warm: h.warm, hub: true, label: h.label })
+    nodes.push({ ci, w: [...h.w] as Vec3, r: h.core ? 4.6 : 3.2, c: h.c, warm: h.warm, hub: true, label: h.label })
   })
-  const stars: any[] = []
+  const stars: SceneStar[] = []
   for (let i = 0; i < 520; i++) {
     const u = rnd() * 2 - 1,
       th = rnd() * 6.28,
       rr = 360 + rnd() * 220
     const s = Math.sqrt(1 - u * u)
-    stars.push({ w: [Math.cos(th) * s * rr, Math.sin(th) * s * rr, u * rr], r: 0.5 + rnd() * 1.1, tw: rnd() * 6.28 })
+    stars.push({ w: [Math.cos(th) * s * rr, Math.sin(th) * s * rr, u * rr] as Vec3, r: 0.5 + rnd() * 1.1, tw: rnd() * 6.28 })
   }
   // each cluster's works become planets orbiting the hub-star
-  const planets = hubs.map((h: any) => {
+  const planets: SceneOrbit[][] = hubs.map((h: HubWithWorld) => {
     if (h.core || !h.works) return []
     const perShell: Record<number, number> = {}
     // shelled clusters (writing): only shell-0 (essays) orbit as bodies;
     // fiction (shell 1) collapses into a single clickable sub-star (drawn in render).
-    const orbiting = h.shells ? h.works.filter((w: any) => (w.shell || 0) === 0) : h.works
-    return orbiting.map((wk: any, i: number) => {
+    const orbiting = h.shells ? h.works.filter((w: AtlasWork) => (w.shell || 0) === 0) : h.works
+    return orbiting.map((wk: AtlasWork, i: number) => {
       const sh = wk.shell || 0
       perShell[sh] = perShell[sh] || 0
       const idxInShell = perShell[sh]++
@@ -237,7 +256,7 @@ function buildScene(domains: AtlasDomain[]) {
   return { hubs, nodes, stars, planets }
 }
 
-function drawGizmo(ctx: CanvasRenderingContext2D, ox: number, oy: number, s: any, proj: any) {
+function drawGizmo(ctx: CanvasRenderingContext2D, ox: number, oy: number, s: SceneState, proj: ProjFn) {
   const o = proj([0, 0, 0], { ...s, zoom: 1 })
   const base = { sx: ox, sy: oy }
   ;([
@@ -282,7 +301,7 @@ export default function AtlasCanvas({
   const cvRef = useRef<HTMLCanvasElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const scene = useMemo(() => buildScene(domains), [domains])
-  const st = useRef<any>({
+  const st = useRef<SceneState>({
     rx: -0.2,
     ry: 0.5,
     zoom: 1,
@@ -353,7 +372,7 @@ export default function AtlasCanvas({
     gctx.putImageData(gimg, 0, 0)
 
     const FOCAL = 920
-    const proj = (w: number[], s: any) => {
+    const proj = (w: number[], s: SceneState): Projected => {
       const { rx, ry } = s
       const cy = Math.cos(ry),
         sy = Math.sin(ry),
@@ -403,7 +422,7 @@ export default function AtlasCanvas({
         s.warpEnv = warpEnv
         const cyy = s.entered >= 0 ? 0.5 : 0.46
         // shelled clusters (writing): frame the midpoint between essays star & fiction sub-star
-        const camHub = scene.hubs[camF] as any
+        const camHub = scene.hubs[camF]
         const tgt =
           s.entered >= 0 && camHub.shells
             ? [camHub.w[0] + 66, camHub.w[1] + 8, camHub.w[2] - 23]
@@ -448,12 +467,12 @@ export default function AtlasCanvas({
       ctx.fillRect(0, 0, W, H)
 
       // lens center for spacetime bending (active during warp)
-      let _wc: any = null
+      let _wc: { x: number; y: number; we: number; dir: number; maxR: number } | null = null
       if (s.warpEnv > 0.02) {
         let lcx = W / 2,
           lcy = H / 2
         if (s.entered >= 0) {
-          const hp0 = proj((scene.hubs[s.entered] as any).w, s)
+          const hp0 = proj(scene.hubs[s.entered].w, s)
           lcx = hp0.sx
           lcy = hp0.sy
         }
@@ -469,7 +488,7 @@ export default function AtlasCanvas({
         return [_wc.x + Math.cos(a) * RR, _wc.y + Math.sin(a) * RR]
       }
 
-      for (const star of scene.stars as any[]) {
+      for (const star of scene.stars) {
         const pr = proj(star.w, s)
         const a = (0.15 + 0.2 * (0.5 + 0.5 * Math.sin(now * 1.2 + star.tw))) * Math.min(1, pr.scale)
         const [bx, by] = bend(pr.sx, pr.sy)
@@ -479,11 +498,11 @@ export default function AtlasCanvas({
         ctx.fill()
       }
 
-      const hp = (scene.hubs as any[]).map(h => proj(h.w, s))
+      const hp = scene.hubs.map(h => proj(h.w, s))
 
       // volumetric cluster haze (additive bloom)
       ctx.globalCompositeOperation = "lighter"
-      ;(scene.hubs as any[]).forEach((h, i) => {
+      ;scene.hubs.forEach((h, i) => {
         const pr = hp[i]
         const fd = s.focus >= 0 && s.focus !== i ? 0.22 : 1
         const rad = (h.core ? 46 : 78) * pr.scale * (h.id === "music" ? 1.2 : 1)
@@ -511,7 +530,7 @@ export default function AtlasCanvas({
         ctx.lineTo(B1.sx, B1.sy)
         ctx.stroke()
       })
-      for (const nd of scene.nodes as any[]) {
+      for (const nd of scene.nodes) {
         if (nd.hub) continue
         const H1 = hp[nd.ci],
           pr = proj(nd.w, s)
@@ -528,14 +547,14 @@ export default function AtlasCanvas({
         const e = EDGES[Math.floor(Math.random() * EDGES.length)]
         s.signals.push({ e, p: 0, sp: 0.4 + Math.random() * 0.5 })
       }
-      s.signals = s.signals.filter((sig: any) => sig.p < 1)
-      s.signals.forEach((sig: any) => {
+      s.signals = s.signals.filter((sig: Signal) => sig.p < 1)
+      s.signals.forEach((sig: Signal) => {
         sig.p += sig.sp * dt
         const A1 = hp[sig.e[0]],
           B1 = hp[sig.e[1]]
         const x = A1.sx + (B1.sx - A1.sx) * sig.p,
           y = A1.sy + (B1.sy - A1.sy) * sig.p
-        const col = hx((scene.hubs[sig.e[0]] as any).c)
+        const col = hx(scene.hubs[sig.e[0]].c)
         const a = 0.9 * (1 - Math.abs(sig.p - 0.5) * 1.5) * gal
         ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${a})`
         ctx.beginPath()
@@ -543,7 +562,7 @@ export default function AtlasCanvas({
         ctx.fill()
       })
 
-      const drawn = (scene.nodes as any[])
+      const drawn = scene.nodes
         .map(nd => ({ nd, pr: proj(nd.w, s) }))
         .sort((p, q) => q.pr.z - p.pr.z)
       for (const { nd, pr } of drawn) {
@@ -658,7 +677,7 @@ export default function AtlasCanvas({
       }
 
       ctx.textBaseline = "top"
-      ;(scene.hubs as any[]).forEach((h, i) => {
+      ;scene.hubs.forEach((h, i) => {
         const pr = hp[i]
         const front = Math.max(0, Math.min(1, (pr.scale - 0.7) / 0.6))
         if (front <= 0.05) return
@@ -680,8 +699,8 @@ export default function AtlasCanvas({
 
       // ── entered cluster → solar system ──
       if (s.entered >= 0 && s.enterP > 0.02) {
-        const hub = scene.hubs[s.entered] as any
-        const sys = (scene.planets[s.entered] as any[]) || []
+        const hub = scene.hubs[s.entered]
+        const sys = scene.planets[s.entered] || []
         const hubPr = proj(hub.w, s)
         const [hr, hg, hb] = hx(hub.c)
         const ep = s.enterP
@@ -728,9 +747,9 @@ export default function AtlasCanvas({
         ctx.beginPath()
         ctx.arc(hubPr.sx, hubPr.sy, 9 * ep + 3, 0, 6.28)
         ctx.fill()
-        const hits: any[] = []
+        const hits: PlanetHit[] = []
         const FICTION_OFF = [132, 16, -46]
-        const secCenter = (pl: any) =>
+        const secCenter = (pl: SceneOrbit) =>
           hub.shells && pl.shell === 1
             ? [hub.w[0] + FICTION_OFF[0], hub.w[1] + FICTION_OFF[1], hub.w[2] + FICTION_OFF[2]]
             : hub.w
@@ -795,7 +814,7 @@ export default function AtlasCanvas({
           }
           s._fictionHit = { x: fc.sx, y: fc.sy, r: 48 }
         }
-        sys.forEach((pl: any, pi: number) => {
+        sys.forEach((pl: SceneOrbit, pi: number) => {
           pl.ang += pl.speed * dt
           const ctr = secCenter(pl)
           const cpr = proj(ctr, s)
@@ -839,11 +858,11 @@ export default function AtlasCanvas({
         let cx = W / 2,
           cy = H / 2
         if (s.entered >= 0) {
-          const hpW = proj((scene.hubs[s.entered] as any).w, s)
+          const hpW = proj(scene.hubs[s.entered].w, s)
           cx = hpW.sx
           cy = hpW.sy
         }
-        const hubC = s.entered >= 0 ? (scene.hubs[s.entered] as any).c : s.exitHub >= 0 ? (scene.hubs[s.exitHub] as any).c : "#96aaff"
+        const hubC = s.entered >= 0 ? scene.hubs[s.entered].c : s.exitHub! >= 0 ? scene.hubs[s.exitHub!].c : "#96aaff"
         const [hr, hg, hb] = hx(hubC)
         const dir = s.exiting ? -1 : 1
         const maxR = Math.hypot(W, H)
@@ -929,7 +948,7 @@ export default function AtlasCanvas({
       const s = st.current
       let best = -1,
         bd = rad
-      ;(scene.hubs as any[]).forEach((h, i) => {
+      ;scene.hubs.forEach((h, i) => {
         const pr = proj(h.w, s)
         const d = Math.hypot(pr.sx - mx, pr.sy - my)
         if (d < bd) {
@@ -965,7 +984,7 @@ export default function AtlasCanvas({
       if (!s._planetHits) return -1
       let best = -1,
         bd = 999
-      s._planetHits.forEach((ph: any) => {
+      s._planetHits.forEach((ph: PlanetHit) => {
         const d = Math.hypot(ph.x - mx, ph.y - my)
         if (d < ph.r && d < bd) {
           bd = d
@@ -980,9 +999,9 @@ export default function AtlasCanvas({
       if (s.entered >= 0) {
         const pi = hitPlanet(mx, my)
         if (pi >= 0) {
-          const pl = (scene.planets[s.entered] as any[])[pi]
+          const pl = scene.planets[s.entered][pi]
           if (pl.work.kind === "story") setPanel({ type: "fiction" })
-          else setPanel({ type: "project", work: pl.work, domain: scene.hubs[s.entered] as any })
+          else setPanel({ type: "project", work: pl.work, domain: scene.hubs[s.entered] })
           return
         }
         if (s._fictionHit && Math.hypot(s._fictionHit.x - mx, s._fictionHit.y - my) < s._fictionHit.r) {
@@ -1097,7 +1116,7 @@ export default function AtlasCanvas({
       e.preventDefault()
       if (e.touches.length === 2 && s.pinchD) {
         const d = touchDist(e.touches[0], e.touches[1])
-        s.zoom = Math.max(0.55, Math.min(2.6, s.pinchZoom * (d / s.pinchD)))
+        s.zoom = Math.max(0.55, Math.min(2.6, s.pinchZoom! * (d / s.pinchD)))
         return
       }
       if (e.touches.length === 1 && s.drag) {
