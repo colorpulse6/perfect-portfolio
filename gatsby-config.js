@@ -4,7 +4,7 @@ module.exports = {
     title: `Nichalas Barnes`,
     description: `Nichalas Barnes Portfolio`,
     author: `Nichalas Barnes`,
-    siteURL: "https://nichalasbarnes.com/",
+    siteUrl: "https://nichalasbarnes.com/",
     menuLinks: [
       {
         name: "home",
@@ -37,6 +37,7 @@ module.exports = {
       },
     },
     `gatsby-plugin-react-helmet`,
+    `gatsby-plugin-sitemap`,
     `gatsby-plugin-image`,
     {
       resolve: `gatsby-source-filesystem`,

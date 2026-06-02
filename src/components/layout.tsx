@@ -23,7 +23,6 @@ interface SiteMetadataQuery {
   site: {
     siteMetadata: {
       title: string
-      siteURL: string
       menuLinks: Array<{
         name: string
         link: string
@@ -109,7 +108,6 @@ const Layout: React.FC<LayoutProps> = ({
       site {
         siteMetadata {
           title
-          siteURL
           menuLinks {
             name
             link

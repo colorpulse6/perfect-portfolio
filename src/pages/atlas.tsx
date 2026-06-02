@@ -116,7 +116,7 @@ const CURATED: Record<string, AtlasWork[]> = {
   ],
 }
 
-const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, data }) => {
+const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data }) => {
   useEffect(() => {
     if (transitionStatus === "entering") {
       gsap.to(".atlas-page", { autoAlpha: 1, duration: 1 })
@@ -280,7 +280,7 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, data }) => {
 
   return (
     <div className="atlas-page" style={{ opacity: 0 }}>
-      <SEO title="Atlas" />
+      <SEO title="Atlas" description="A 3D galaxy-map of Nichalas Barnes' work. Drag to rotate, dive into a cluster, and explore projects, essays, and fiction." pathname={location?.pathname} />
       <AtlasCanvas domains={domains} fiction={fiction} essays={essays} changelog={changelog} />
     </div>
   )
