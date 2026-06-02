@@ -7,6 +7,7 @@
 const SITE_URL = "https://nichalasbarnes.com"
 export const PERSON_ID = `${SITE_URL}/#person`
 export const WEBSITE_ID = `${SITE_URL}/#website`
+export const MUSIC_GROUP_ID = `${SITE_URL}/#alexshand`
 
 export type JsonLd = Record<string, unknown>
 
@@ -15,6 +16,7 @@ export const PERSON: JsonLd = {
   "@type": "Person",
   "@id": PERSON_ID,
   name: "Nichalas Barnes",
+  alternateName: "Nic Barnes",
   jobTitle: "Software Engineer & Composer",
   description:
     "Software engineer and composer. Builds Obsidian plugins, web apps, developer tools, and AI agent systems, after a decade leading a ten-piece ensemble across the US and Europe.",
@@ -25,8 +27,8 @@ export const PERSON: JsonLd = {
     "https://www.linkedin.com/in/nic-barnes-a3297217/",
     "https://medium.com/@colorpulse_6839",
     "https://www.npmjs.com/~colorpulse",
-    "https://alexshand.bandcamp.com/",
   ],
+  memberOf: { "@id": MUSIC_GROUP_ID },
   knowsAbout: [
     "Software engineering",
     "TypeScript",
@@ -51,6 +53,21 @@ export const WEBSITE: JsonLd = {
     "The portfolio of Nichalas Barnes: developer tools, web apps, games, Obsidian plugins, music, and writing.",
   publisher: { "@id": PERSON_ID },
   inLanguage: "en",
+}
+
+// The music half of the entity. MusicBrainz + Bandcamp are its sameAs anchors;
+// member links it back to the Person so engines connect the two identities.
+export const ALEX_HAND: JsonLd = {
+  "@type": "MusicGroup",
+  "@id": MUSIC_GROUP_ID,
+  name: "Alex's Hand",
+  description:
+    "A ten-piece ensemble led by Nichalas Barnes, touring the US and Europe over a decade.",
+  member: { "@id": PERSON_ID },
+  sameAs: [
+    "https://musicbrainz.org/artist/6e17224e-9498-417c-a593-9cf941ccf743",
+    "https://alexshand.bandcamp.com/",
+  ],
 }
 
 /** ProfilePage node for the About page; its mainEntity is the Person. */
@@ -144,6 +161,6 @@ export function faqPage(items: FaqItem[]): JsonLd {
 export function buildGraph(extra: JsonLd[] = []): JsonLd {
   return {
     "@context": "https://schema.org",
-    "@graph": [PERSON, WEBSITE, ...extra],
+    "@graph": [PERSON, WEBSITE, ALEX_HAND, ...extra],
   }
 }

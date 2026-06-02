@@ -34,3 +34,4 @@ Software engineering, TypeScript, React, Gatsby, Obsidian plugin development, AI
 - Medium: https://medium.com/@colorpulse_6839
 - npm: https://www.npmjs.com/~colorpulse
 - Bandcamp (Alex's Hand): https://alexshand.bandcamp.com/
+- MusicBrainz (Alex's Hand): https://musicbrainz.org/artist/6e17224e-9498-417c-a593-9cf941ccf743
