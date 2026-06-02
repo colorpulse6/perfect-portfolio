@@ -6,6 +6,7 @@ import {
   HOVER_VIDEOS,
 } from "../helpers/projectImages"
 import { Fade, Flip } from "react-awesome-reveal"
+import TransitionLink from "gatsby-plugin-transition-link"
 
 import Spring from "../components/Spring"
 
@@ -21,6 +22,8 @@ interface ProjectProps {
   name: string
   /** URL link to the live project */
   link: string
+  /** Slug for the project's detail page (/projects/<slug>) */
+  slug: string
   /** GitHub repository URL (optional) */
   github?: string
   /** Static image for the project */
@@ -43,6 +46,7 @@ interface ProjectProps {
 const Project: React.FC<ProjectProps> = ({
   name,
   link,
+  slug,
   github,
   image,
   description,
@@ -121,10 +125,10 @@ const Project: React.FC<ProjectProps> = ({
           <Fade>
             <div className="project-copy-reveal">
               <Spring isTitle={false}>
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <TransitionLink
+                  to={`/projects/${slug}`}
+                  exit={{ length: 0.5 }}
+                  entry={{ length: 0.5 }}
                   onMouseEnter={() => handleLinkMouseEnter(name)}
                   onMouseLeave={handleLinkMouseLeave}
                 >
@@ -138,7 +142,7 @@ const Project: React.FC<ProjectProps> = ({
                     {name}
                   </h3>
                   <span>{name === "Gigzilla" && " (Deprecated)"}</span>
-                </a>
+                </TransitionLink>
               </Spring>
               <p>{description}</p>
             </div>

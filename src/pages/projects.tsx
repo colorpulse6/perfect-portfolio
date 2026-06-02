@@ -21,6 +21,7 @@ interface ProjectQueryData {
       imgSrc: string
       id: string
       cluster?: string
+      slug: string
     }>
   }
 }
@@ -52,6 +53,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
           imgSrc
           id
           cluster
+          slug
         }
       }
     }
@@ -91,6 +93,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
                 techArray={getImages(project.techArray)}
                 index={i}
                 link={project.link}
+                slug={project.slug}
                 github={project.github}
                 key={project.id}
                 firestore={project.name === "Fire Store"}

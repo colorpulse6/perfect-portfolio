@@ -12,6 +12,12 @@ SourceMapConsumer.initialize({
   "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.3/lib/mappings.wasm",
 })
 
+const slugify = s =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
@@ -208,6 +214,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   projects.forEach(project => {
     const node = {
       name: project.name,
+      slug: slugify(project.name),
       techArray: project.techArray,
       description: project.description,
       link: project.link,
@@ -810,4 +817,29 @@ exports.onCreateWebpackConfig = ({ actions, stage, getConfig }) => {
   }
 
   actions.replaceWebpackConfig(config)
+}
+
+// Generate a detail page per project at /projects/<slug>. These are deep,
+// individually-citable pages (with SoftwareApplication + BreadcrumbList schema)
+// rather than thin list rows.
+exports.createPages = async ({ graphql, actions }) => {
+  const result = await graphql(`
+    query {
+      allProject {
+        nodes {
+          slug
+        }
+      }
+    }
+  `)
+  if (result.errors) throw result.errors
+  const template = require.resolve("./src/templates/project.tsx")
+  result.data.allProject.nodes.forEach(p => {
+    if (!p.slug) return
+    actions.createPage({
+      path: `/projects/${p.slug}`,
+      component: template,
+      context: { slug: p.slug },
+    })
+  })
 }
