@@ -65,6 +65,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
 
   return (
     <Canvas
+      aria-hidden="true"
       style={{
         position: "fixed",
         top: 0,

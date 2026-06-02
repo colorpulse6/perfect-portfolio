@@ -7,7 +7,7 @@
 
 import React, { useMemo, useRef, useEffect } from "react"
 import { useStaticQuery, graphql } from "gatsby"
-import { motion, useMotionValue, useSpring } from "framer-motion"
+import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion"
 import Header from "./header"
 import SideBar from "../components/SideBar"
 import SideBarCollapsed from "../components/SideBarCollapsed"
@@ -128,6 +128,8 @@ const Layout: React.FC<LayoutProps> = ({
   const trailXSpring = useSpring(cursorX, trailConfig)
   const trailYSpring = useSpring(cursorY, trailConfig)
 
+  const prefersReducedMotion = useReducedMotion()
+
   const cursorTheme = useMemo(() => {
     const theme = resolveTheme(location?.pathname || "/")
     const c = theme.colors[0]
@@ -163,16 +165,17 @@ const Layout: React.FC<LayoutProps> = ({
     }
   }, [cursorX, cursorY])
 
-  // Toggle the site's custom cursor off on the full-bleed atlas (and on touch).
+  // Toggle the site's custom cursor off on the full-bleed atlas, on touch, and
+  // when the visitor prefers reduced motion (so the native cursor is restored).
   React.useEffect(() => {
     if (typeof document === "undefined" || typeof window === "undefined") return
     const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
-    if (!isAtlas && !hasTouch && window.innerWidth > 550) {
+    if (!isAtlas && !hasTouch && !prefersReducedMotion && window.innerWidth > 550) {
       document.body.classList.add("custom-cursor")
     } else {
       document.body.classList.remove("custom-cursor")
     }
-  }, [isAtlas])
+  }, [isAtlas, prefersReducedMotion])
 
   if (isAtlas) {
     // Full-bleed: only the atlas page renders (no nebula, header, sidebar,
@@ -192,7 +195,7 @@ const Layout: React.FC<LayoutProps> = ({
     <AmbientAudioProvider pagePath={pagePath}>
       <div className="layout-container">
         <ParticleBackground pagePath={pagePath} />
-        {!isTouch && (
+        {!isTouch && !prefersReducedMotion && (
           <>
             <motion.div
               className="cursor-trail"

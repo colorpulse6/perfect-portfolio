@@ -1203,7 +1203,12 @@ export default function AtlasCanvas({
         overflow: "hidden",
       }}
     >
-      <canvas ref={cvRef} style={{ position: "absolute", inset: 0 }} />
+      <canvas
+        ref={cvRef}
+        role="img"
+        aria-label="Interactive galaxy map of Nichalas Barnes' work. Use the menu at the bottom left to open the About, Writing, Changelog, and Contact sections."
+        style={{ position: "absolute", inset: 0 }}
+      />
 
       <div style={{ position: "absolute", top: 22, left: 26 }}>
         <TransitionLink
@@ -1286,24 +1291,24 @@ export default function AtlasCanvas({
           color: A.fainter,
         }}
       >
-        <span style={{ color: A.paper, cursor: "pointer" }} onClick={resetToGalaxy}>
+        <button type="button" onClick={resetToGalaxy} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.paper, cursor: "pointer" }}>
           WORK
-        </span>
-        <span style={{ cursor: "pointer" }} onClick={() => setPanel({ type: "about" })}>
+        </button>
+        <button type="button" onClick={() => setPanel({ type: "about" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
           ABOUT
-        </span>
-        <span style={{ cursor: "pointer" }} onClick={() => setPanel({ type: "writing" })}>
+        </button>
+        <button type="button" onClick={() => setPanel({ type: "writing" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
           WRITING
-        </span>
-        <span style={{ cursor: "pointer" }} onClick={() => setPanel({ type: "changelog" })}>
+        </button>
+        <button type="button" onClick={() => setPanel({ type: "changelog" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
           CHANGELOG
-        </span>
-        <span style={{ cursor: "pointer", color: term ? A.cyan : A.fainter }} onClick={() => setTerm(v => !v)}>
+        </button>
+        <button type="button" aria-pressed={term} onClick={() => setTerm(v => !v)} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: term ? A.cyan : A.fainter, cursor: "pointer" }}>
           TERMINAL
-        </span>
-        <span style={{ cursor: "pointer" }} onClick={() => setPanel({ type: "contact" })}>
+        </button>
+        <button type="button" onClick={() => setPanel({ type: "contact" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
           CONTACT
-        </span>
+        </button>
       </div>
 
       {entered >= 0 && (
@@ -1422,9 +1427,9 @@ function AtlasTerminal({ onClose }: { onClose: () => void }) {
       >
         <span style={{ width: 9, height: 9, borderRadius: 99, background: A.cyan }} />
         <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: 2, color: A.faint, flex: 1 }}>TERMINAL</span>
-        <span style={{ fontFamily: MONO, fontSize: 14, color: A.fainter, cursor: "pointer" }} onClick={onClose}>
+        <button type="button" aria-label="Close terminal" onClick={onClose} style={{ background: "none", border: "none", padding: 0, fontFamily: MONO, fontSize: 14, color: A.fainter, cursor: "pointer" }}>
           ✕
-        </span>
+        </button>
       </div>
       <div
         ref={bodyRef}
