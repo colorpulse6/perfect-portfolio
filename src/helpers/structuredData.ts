@@ -157,6 +157,37 @@ export function faqPage(items: FaqItem[]): JsonLd {
   }
 }
 
+/** A fiction / writing piece as a CreativeWork authored by the Person. */
+export function creativeWork(item: { title: string; excerpt?: string }): JsonLd {
+  const node: JsonLd = {
+    "@type": "CreativeWork",
+    name: item.title,
+    genre: "Fiction",
+    author: { "@id": PERSON_ID },
+    isPartOf: { "@id": WEBSITE_ID },
+  }
+  if (item.excerpt) node.abstract = item.excerpt
+  return node
+}
+
+export interface BreadcrumbItem {
+  name: string
+  url: string
+}
+
+/** A BreadcrumbList for a page's position in the site hierarchy. */
+export function breadcrumb(items: BreadcrumbItem[]): JsonLd {
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  }
+}
+
 /** Wrap the always-present identity nodes plus any page-specific nodes. */
 export function buildGraph(extra: JsonLd[] = []): JsonLd {
   return {

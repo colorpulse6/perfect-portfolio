@@ -10,6 +10,7 @@ import {
 } from "../helpers/wordReveal"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
+import { creativeWork } from "../helpers/structuredData"
 
 interface WritingItem {
   title: string
@@ -48,6 +49,9 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
   const readerRef = useRef<HTMLDivElement>(null)
   const revealTimer = useRef<number>(0)
   const storiesData = data.allWriting.nodes
+  const writingSchema = storiesData.map(s =>
+    creativeWork({ title: s.title, excerpt: (s.content || "").slice(0, 160) })
+  )
 
   usePageTransition(transitionStatus, ".writings", { enter: 1, exit: 0.03, mount: 0.5 })
 
@@ -155,7 +159,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
 
   return (
     <div style={{ opacity: 0, position: "relative" }} className="writings">
-      <SEO title="writings" description="Short fiction and essays by Nichalas Barnes." pathname={location?.pathname} />
+      <SEO title="writings" description="Short fiction and essays by Nichalas Barnes." pathname={location?.pathname} schema={writingSchema} />
 
       {readerMode && currentStory ? (
         <div className="reader-container" ref={readerRef}>
