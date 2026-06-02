@@ -4,6 +4,7 @@ import SEO from "../components/seo"
 import SideBarCollapsed from "../components/SideBarCollapsed"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
+import { changelogEntry } from "../helpers/structuredData"
 import "./changelog.css"
 
 interface ChangelogNode {
@@ -70,6 +71,10 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({
     (n) => filter === "all" || n.frontmatter.type === filter
   )
 
+  const changelogSchema = (data?.allMarkdownRemark?.nodes || []).map((n) =>
+    changelogEntry(n.frontmatter)
+  )
+
   return (
     <>
       <SideBarCollapsed
@@ -79,7 +84,7 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({
       />
 
       <div style={{ opacity: 0, position: "relative" }} className="changelog">
-        <SEO title="Changelog" description="A running ship log of Nichalas Barnes' recent work, releases, and writing." pathname={location?.pathname} />
+        <SEO title="Changelog" description="A running ship log of Nichalas Barnes' recent work, releases, and writing." pathname={location?.pathname} schema={changelogSchema} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>

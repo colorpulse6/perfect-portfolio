@@ -78,6 +78,10 @@ const IndexPage: React.FC<IndexPageProps> = ({
           <h1 className="glitch-text" data-text="Welcome to Nichalas Barnes">
             Welcome to Nichalas Barnes
           </h1>
+          <p className="home-intro">
+            Software engineer and composer. Obsidian plugins, web apps, AI
+            systems, and a decade of music across the US and Europe.
+          </p>
           <div className="atlas-cta">
             <button className="atlas-enter" onClick={diveToAtlas}>
               <span>Explore the Atlas</span>
@@ -89,6 +93,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
       </div>
       {diving && <AtlasDive />}
       <style>{`
+        .home-intro { max-width: 560px; margin: 16px auto 0; color: rgba(190,200,230,0.68); font-size: 14px; line-height: 1.6; font-weight: 300; }
         .atlas-cta { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
         .atlas-enter { display: inline-flex; align-items: center; gap: 12px; padding: 14px 28px; border: 1px solid rgba(54,230,219,0.35); border-radius: 999px; white-space: nowrap; color: rgba(238,242,255,0.92); font-family: "Courier New", "Lucida Console", monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; background: rgba(54,230,219,0.04); box-shadow: 0 0 30px rgba(54,230,219,0.08); transition: all .25s; backdrop-filter: blur(4px); }
         .atlas-enter:hover { background: rgba(54,230,219,0.12); box-shadow: 0 0 50px rgba(54,230,219,0.22); transform: translateY(-2px); }

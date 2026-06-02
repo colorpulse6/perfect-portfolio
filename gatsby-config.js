@@ -2,7 +2,7 @@ module.exports = {
   siteMetadata: {
     html: { useGatsbyImage: false },
     title: `Nichalas Barnes`,
-    description: `Nichalas Barnes Portfolio`,
+    description: `Software engineer and composer. Obsidian plugins, web apps, developer tools, AI systems, and a decade of music across the US and Europe.`,
     author: `Nichalas Barnes`,
     siteUrl: "https://nichalasbarnes.com/",
     menuLinks: [

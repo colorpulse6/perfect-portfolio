@@ -1,0 +1,36 @@
+# Nichalas Barnes
+
+> Software engineer and composer. Builds Obsidian plugins, web apps, developer tools, and AI agent systems, after a decade leading a ten-piece ensemble across the US and Europe.
+
+Nichalas Barnes is a software engineer and composer who has lived in Seattle, Berlin, and Madrid. He spent the first decade of his career as a composer, bandleader, and audio technician leading the ten-piece ensemble Alex's Hand across twelve countries, then moved into software. Today he builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. The same discipline carries across mediums; the medium changed, the craft did not.
+
+## Pages
+
+- [Home](https://nichalasbarnes.com/): Overview and the interactive Atlas entry point.
+- [About](https://nichalasbarnes.com/about/): Background and origin story, from composer to engineer.
+- [Projects](https://nichalasbarnes.com/projects/): Selected developer tools, web apps, games, and Obsidian plugins.
+- [Changelog](https://nichalasbarnes.com/changelog/): A running ship log of recent releases and writing.
+- [Writing](https://nichalasbarnes.com/writing/): Essays and fiction.
+- [Atlas](https://nichalasbarnes.com/atlas/): A 3D galaxy-map of every project, essay, and piece of fiction.
+
+## Selected work
+
+- Brain Atlas: an Obsidian plugin that renders a vault as a navigable 3D galaxy.
+- Cerebro Mycelium: an Obsidian plugin that renders a vault as a living fungal network.
+- El Form: a typed, headless React form library with full documentation.
+- Throttle: a tool for tracking Claude Max and Codex Pro usage limits.
+- Cerebro: a macOS application for AI agent orchestration (in progress).
+
+The full, current list lives at https://nichalasbarnes.com/projects/ and https://nichalasbarnes.com/changelog/.
+
+## Areas of expertise
+
+Software engineering, TypeScript, React, Gatsby, Obsidian plugin development, AI agent orchestration, web application development, music composition, bandleading, and audio engineering.
+
+## Links
+
+- GitHub: https://github.com/colorpulse6
+- LinkedIn: https://www.linkedin.com/in/nic-barnes-a3297217/
+- Medium: https://medium.com/@colorpulse_6839
+- npm: https://www.npmjs.com/~colorpulse
+- Bandcamp (Alex's Hand): https://alexshand.bandcamp.com/

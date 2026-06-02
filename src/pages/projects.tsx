@@ -6,6 +6,7 @@ import { useStaticQuery, graphql } from "gatsby"
 import SideBarCollapsed from "../components/SideBarCollapsed"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
+import { softwareApplication } from "../helpers/structuredData"
 
 // Type for GraphQL query result
 interface ProjectQueryData {
@@ -19,6 +20,7 @@ interface ProjectQueryData {
       github?: string
       imgSrc: string
       id: string
+      cluster?: string
     }>
   }
 }
@@ -49,12 +51,23 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
           github
           imgSrc
           id
+          cluster
         }
       }
     }
   `)
 
   usePageTransition(transitionStatus, ".projects", { enter: 1, exit: 0.3, mount: 1 })
+
+  const projectSchema = data.allProject.nodes.map(p =>
+    softwareApplication({
+      name: p.name,
+      description: p.description,
+      link: p.link,
+      github: p.github,
+      cluster: p.cluster,
+    })
+  )
 
   return (
     <>
@@ -64,7 +77,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
         menuLinks={[]}
       />
       <div style={{ opacity: 0, position: "relative" }} className="projects">
-        <SEO title="Projects" description="Selected projects by Nichalas Barnes: developer tools, web apps, games, and Obsidian plugins." pathname={location?.pathname} />
+        <SEO title="Projects" description="Selected projects by Nichalas Barnes: developer tools, web apps, games, and Obsidian plugins." pathname={location?.pathname} schema={projectSchema} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>

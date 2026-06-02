@@ -5,6 +5,7 @@ import FloatingPageIcons from "../components/nebula/FloatingPageIcons"
 import { ARTIFACTS } from "../components/nebula/artifacts"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
+import { profilePage } from "../helpers/structuredData"
 import "./about.css"
 
 // Define the props interface for the About page
@@ -62,7 +63,7 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
       />
 
       <div style={{ opacity: 0, position: "relative" }} className="about">
-        <SEO title="About" description="From composer and bandleader to software engineer. The origin story of Nichalas Barnes, from Seattle to Berlin to Madrid." pathname={location?.pathname} />
+        <SEO title="About" description="From composer and bandleader to software engineer. The origin story of Nichalas Barnes, from Seattle to Berlin to Madrid." pathname={location?.pathname} schema={[profilePage()]} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>
