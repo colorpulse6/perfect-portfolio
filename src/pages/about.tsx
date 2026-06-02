@@ -5,8 +5,33 @@ import FloatingPageIcons from "../components/nebula/FloatingPageIcons"
 import { ARTIFACTS } from "../components/nebula/artifacts"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
-import { profilePage } from "../helpers/structuredData"
+import { profilePage, faqPage, type FaqItem } from "../helpers/structuredData"
 import "./about.css"
+
+// Q&A surfaced both as a visible FAQ and as FAQPage JSON-LD, so AI engines can
+// lift clean, answer-first statements about who Nichalas is and what he builds.
+const FAQ_ITEMS: FaqItem[] = [
+  {
+    q: "Who is Nichalas Barnes?",
+    a: "Nichalas Barnes is a software engineer and composer. He spent the first decade of his career as a composer, bandleader, and audio technician, leading the ten-piece ensemble Alex's Hand on international tours across the US and Europe, before moving into software engineering. He has lived in Seattle, Berlin, and Madrid.",
+  },
+  {
+    q: "What does Nichalas Barnes build?",
+    a: "He builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. Recent work includes Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a CLI usage tracker).",
+  },
+  {
+    q: "What is Brain Atlas?",
+    a: "Brain Atlas is an Obsidian plugin by Nichalas Barnes that renders a vault as a navigable 3D galaxy, turning notes and the links between them into an explorable star map.",
+  },
+  {
+    q: "What technologies does Nichalas Barnes work with?",
+    a: "TypeScript, React, and Gatsby on the frontend; Node, GraphQL, Postgres, AWS, and Terraform for infrastructure; and AI-native, agent-orchestrated workflows for building at scale.",
+  },
+  {
+    q: "How can I contact or follow Nichalas Barnes?",
+    a: "Through GitHub (colorpulse6), LinkedIn, Medium, npm, and Bandcamp (as Alex's Hand), or the contact form on this site.",
+  },
+]
 
 // Define the props interface for the About page
 interface AboutProps {
@@ -63,7 +88,7 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
       />
 
       <div style={{ opacity: 0, position: "relative" }} className="about">
-        <SEO title="About" description="From composer and bandleader to software engineer. The origin story of Nichalas Barnes, from Seattle to Berlin to Madrid." pathname={location?.pathname} schema={[profilePage()]} />
+        <SEO title="About" description="From composer and bandleader to software engineer. The origin story of Nichalas Barnes, from Seattle to Berlin to Madrid." pathname={location?.pathname} schema={[profilePage(), faqPage(FAQ_ITEMS)]} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>
@@ -213,6 +238,22 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
               spent building things from scratch.
             </p>
           </div>
+
+          <section
+            className="about-faq"
+            aria-label="Frequently asked questions"
+            style={{ marginTop: 48 }}
+          >
+            <h2 className="about-headline">Frequently Asked</h2>
+            {FAQ_ITEMS.map(item => (
+              <div key={item.q} style={{ marginTop: 24 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 6 }}>
+                  {item.q}
+                </h3>
+                <p>{item.a}</p>
+              </div>
+            ))}
+          </section>
         </div>
       </div>
       <FloatingPageIcons artifacts={aboutArtifacts} />

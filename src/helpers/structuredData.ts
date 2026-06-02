@@ -120,6 +120,26 @@ export function changelogEntry(e: ChangelogSchemaInput): JsonLd {
   return node
 }
 
+export interface FaqItem {
+  q: string
+  a: string
+}
+
+/** An FAQ rendered as FAQPage Question/Answer pairs (liftable by LLMs). */
+export function faqPage(items: FaqItem[]): JsonLd {
+  return {
+    "@type": "FAQPage",
+    "@id": `${SITE_URL}/about/#faq`,
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": PERSON_ID },
+    mainEntity: items.map(item => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  }
+}
+
 /** Wrap the always-present identity nodes plus any page-specific nodes. */
 export function buildGraph(extra: JsonLd[] = []): JsonLd {
   return {
