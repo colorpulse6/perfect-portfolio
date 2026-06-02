@@ -1,21 +1,30 @@
-import React, { useRef, useEffect, useState } from "react"
-import { useTransition, useChain, animated, config } from "react-spring"
+import React, { useRef, useState } from "react"
+import { useTransition, useChain, animated as animatedWeb, config } from "react-spring"
 import TransitionLink from "gatsby-plugin-transition-link"
 import Spring from "../components/Spring"
 
 import "./sidebar.css"
 
-export default ({
-  navOpen,
-  setNavOpen,
-  transitionStatus,
+// react-spring v8's `animated` host-element types collide with the three.js
+// variant present in this project (via @react-three/fiber); the web runtime is
+// correct, so type the helper loosely.
+const animated: any = animatedWeb
 
-  // onAnimationStart,
-  // onAnimationEnd
-}) => {
+interface SideBarProps {
+  navOpen: boolean
+  setNavOpen: (open: boolean) => void
+  transitionStatus?: string
+}
+
+interface HoverState {
+  hover: boolean
+  index: string | null
+}
+
+const SideBar: React.FC<SideBarProps> = ({ navOpen, setNavOpen }) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 768
 
-  const sidebarRef = useRef()
+  const sidebarRef = useRef<any>(null)
   const transition = useTransition(navOpen, null, {
     from: {
       transform: "translateX(100vw)",
@@ -29,12 +38,10 @@ export default ({
     unique: true,
     config: config.stiff,
     ref: sidebarRef,
-    // onStart: onAnimationStart,
-    // onRest: onAnimationEnd
   })
 
   const items = ["Home", "Projects", "Changelog", "About", "Contact"]
-  const itemsRef = useRef()
+  const itemsRef = useRef<any>(null)
   const trail = useTransition(navOpen ? items : [], item => item, {
     from: {
       opacity: 0,
@@ -59,7 +66,7 @@ export default ({
     navOpen ? [0, 0.25] : [0, 0.6]
   )
 
-  const [isHover, setIsHover] = useState({ hover: false, index: null })
+  const [, setIsHover] = useState<HoverState>({ hover: false, index: null })
 
   return transition.map(({ item, key, props }) =>
     item ? (
@@ -69,7 +76,7 @@ export default ({
             <Spring>
               <TransitionLink
                 onMouseEnter={() => setIsHover({ hover: true, index: item })}
-                onMouseLeave={() => setIsHover(false)}
+                onMouseLeave={() => setIsHover({ hover: false, index: null })}
                 onClick={() => {
                   setNavOpen(!navOpen)
                 }}
@@ -95,3 +102,5 @@ export default ({
     ) : null
   )
 }
+
+export default SideBar
