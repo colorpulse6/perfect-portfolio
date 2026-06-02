@@ -15,10 +15,10 @@ Nichalas Barnes is a software engineer and composer who has lived in Seattle, Be
 
 ## Selected work
 
-- Brain Atlas: an Obsidian plugin that renders a vault as a navigable 3D galaxy.
+- Brain Atlas: an Obsidian plugin that renders a vault as an animated 3D anatomical brain (notes become nodes, links become neural pathways, note types group into brain regions).
 - Cerebro Mycelium: an Obsidian plugin that renders a vault as a living fungal network.
 - El Form: a typed, headless React form library with full documentation.
-- Throttle: a tool for tracking Claude Max and Codex Pro usage limits.
+- Throttle: a macOS app for tracking Claude Max and Codex Pro usage limits.
 - Cerebro: a macOS application for AI agent orchestration (in progress).
 
 The full, current list lives at https://nichalasbarnes.com/projects/ and https://nichalasbarnes.com/changelog/.
