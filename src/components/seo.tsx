@@ -6,6 +6,7 @@
 import React from "react"
 import { Helmet } from "react-helmet"
 import { useStaticQuery, graphql } from "gatsby"
+import { buildGraph, JsonLd } from "../helpers/structuredData"
 
 // Type for individual meta tag objects - using any to match react-helmet's flexible meta prop
 type MetaTag = any
@@ -34,6 +35,8 @@ interface SEOProps {
   pathname?: string
   /** Optional path (under siteUrl) to a social image; defaults to /og-image.png */
   image?: string
+  /** Extra JSON-LD @graph nodes for this page (Person + WebSite are always emitted). */
+  schema?: JsonLd[]
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -43,6 +46,7 @@ const SEO: React.FC<SEOProps> = ({
   title,
   pathname,
   image,
+  schema,
 }) => {
   const { site }: SiteMetadataQuery = useStaticQuery(graphql`
     query {
@@ -62,6 +66,7 @@ const SEO: React.FC<SEOProps> = ({
   const siteUrl = (site.siteMetadata?.siteUrl || "").replace(/\/+$/, "")
   const url = pathname ? `${siteUrl}${pathname}` : siteUrl
   const ogImage = `${siteUrl}${image || "/og-image.png"}`
+  const jsonLd = buildGraph(schema)
 
   return (
     <Helmet
@@ -69,6 +74,9 @@ const SEO: React.FC<SEOProps> = ({
       title={title}
       titleTemplate={defaultTitle ? `%s | ${defaultTitle}` : undefined}
       link={[{ rel: "canonical", href: url }]}
+      script={[
+        { type: "application/ld+json", innerHTML: JSON.stringify(jsonLd) },
+      ]}
       meta={[
         { name: "description", content: metaDescription },
         { property: "og:title", content: title },
