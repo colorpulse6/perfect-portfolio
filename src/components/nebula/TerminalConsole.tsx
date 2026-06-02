@@ -322,6 +322,7 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
           ref={inputRef}
           className="terminal-input"
           type="text"
+          maxLength={500}
           value={commandInput}
           onChange={(e) => {
             setCommandInput(e.target.value)
