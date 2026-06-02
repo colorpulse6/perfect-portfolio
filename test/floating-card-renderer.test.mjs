@@ -14,8 +14,8 @@ test("floating changelog cards support custom media and CTA labels", () => {
 
   assert.match(source, /media: string \| null/)
   assert.match(source, /cta: string \| null/)
-  assert.match(source, /brain-atlas-spin\.gif/)
-  assert.match(source, /cerebro-mycelium\.gif/)
+  assert.match(source, /brain-atlas-spin\.mp4/)
+  assert.match(source, /cerebro-mycelium\.mp4/)
   assert.match(source, /throttle-dashboard\.png/)
   assert.match(source, /cerebro-dashboard\.png/)
   assert.match(source, /entry\.cta \|\|/)

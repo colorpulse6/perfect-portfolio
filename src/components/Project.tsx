@@ -1,6 +1,10 @@
 import React, { useState } from "react"
 import "../../src/pages/projects.css"
-import { LOCAL_PRIMARY_IMAGES, HOVER_IMAGES } from "../helpers/projectImages"
+import {
+  LOCAL_PRIMARY_IMAGES,
+  PRIMARY_VIDEOS,
+  HOVER_VIDEOS,
+} from "../helpers/projectImages"
 import { Fade, Flip } from "react-awesome-reveal"
 
 import Spring from "../components/Spring"
@@ -46,23 +50,10 @@ const Project: React.FC<ProjectProps> = ({
   index,
   firestore,
 }) => {
-  const [hover, setHover] = useState<boolean>(false)
   const [linkHover, setLinkHover] = useState<LinkHoverState>({
     active: false,
     index: "",
   })
-
-  // Get the appropriate image source based on hover state and project name.
-  // Primary screenshot resolution is shared with the atlas (see projectImages.ts);
-  // the hover GIF swap stays page-specific here.
-  const getImageSource = (): string => {
-    if (LOCAL_PRIMARY_IMAGES[name]) return LOCAL_PRIMARY_IMAGES[name]
-    if (!hover) return image
-    return HOVER_IMAGES[name] || image
-  }
-
-  const handleMouseEnter = (): void => setHover(true)
-  const handleMouseLeave = (): void => setHover(false)
 
   const handleLinkMouseEnter = (linkIndex: string): void => {
     setLinkHover({ active: true, index: linkIndex })
@@ -80,6 +71,42 @@ const Project: React.FC<ProjectProps> = ({
       ? "project-images project-images--contain"
     : "project-images"
 
+  // Animated previews ship as small MP4 clips and play on hover (matching the
+  // original GIF-on-hover behavior). Hover clips use the Cloudinary screenshot as
+  // the resting poster; primary clips rest on their own first frame.
+  const renderMedia = () => {
+    const video = PRIMARY_VIDEOS[name] || HOVER_VIDEOS[name]
+    if (video) {
+      return (
+        <video
+          className={imageClassName}
+          src={video}
+          poster={HOVER_VIDEOS[name] ? image : undefined}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={`${name} preview`}
+          onMouseEnter={e => {
+            e.currentTarget.play().catch(() => {})
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.pause()
+            e.currentTarget.currentTime = 0
+          }}
+        />
+      )
+    }
+    return (
+      <img
+        className={imageClassName}
+        src={LOCAL_PRIMARY_IMAGES[name] || image}
+        alt={`${name} project screenshot`}
+        loading="lazy"
+      />
+    )
+  }
+
   return (
     <>
       <div
@@ -89,15 +116,7 @@ const Project: React.FC<ProjectProps> = ({
             : "project-container flex-reverse"
         }
       >
-        <Fade>
-          <img
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            src={getImageSource()}
-            alt={`${name} project screenshot`}
-            className={imageClassName}
-          />
-        </Fade>
+        <Fade>{renderMedia()}</Fade>
         <div className="description-container">
           <Fade>
             <div className="project-copy-reveal">

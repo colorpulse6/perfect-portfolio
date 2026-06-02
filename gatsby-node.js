@@ -24,7 +24,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       github: "https://github.com/colorpulse6/brain-atlas",
       techArray: [14, 8, 10, 11, 30],
       ref: "brainAtlasRef",
-      imgSrc: "brain-atlas-spin.gif",
+      imgSrc: "brain-atlas-spin.mp4",
       description:
         "An Obsidian community plugin that renders your vault as an animated 3D anatomical brain. Notes become nodes, links become neural pathways, and note types cluster into brain regions.",
     },
@@ -80,7 +80,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       github: "https://github.com/colorpulse6/el-form",
       techArray: [21, 13, 14, 19, 11, 2, 10, 30],
       ref: "elFormRef",
-      imgSrc: "elform-docs-dark.gif",
+      imgSrc: "elform-docs-dark.mp4",
       description:
         "Modern open source form library with AutoForm and hooks for maximum flexibility.",
     },

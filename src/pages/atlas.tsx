@@ -11,7 +11,7 @@ import type {
   EssayItem,
   ChangelogItem,
 } from "../components/atlas/atlasShared"
-import { resolveProjectImage } from "../helpers/projectImages"
+import { resolveProjectMedia } from "../helpers/projectImages"
 import "./atlas.css"
 
 interface ProjectNode {
@@ -80,7 +80,7 @@ const CURATED: Record<string, AtlasWork[]> = {
       t: "Cerebro Mycelium",
       meta: "vault as a living fungal network",
       body: "Renders a vault as a living fungal network. Notes become soft kind-clusters, wikilinks become curved hyphae, and recent notes glow as fruiting bodies.",
-      media: resolveProjectImage("Cerebro Mycelium", ""),
+      media: resolveProjectMedia("Cerebro Mycelium", ""),
       medium: "OBSIDIAN PLUGIN",
       tech: ["TypeScript", "Canvas 2D", "Recency model"],
       status: "released",
@@ -138,7 +138,7 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
       t: p.name,
       meta: p.description,
       body: p.description,
-      media: resolveProjectImage(p.name, p.imgSrc),
+      media: resolveProjectMedia(p.name, p.imgSrc),
       medium: p.medium,
       tech: p.tech || [],
       status: p.status || "released",

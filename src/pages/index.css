@@ -188,12 +188,29 @@ h1 {
   );
 }
 .background-video {
-  background-image: url(https://media.giphy.com/media/CvWb8F42SAfGo/giphy.gif);
-  background-size: cover;
+  background: linear-gradient(120deg, #633dc7, #c76ea1, #4fb5db, #f2ab47, #8c4fd1);
+  background-size: 300% 300%;
+  animation: bg-shift 9s ease infinite;
   color: transparent !important;
   -moz-background-clip: initial;
   -webkit-background-clip: text;
-  /* -webkit-text-stroke: .3px grey; */
+  background-clip: text;
+}
+@keyframes bg-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .background-video {
+    animation: none;
+  }
 }
 
 .second-title {

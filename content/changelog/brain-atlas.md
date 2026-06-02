@@ -6,7 +6,7 @@ link: "https://community.obsidian.md/plugins/brain-atlas"
 status: "released"
 featured: true
 project: "Obsidian"
-media: "brain-atlas-spin.gif"
+media: "brain-atlas-spin.mp4"
 cta: "Install"
 ---
 

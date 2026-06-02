@@ -44,7 +44,7 @@ test("Brain Atlas changelog entry is featured for floating project cards", () =>
     title: "Brain Atlas: Obsidian Plugin",
     date: "2026-05-31",
     link: "https://community.obsidian.md/plugins/brain-atlas",
-    media: "brain-atlas-spin.gif",
+    media: "brain-atlas-spin.mp4",
     bodyPattern: /frontmatter value mappings/i,
   })
 })
@@ -66,7 +66,7 @@ test("Cerebro Mycelium changelog entry is featured for floating project cards", 
     slug: "cerebro-mycelium",
     title: "Cerebro Mycelium: Obsidian Plugin",
     link: "https://community.obsidian.md/plugins/cerebro-mycelium",
-    media: "cerebro-mycelium.gif",
+    media: "cerebro-mycelium.mp4",
     bodyPattern: /living fungal network/i,
   })
 })
