@@ -2,11 +2,30 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import { navigate } from "gatsby"
 import { ARTIFACTS, ArtifactDef } from "./artifacts"
 import { useInteractionSounds } from "../audio/useInteractionSounds"
-import BrainAtlasVid from "../../images/brain-atlas-spin.mp4"
-import CerebroMyceliumVid from "../../images/cerebro-mycelium.mp4"
-import ThrottleDashboard from "../../images/throttle-dashboard.png"
-import CerebroDashboard from "../../images/cerebro-dashboard.png"
-import { isVideo } from "../../helpers/projectImages"
+import {
+  FloatingIcon,
+  FloatingCard,
+  FloatingItem,
+  spawnFromEdge,
+  MAX_ICONS,
+  ICON_FLOAT_DURATION,
+  ICON_COOLDOWN,
+  MAX_CARDS,
+  CARD_FLOAT_DURATION,
+  CARD_COOLDOWN,
+  DISSOLVE_DURATION,
+  MATERIALIZE_DURATION,
+} from "./floatingPhysics"
+import {
+  TYPE_COLORS,
+  STATUS_LABELS,
+  MEDIA_ASSETS,
+  isVideo,
+  getCardMediaStyle,
+  glassStyle,
+  cardStyle,
+  getItemId,
+} from "./cardRendering"
 
 export interface FeaturedEntry {
   title: string
@@ -24,148 +43,6 @@ export interface FeaturedEntry {
 interface DomArtifactsProps {
   onArtifactActivate?: (artifact: ArtifactDef) => void
   featuredEntries?: FeaturedEntry[]
-}
-
-interface FloatingIcon {
-  kind: "icon"
-  artifact: ArtifactDef
-  x: number
-  y: number
-  vx: number
-  vy: number
-  opacity: number
-  phase: "shooting" | "materializing" | "floating" | "dissolving" | "hidden"
-  phaseTime: number
-  bobPhase: number
-}
-
-interface FloatingCard {
-  kind: "card"
-  entry: FeaturedEntry
-  id: string
-  x: number
-  y: number
-  vx: number
-  vy: number
-  opacity: number
-  phase: "shooting" | "materializing" | "floating" | "dissolving" | "hidden"
-  phaseTime: number
-  bobPhase: number
-}
-
-type FloatingItem = FloatingIcon | FloatingCard
-
-const MAX_ICONS = 3
-const ICON_FLOAT_DURATION = 12
-const ICON_COOLDOWN = 10000
-const MAX_CARDS = 2
-const CARD_FLOAT_DURATION = 12
-const CARD_COOLDOWN = 5000
-const DISSOLVE_DURATION = 2
-const MATERIALIZE_DURATION = 1.5
-
-function spawnFromEdge(): { x: number; y: number; vx: number; vy: number } {
-  const w = typeof window !== "undefined" ? window.innerWidth : 1200
-  const h = typeof window !== "undefined" ? window.innerHeight : 800
-  const side = Math.floor(Math.random() * 4)
-  let x: number, y: number
-
-  switch (side) {
-    case 0: x = -60; y = Math.random() * h; break
-    case 1: x = w + 60; y = Math.random() * h; break
-    case 2: x = Math.random() * w; y = -60; break
-    default: x = Math.random() * w; y = h + 60; break
-  }
-
-  const targetX = w * 0.2 + Math.random() * w * 0.6
-  const targetY = h * 0.2 + Math.random() * h * 0.6
-  const angle = Math.atan2(targetY - y, targetX - x)
-  const speed = 300 + Math.random() * 200
-
-  return { x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed }
-}
-
-const TYPE_COLORS: Record<string, string> = {
-  project: "#5b8def",
-  writing: "#d4a053",
-  update: "#4aba7a",
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  "in-progress": "In Progress",
-  released: "Released",
-  published: "Published",
-}
-
-const MEDIA_ASSETS: Record<string, string> = {
-  "brain-atlas-spin.mp4": BrainAtlasVid,
-  "cerebro-mycelium.mp4": CerebroMyceliumVid,
-  "throttle-dashboard.png": ThrottleDashboard,
-  "cerebro-dashboard.png": CerebroDashboard,
-}
-
-const CONTAIN_MEDIA = new Set(["throttle-dashboard.png", "cerebro-dashboard.png"])
-const MEDIA_HEIGHTS: Record<string, number> = {
-  "throttle-dashboard.png": 220,
-  "cerebro-dashboard.png": 150,
-}
-
-function isContainMedia(media: string | null): boolean {
-  return media !== null && CONTAIN_MEDIA.has(media)
-}
-
-function getCardMediaHeight(media: string | null): number {
-  return media !== null && MEDIA_HEIGHTS[media] ? MEDIA_HEIGHTS[media] : 88
-}
-
-function getCardMediaStyle(media: string | null): React.CSSProperties {
-  const contained = isContainMedia(media)
-  return {
-    display: "block",
-    width: "100%",
-    height: getCardMediaHeight(media),
-    objectFit: contained ? "contain" : "cover",
-    objectPosition: "center",
-    background: contained ? "rgba(10,8,20,0.8)" : "transparent",
-    borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.1)",
-    marginBottom: 12,
-    opacity: 0.9,
-  }
-}
-
-const glassStyle: React.CSSProperties = {
-  width: 52,
-  height: 52,
-  borderRadius: 14,
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s",
-  pointerEvents: "auto" as const,
-}
-
-const cardStyle: React.CSSProperties = {
-  width: 280,
-  borderRadius: 16,
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  padding: "18px 20px 14px",
-  cursor: "pointer",
-  transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
-  pointerEvents: "auto" as const,
-  fontFamily: "-apple-system, 'Segoe UI', sans-serif",
-}
-
-function getItemId(item: FloatingItem): string {
-  return item.kind === "icon" ? `icon-${item.artifact.id}` : `card-${item.id}`
 }
 
 const DomArtifacts: React.FC<DomArtifactsProps> = ({
