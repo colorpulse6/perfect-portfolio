@@ -100,7 +100,7 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
         menuLinks={[]}
       />
       <div style={{ opacity: 0, position: "relative" }} className="projects">
-        <SEO title="Projects" />
+        <SEO title="Projects" description="Selected projects by Nichalas Barnes: developer tools, web apps, games, and Obsidian plugins." pathname={location?.pathname} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>

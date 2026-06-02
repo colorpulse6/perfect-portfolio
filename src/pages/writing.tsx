@@ -168,7 +168,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
 
   return (
     <div style={{ opacity: 0, position: "relative" }} className="writings">
-      <SEO title="writings" />
+      <SEO title="writings" description="Short fiction and essays by Nichalas Barnes." pathname={location?.pathname} />
 
       {readerMode && currentStory ? (
         <div className="reader-container" ref={readerRef}>

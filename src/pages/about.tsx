@@ -94,7 +94,7 @@ const About: React.FC<AboutProps> = ({ transitionStatus, location }) => {
       />
 
       <div style={{ opacity: 0, position: "relative" }} className="about">
-        <SEO title="About" />
+        <SEO title="About" description="From composer and bandleader to software engineer. The origin story of Nichalas Barnes, from Seattle to Berlin to Madrid." pathname={location?.pathname} />
         <p className="second-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
         </p>

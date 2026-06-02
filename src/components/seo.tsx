@@ -1,10 +1,8 @@
 /**
- * SEO component that queries for data with
- * Gatsby's useStaticQuery React hook
- *
- * See: https://www.gatsbyjs.com/docs/use-static-query/
+ * SEO component (react-helmet). Emits title, description, canonical, Open Graph,
+ * and Twitter tags. Pass `pathname` (from the page's `location`) so canonical /
+ * og:url are absolute.
  */
-
 import React from "react"
 import { Helmet } from "react-helmet"
 import { useStaticQuery, graphql } from "gatsby"
@@ -12,18 +10,17 @@ import { useStaticQuery, graphql } from "gatsby"
 // Type for individual meta tag objects - using any to match react-helmet's flexible meta prop
 type MetaTag = any
 
-// Type for the GraphQL query result
 interface SiteMetadataQuery {
   site: {
     siteMetadata: {
       title: string
       description: string
       author: string
+      siteUrl: string
     }
   }
 }
 
-// Define the props interface for the SEO component
 interface SEOProps {
   /** Description for the page meta tag */
   description?: string
@@ -33,18 +30,19 @@ interface SEOProps {
   meta?: MetaTag[]
   /** Title for the page */
   title: string
+  /** Page pathname (from location) for canonical / og:url */
+  pathname?: string
+  /** Optional path (under siteUrl) to a social image; defaults to /og-image.png */
+  image?: string
 }
 
-/**
- * SEO component that sets up page metadata using react-helmet
- * @param props - The component props
- * @returns JSX element for page metadata
- */
 const SEO: React.FC<SEOProps> = ({
   description = "",
   lang = "en",
   meta = [],
   title,
+  pathname,
+  image,
 }) => {
   const { site }: SiteMetadataQuery = useStaticQuery(graphql`
     query {
@@ -53,6 +51,7 @@ const SEO: React.FC<SEOProps> = ({
           title
           description
           author
+          siteUrl
         }
       }
     }
@@ -60,47 +59,29 @@ const SEO: React.FC<SEOProps> = ({
 
   const metaDescription = description || site.siteMetadata.description
   const defaultTitle = site.siteMetadata?.title
+  const siteUrl = (site.siteMetadata?.siteUrl || "").replace(/\/+$/, "")
+  const url = pathname ? `${siteUrl}${pathname}` : siteUrl
+  const ogImage = `${siteUrl}${image || "/og-image.png"}`
 
   return (
     <Helmet
-      htmlAttributes={{
-        lang,
-      }}
+      htmlAttributes={{ lang }}
       title={title}
       titleTemplate={defaultTitle ? `%s | ${defaultTitle}` : undefined}
+      link={[{ rel: "canonical", href: url }]}
       meta={[
-        {
-          name: "description",
-          content: metaDescription,
-        },
-        {
-          property: "og:title",
-          content: title,
-        },
-        {
-          property: "og:description",
-          content: metaDescription,
-        },
-        {
-          property: "og:type",
-          content: "website",
-        },
-        {
-          name: "twitter:card",
-          content: "summary",
-        },
-        {
-          name: "twitter:creator",
-          content: site.siteMetadata?.author || "",
-        },
-        {
-          name: "twitter:title",
-          content: title,
-        },
-        {
-          name: "twitter:description",
-          content: metaDescription,
-        },
+        { name: "description", content: metaDescription },
+        { property: "og:title", content: title },
+        { property: "og:description", content: metaDescription },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: defaultTitle },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:creator", content: site.siteMetadata?.author || "" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: metaDescription },
+        { name: "twitter:image", content: ogImage },
       ].concat(meta)}
     />
   )

@@ -105,7 +105,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
         style={{ opacity: 0, position: "relative", zIndex: 2 }}
         className="hometex"
       >
-        <SEO title="Home" />
+        <SEO title="Home" description="Software engineer and composer Nichalas Barnes. A living map of every medium: developer tools, web apps, games, Obsidian plugins, music, and writing." pathname={location?.pathname} />
         <div className="title">
           <h1 className="glitch-text" data-text="Welcome to Nichalas Barnes">
             Welcome to Nichalas Barnes

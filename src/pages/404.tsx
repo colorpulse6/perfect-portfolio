@@ -8,7 +8,7 @@ import SEO from "../components/seo"
  */
 const NotFoundPage: React.FC = () => (
   <Layout>
-    <SEO title="404: Not found" />
+    <SEO title="404: Not found" description="The page you are looking for does not exist." meta={[{ name: "robots", content: "noindex" }]} />
     <h1>404: Not Found</h1>
     <p>You just hit a route that doesn&#39;t exist... the sadness.</p>
   </Layout>

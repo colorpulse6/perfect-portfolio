@@ -4,5 +4,7 @@
  * See: https://www.gatsbyjs.com/docs/ssr-apis/
  */
 
-// You can delete this file if you're not using it
-
+// Ensure the <html lang> attribute is present in the server-rendered markup.
+exports.onRenderBody = ({ setHtmlAttributes }) => {
+  setHtmlAttributes({ lang: "en" })
+}

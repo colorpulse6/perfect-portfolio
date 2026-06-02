@@ -93,7 +93,7 @@ const Contact: React.FC<ContactProps> = ({ transitionStatus, location }) => {
         transitionStatus={transitionStatus}
         menuLinks={[]}
       />
-      <SEO title="Contact" />
+      <SEO title="Contact" description="Get in touch with Nichalas Barnes." pathname={location?.pathname} />
       <div className="container contact">
         <h1 className="contact-title background-video">
           {location.pathname.substring(1).replace(/\/$/, "")}
