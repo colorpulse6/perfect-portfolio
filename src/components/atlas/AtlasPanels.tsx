@@ -20,6 +20,7 @@ import type {
 } from "./atlasShared"
 import { Mist, Spectral, SPEC } from "./AtlasFog"
 import { formatTextContent, wrapWordsInSpans, revealDelay } from "../../helpers/wordReveal"
+import { isVideo } from "../../helpers/projectImages"
 
 const WSPEC = SPEC
 const WSTAT: Record<string, string> = {
@@ -265,22 +266,42 @@ function WProject({
         )}
       </div>
       <Spectral text={title} size={34} />
-      {media && (
-        <img
-          src={media}
-          alt={title}
-          style={{
-            width: 420,
-            maxWidth: "70%",
-            height: 240,
-            objectFit: "contain",
-            marginTop: 20,
-            opacity: 0.9,
-            WebkitMaskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
-            maskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
-          }}
-        />
-      )}
+      {media &&
+        (isVideo(media) ? (
+          <video
+            src={media}
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-label={title}
+            style={{
+              width: 420,
+              maxWidth: "70%",
+              height: 240,
+              objectFit: "contain",
+              marginTop: 20,
+              opacity: 0.9,
+              WebkitMaskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
+              maskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
+            }}
+          />
+        ) : (
+          <img
+            src={media}
+            alt={title}
+            style={{
+              width: 420,
+              maxWidth: "70%",
+              height: 240,
+              objectFit: "contain",
+              marginTop: 20,
+              opacity: 0.9,
+              WebkitMaskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
+              maskImage: "radial-gradient(115% 125% at 50% 45%, #000 70%, transparent 100%)",
+            }}
+          />
+        ))}
       <p style={{ ...lead, maxWidth: 480, margin: "18px auto 0" }}>{body}</p>
       {tech && tech.length > 0 && (
         <div

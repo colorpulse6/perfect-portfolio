@@ -6,7 +6,7 @@ link: "https://community.obsidian.md/plugins/cerebro-mycelium"
 status: "released"
 featured: true
 project: "Obsidian"
-media: "cerebro-mycelium.gif"
+media: "cerebro-mycelium.mp4"
 cta: "Install"
 ---
 

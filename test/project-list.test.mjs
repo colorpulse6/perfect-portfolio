@@ -26,7 +26,7 @@ test("Brain Atlas is the first portfolio project", () => {
   assert.equal(brainAtlas.name, "Brain Atlas")
   assert.equal(brainAtlas.link, "https://community.obsidian.md/plugins/brain-atlas")
   assert.equal(brainAtlas.github, "https://github.com/colorpulse6/brain-atlas")
-  assert.equal(brainAtlas.imgSrc, "brain-atlas-spin.gif")
+  assert.equal(brainAtlas.imgSrc, "brain-atlas-spin.mp4")
 })
 
 test("Throttle appears above Job Toast in the portfolio project list", () => {
@@ -43,14 +43,14 @@ test("Throttle appears above Job Toast in the portfolio project list", () => {
   assert.equal(throttle.imgSrc, "throttle-dashboard.png")
 })
 
-test("El Form uses the current docs URL and dark-mode docs GIF", () => {
+test("El Form uses the current docs URL and dark-mode docs clip", () => {
   const projects = loadProjects()
   const elForm = projects.find(project => project.name === "El Form")
 
   assert.ok(elForm)
   assert.equal(elForm.link, "https://elform.dev/docs/intro")
   assert.equal(elForm.github, "https://github.com/colorpulse6/el-form")
-  assert.equal(elForm.imgSrc, "elform-docs-dark.gif")
+  assert.equal(elForm.imgSrc, "elform-docs-dark.mp4")
 })
 
 test("Cerebro appears in the portfolio as a work-in-progress macOS app", () => {

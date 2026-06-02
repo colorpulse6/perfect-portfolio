@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import { navigate } from "gatsby"
 import { ARTIFACTS, ArtifactDef } from "./artifacts"
 import { useInteractionSounds } from "../audio/useInteractionSounds"
-import BrainAtlasGif from "../../images/brain-atlas-spin.gif"
-import CerebroMyceliumGif from "../../images/cerebro-mycelium.gif"
+import BrainAtlasVid from "../../images/brain-atlas-spin.mp4"
+import CerebroMyceliumVid from "../../images/cerebro-mycelium.mp4"
 import ThrottleDashboard from "../../images/throttle-dashboard.png"
 import CerebroDashboard from "../../images/cerebro-dashboard.png"
+import { isVideo } from "../../helpers/projectImages"
 
 export interface FeaturedEntry {
   title: string
@@ -97,8 +98,8 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const MEDIA_ASSETS: Record<string, string> = {
-  "brain-atlas-spin.gif": BrainAtlasGif,
-  "cerebro-mycelium.gif": CerebroMyceliumGif,
+  "brain-atlas-spin.mp4": BrainAtlasVid,
+  "cerebro-mycelium.mp4": CerebroMyceliumVid,
   "throttle-dashboard.png": ThrottleDashboard,
   "cerebro-dashboard.png": CerebroDashboard,
 }
@@ -604,13 +605,24 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                   )}
                 </div>
 
-                {mediaSrc && (
-                  <img
-                    src={mediaSrc}
-                    alt={entry.title}
-                    style={getCardMediaStyle(entry.media)}
-                  />
-                )}
+                {mediaSrc &&
+                  (isVideo(mediaSrc) ? (
+                    <video
+                      src={mediaSrc}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      aria-label={entry.title}
+                      style={getCardMediaStyle(entry.media)}
+                    />
+                  ) : (
+                    <img
+                      src={mediaSrc}
+                      alt={entry.title}
+                      style={getCardMediaStyle(entry.media)}
+                    />
+                  ))}
 
                 {entry.project && (
                   <div
