@@ -26,6 +26,9 @@ const Hamburger: React.FC<HamburgerProps> = ({ navOpen, setNavOpen }) => {
         barColor="white"
         isActive={navOpen}
         toggleButton={toggleButton}
+        aria-label={navOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={navOpen}
+        aria-controls="primary-navigation"
       />
     </>
   )
