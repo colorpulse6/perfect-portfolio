@@ -21,6 +21,19 @@ const slugify = s =>
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
+      name: "Polis Atlas",
+      cluster: "sites",
+      status: "live",
+      medium: "WEB APP",
+      tech: ["React", "TypeScript", "Three.js", "Vite"],
+      link: "https://polisatlas.com/",
+      techArray: [13, 14, 21],
+      ref: "polisAtlasRef",
+      imgSrc: "polis-atlas.jpg",
+      description:
+        "An interactive atlas of political power: a spectrum that maps 50 ideologies from total state to no state, plus a 3D globe classifying every country by its system of government with 18 real-world statistics layered on top.",
+    },
+    {
       name: "Brain Atlas",
       cluster: "obsidian",
       status: "released",

@@ -155,7 +155,7 @@ function drawOrb(
 }
 
 // Constellation between hubs — indices into the canonical hub order:
-// [me, obsidian, web, games, tools, music, writing, ai].
+// [me, obsidian, web, games, tools, music, writing, ai, sites].
 const EDGES: [number, number][] = [
   [0, 1],
   [0, 2],
@@ -164,6 +164,7 @@ const EDGES: [number, number][] = [
   [0, 5],
   [0, 6],
   [0, 7],
+  [0, 8],
   [1, 2],
   [2, 4],
   [3, 6],
@@ -171,6 +172,7 @@ const EDGES: [number, number][] = [
   [5, 4],
   [7, 4],
   [7, 2],
+  [2, 8],
 ]
 
 function buildScene(domains: AtlasDomain[]): Scene {

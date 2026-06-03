@@ -6,6 +6,7 @@
 
 import ThrottleDashboard from "../images/throttle-dashboard.png"
 import CerebroDashboard from "../images/cerebro-dashboard.png"
+import PolisAtlasImg from "../images/polis-atlas.jpg"
 import BrainAtlasVid from "../images/brain-atlas-spin.mp4"
 import ElFormVid from "../images/elform-docs-dark.mp4"
 import CerebroMyceliumVid from "../images/cerebro-mycelium.mp4"
@@ -18,6 +19,7 @@ import MadScienceVid from "../images/mad-science.mp4"
 export const LOCAL_PRIMARY_IMAGES: Record<string, string> = {
   Throttle: ThrottleDashboard,
   Cerebro: CerebroDashboard,
+  "Polis Atlas": PolisAtlasImg,
 }
 
 /** Always-animated primary clips (rendered as an autoplaying muted <video>). */

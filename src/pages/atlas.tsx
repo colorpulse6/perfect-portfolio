@@ -63,6 +63,7 @@ const CTA_CLUSTER: Record<string, string> = {
   tools: "Visit",
   ai: "Open",
   music: "Listen",
+  sites: "Visit",
 }
 const CTA_NAME: Record<string, string> = {
   "El Form": "Docs",
@@ -173,10 +174,11 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
     const gamesWorks = [...byCluster("games"), ...CURATED.games]
     const toolsWorks = byCluster("tools")
     const aiWorks = byCluster("ai")
+    const sitesWorks = byCluster("sites")
     const musicWorks = CURATED.music
 
-    // Canonical hub order — EDGES in AtlasCanvas reference these indices:
-    // [me, obsidian, apps, games, tools, music, writing].
+    // Canonical hub order. EDGES in AtlasCanvas reference these indices:
+    // [me, obsidian, web, games, tools, music, writing, ai, sites].
     const domains: AtlasDomain[] = [
       {
         id: "me",
@@ -258,6 +260,16 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
         p: [-0.3, -0.2, 0.66],
         count: aiWorks.length,
         works: aiWorks,
+      },
+      {
+        id: "sites",
+        label: "SITES",
+        tag: "live web destinations",
+        unit: "sites",
+        c: "#46c79c",
+        p: [0.6, -0.25, -0.72],
+        count: sitesWorks.length,
+        works: sitesWorks,
       },
     ]
 

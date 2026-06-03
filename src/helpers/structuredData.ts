@@ -98,6 +98,7 @@ const CLUSTER_CATEGORY: Record<string, string> = {
   games: "GameApplication",
   tools: "DeveloperApplication",
   ai: "DeveloperApplication",
+  sites: "WebApplication",
 }
 
 /** A project rendered as a SoftwareApplication authored by the Person. */
