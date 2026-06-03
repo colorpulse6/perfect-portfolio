@@ -7,6 +7,7 @@
 import ThrottleDashboard from "../images/throttle-dashboard.png"
 import CerebroDashboard from "../images/cerebro-dashboard.png"
 import PolisAtlasImg from "../images/polis-atlas.jpg"
+import PolisAtlasVid from "../images/polis-atlas.mp4"
 import BrainAtlasVid from "../images/brain-atlas-spin.mp4"
 import ElFormVid from "../images/elform-docs-dark.mp4"
 import CerebroMyceliumVid from "../images/cerebro-mycelium.mp4"
@@ -27,6 +28,7 @@ export const PRIMARY_VIDEOS: Record<string, string> = {
   "Brain Atlas": BrainAtlasVid,
   "El Form": ElFormVid,
   "Cerebro Mycelium": CerebroMyceliumVid,
+  "Polis Atlas": PolisAtlasVid,
 }
 
 /** Animated clips shown on hover (poster = the project's static screenshot). */
