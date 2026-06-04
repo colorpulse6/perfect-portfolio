@@ -17,6 +17,8 @@ interface HeaderProps {
   navOpen: boolean
   /** Function to toggle the navigation menu state */
   setNavOpen: (isOpen: boolean) => void
+  /** Center the social row (used on the full-bleed atlas so it clears the atlas's own top-left title) */
+  atlas?: boolean
 }
 
 /**
@@ -27,17 +29,24 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   navOpen,
   setNavOpen,
+  atlas = false,
 }) => {
   return (
     <header>
       <div className="header-container">
-        <div style={{ display: "flex" }}>
+        <div
+          style={
+            atlas
+              ? { display: "flex", flex: 1, justifyContent: "center" }
+              : { display: "flex" }
+          }
+        >
           <Spring isTitle>
             <div style={{ display: "flex", alignSelf: "center" }}>
               <Link
                 to="/"
                 style={{
-                  marginLeft: "150px",
+                  marginLeft: atlas ? "0px" : "150px",
                   display: "block",
                   width: "20px",
                   height: "20px",

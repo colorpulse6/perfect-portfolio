@@ -174,6 +174,7 @@ const Layout: React.FC<LayoutProps> = ({
             navOpen={navOpen}
             setNavOpen={setNavOpen}
             siteTitle={data.site.siteMetadata.title || "Title"}
+            atlas
           />
           <SideBar
             navOpen={navOpen}

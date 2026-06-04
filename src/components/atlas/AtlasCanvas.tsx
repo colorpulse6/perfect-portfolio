@@ -39,7 +39,7 @@ import type {
   ProjFn,
 } from "./sceneTypes"
 
-const R = 250
+const R = 310
 
 // Per-planet color: blend the cluster hue toward a varied tint so siblings differ.
 const ORB_TINTS = ["#8fd4ff", "#ff9ec9", "#ffd089", "#b59cff", "#8effc4", "#ff8f7a", "#9fb4ff"]
@@ -306,7 +306,7 @@ export default function AtlasCanvas({
   const st = useRef<SceneState>({
     rx: -0.2,
     ry: 0.5,
-    zoom: 1,
+    zoom: 1.32,
     drag: false,
     lx: 0,
     ly: 0,
@@ -452,7 +452,7 @@ export default function AtlasCanvas({
         } else {
           s.warpEnv = 0
         }
-        if (!s.userZoomed) s.zoom += (1 - s.zoom) * (reduce ? 0.4 : 0.06)
+        if (!s.userZoomed) s.zoom += (1.32 - s.zoom) * (reduce ? 0.4 : 0.06)
       }
       s.rx = Math.max(-1.35, Math.min(1.35, s.rx))
       s.pan.x += (s.panTX - s.pan.x) * 0.07
