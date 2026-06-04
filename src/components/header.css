@@ -62,3 +62,35 @@
     margin-top: 14px;
   }
 }
+
+/* Styled hover tooltips for the social icons (native title is flaky behind the
+   custom cursor, so we render our own). */
+header a[data-tooltip] {
+  position: relative;
+}
+header a[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(14, 14, 20, 0.96);
+  color: #e8ecf5;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 100;
+}
+header a[data-tooltip]:hover::after,
+header a[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

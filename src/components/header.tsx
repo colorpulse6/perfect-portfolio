@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://github.com/colorpulse6"
               target="_blank"
               rel="noopener noreferrer"
-              title="GitHub"
+              data-tooltip="GitHub"
             >
               <img
                 className="icons"
@@ -65,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://www.linkedin.com/in/nic-barnes-a3297217/"
               target="_blank"
               rel="noopener noreferrer"
-              title="LinkedIn"
+              data-tooltip="LinkedIn"
             >
               <img
                 className="icons"
@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://medium.com/@colorpulse_6839"
               target="_blank"
               rel="noopener noreferrer"
-              title="Medium"
+              data-tooltip="Medium"
             >
               <img className="icons" src={MediumIcon} alt="Medium link" />
             </a>
@@ -89,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://www.npmjs.com/~colorpulse"
               target="_blank"
               rel="noopener noreferrer"
-              title="npm"
+              data-tooltip="npm"
             >
               <img className="icons" src={NpmIcon} alt="NPM link" />
             </a>
@@ -99,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://buymeacoffee.com/nicbarnes"
               target="_blank"
               rel="noopener noreferrer"
-              title="Buy me a coffee"
+              data-tooltip="Buy me a coffee"
               aria-label="Buy me a coffee"
             >
               <SiBuymeacoffee

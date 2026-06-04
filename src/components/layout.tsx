@@ -164,12 +164,23 @@ const Layout: React.FC<LayoutProps> = ({
   }, [isAtlas, prefersReducedMotion])
 
   if (isAtlas) {
-    // Full-bleed: only the atlas page renders (no nebula, header, sidebar,
-    // footer, cursor, audio toggle, or global terminal). The audio context and
-    // the transition whoosh stay so navigation still feels continuous.
+    // Full-bleed atlas: keep the global header + sidebar nav (so the social
+    // links and navigation stay available), but skip the nebula, footer,
+    // cursor, audio toggle, and terminal so the 3D galaxy stays the focus.
     return (
       <AmbientAudioProvider pagePath={pagePath}>
         <div className="layout-container">
+          <Header
+            navOpen={navOpen}
+            setNavOpen={setNavOpen}
+            siteTitle={data.site.siteMetadata.title || "Title"}
+          />
+          <SideBar
+            navOpen={navOpen}
+            setNavOpen={setNavOpen}
+            transitionStatus={transitionStatus}
+            key="sidebar"
+          />
           <main>{children}</main>
           <TransitionSound transitionStatus={transitionStatus} />
         </div>
