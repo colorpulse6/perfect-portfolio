@@ -99,9 +99,19 @@ export function WContact({ onClose }: { onClose: () => void }) {
               href="https://alexshand.bandcamp.com/"
               target="_blank"
               rel="noopener noreferrer"
+              title="Bandcamp"
               style={{ ...linkS("rgba(150,180,200,0.6)"), fontWeight: 400 }}
             >
               BANDCAMP
+            </a>
+            <a
+              href="https://buymeacoffee.com/nicbarnes"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Buy me a coffee"
+              style={{ ...linkS("#ffdd00"), fontWeight: 400 }}
+            >
+              COFFEE
             </a>
           </div>
           {state === "error" && (

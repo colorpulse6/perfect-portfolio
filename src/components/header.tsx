@@ -51,6 +51,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://github.com/colorpulse6"
               target="_blank"
               rel="noopener noreferrer"
+              title="GitHub"
             >
               <img
                 className="icons"
@@ -64,6 +65,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://www.linkedin.com/in/nic-barnes-a3297217/"
               target="_blank"
               rel="noopener noreferrer"
+              title="LinkedIn"
             >
               <img
                 className="icons"
@@ -77,6 +79,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://medium.com/@colorpulse_6839"
               target="_blank"
               rel="noopener noreferrer"
+              title="Medium"
             >
               <img className="icons" src={MediumIcon} alt="Medium link" />
             </a>
@@ -86,6 +89,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://www.npmjs.com/~colorpulse"
               target="_blank"
               rel="noopener noreferrer"
+              title="npm"
             >
               <img className="icons" src={NpmIcon} alt="NPM link" />
             </a>
@@ -95,9 +99,13 @@ const Header: React.FC<HeaderProps> = ({
               href="https://buymeacoffee.com/nicbarnes"
               target="_blank"
               rel="noopener noreferrer"
+              title="Buy me a coffee"
               aria-label="Buy me a coffee"
             >
-              <SiBuymeacoffee className="icons" style={{ color: "#1f1d2b", height: "auto" }} />
+              <SiBuymeacoffee
+                className="icons"
+                style={{ background: "#ffdd00", color: "#0a0a0a", height: "auto" }}
+              />
             </a>
           </Spring>
         </div>
