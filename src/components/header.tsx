@@ -6,6 +6,7 @@ import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
 import MediumIcon from "../images/medium.webp"
 import NpmIcon from "../images/npm.png"
+import { SiBuymeacoffee } from "react-icons/si"
 import "./header.css"
 
 // Define the props interface for the Header component
@@ -87,6 +88,16 @@ const Header: React.FC<HeaderProps> = ({
               rel="noopener noreferrer"
             >
               <img className="icons" src={NpmIcon} alt="NPM link" />
+            </a>
+          </Spring>
+          <Spring isTitle={false}>
+            <a
+              href="https://buymeacoffee.com/nicbarnes"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Buy me a coffee"
+            >
+              <SiBuymeacoffee className="icons" style={{ color: "#1f1d2b", height: "auto" }} />
             </a>
           </Spring>
         </div>
