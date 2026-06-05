@@ -1375,7 +1375,7 @@ function AtlasTerminal({ onClose }: { onClose: () => void }) {
     work: "7 mediums indexed. Drag the atlas, or type a name: web, ai, games, music...",
     obsidian: "Brain Atlas + Cerebro Mycelium. Vault visualizers, live in the community store.",
     web: "Job Toast · Hoop.It.App · Fire Store · Gigzilla. Web apps, live.",
-    tools: "El Form · Swash Flag · Bot Battle · Regexplain · Throttle. Libraries, SDKs, and dev tooling.",
+    tools: "El Form · Claude Skills · Swash Flag · Bot Battle · Regexplain · Throttle. Libraries, SDKs, and dev tooling.",
     ai: "Cerebro. A native macOS multi-agent workspace orchestrating coding agents.",
     music: "Alex's Hand · 10 years · 10 albums · 12 countries → alexshand.bandcamp.com",
     games: "Knicks Knacks · Sector Zero. Procedural space, co-op in progress.",

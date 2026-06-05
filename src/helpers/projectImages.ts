@@ -7,6 +7,7 @@
 import ThrottleDashboard from "../images/throttle-dashboard.png"
 import CerebroDashboard from "../images/cerebro-dashboard.png"
 import ElFormLanding from "../images/elform-landing.png"
+import ClaudeSkillsImg from "../images/claude-skills.png"
 import PolisAtlasImg from "../images/polis-atlas.jpg"
 import PolisAtlasVid from "../images/polis-atlas.mp4"
 import BrainAtlasVid from "../images/brain-atlas-spin.mp4"
@@ -22,6 +23,7 @@ export const LOCAL_PRIMARY_IMAGES: Record<string, string> = {
   Throttle: ThrottleDashboard,
   Cerebro: CerebroDashboard,
   "El Form": ElFormLanding,
+  "Claude Skills": ClaudeSkillsImg,
   "Polis Atlas": PolisAtlasImg,
 }
 

@@ -104,6 +104,20 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "Modern open source form library with AutoForm and hooks for maximum flexibility.",
     },
     {
+      name: "Claude Skills",
+      cluster: "tools",
+      status: "live",
+      medium: "CLAUDE CODE SKILLS",
+      tech: ["Claude Code", "Python", "Bash"],
+      link: "https://github.com/colorpulse6/claude-skills",
+      github: "https://github.com/colorpulse6/claude-skills",
+      techArray: [29, 18, 30],
+      ref: "claudeSkillsRef",
+      imgSrc: "claude-skills.png",
+      description:
+        "A personal marketplace of Claude Code skills for the PR workflow: /pr-review for AI-assisted reviews with GraphQL/Prisma contract verification, /pr-respond for addressing review comments, and /push for a quality-gated push pipeline. Auto-detects frontend and backend stacks with no per-project config.",
+    },
+    {
       name: "Bot Battle",
       cluster: "tools",
       status: "live",

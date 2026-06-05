@@ -67,6 +67,7 @@ const CTA_CLUSTER: Record<string, string> = {
 }
 const CTA_NAME: Record<string, string> = {
   "El Form": "Docs",
+  "Claude Skills": "GitHub",
   Throttle: "Download",
   "Knicks Knacks": "Open",
 }
