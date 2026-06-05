@@ -6,6 +6,7 @@
 
 import ThrottleDashboard from "../images/throttle-dashboard.png"
 import CerebroDashboard from "../images/cerebro-dashboard.png"
+import ElFormLanding from "../images/elform-landing.png"
 import PolisAtlasImg from "../images/polis-atlas.jpg"
 import PolisAtlasVid from "../images/polis-atlas.mp4"
 import BrainAtlasVid from "../images/brain-atlas-spin.mp4"
@@ -20,19 +21,20 @@ import MadScienceVid from "../images/mad-science.mp4"
 export const LOCAL_PRIMARY_IMAGES: Record<string, string> = {
   Throttle: ThrottleDashboard,
   Cerebro: CerebroDashboard,
+  "El Form": ElFormLanding,
   "Polis Atlas": PolisAtlasImg,
 }
 
 /** Always-animated primary clips (rendered as an autoplaying muted <video>). */
 export const PRIMARY_VIDEOS: Record<string, string> = {
   "Brain Atlas": BrainAtlasVid,
-  "El Form": ElFormVid,
   "Cerebro Mycelium": CerebroMyceliumVid,
   "Polis Atlas": PolisAtlasVid,
 }
 
 /** Animated clips shown on hover (poster = the project's static screenshot). */
 export const HOVER_VIDEOS: Record<string, string> = {
+  "El Form": ElFormVid,
   "Hoop.It.App": HoopVid,
   "Fire Store": FireStoreVid,
   Gigzilla: GigzillaVid,
