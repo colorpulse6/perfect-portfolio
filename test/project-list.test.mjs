@@ -19,11 +19,20 @@ function loadProjects() {
   return nodes.filter(node => node.internal.type === "Project")
 }
 
-test("Brain Atlas is the first portfolio project", () => {
+test("Polis Atlas is the first portfolio project", () => {
   const projects = loadProjects()
-  const brainAtlas = projects[0]
+  const polisAtlas = projects[0]
 
-  assert.equal(brainAtlas.name, "Brain Atlas")
+  assert.equal(polisAtlas.name, "Polis Atlas")
+  assert.equal(polisAtlas.link, "https://polisatlas.com/")
+  assert.equal(polisAtlas.imgSrc, "polis-atlas.jpg")
+})
+
+test("Brain Atlas remains in the portfolio with its plugin + repo links", () => {
+  const projects = loadProjects()
+  const brainAtlas = projects.find(project => project.name === "Brain Atlas")
+
+  assert.ok(brainAtlas)
   assert.equal(brainAtlas.link, "https://community.obsidian.md/plugins/brain-atlas")
   assert.equal(brainAtlas.github, "https://github.com/colorpulse6/brain-atlas")
   assert.equal(brainAtlas.imgSrc, "brain-atlas-spin.mp4")

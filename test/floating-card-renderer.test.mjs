@@ -22,6 +22,7 @@ test("floating changelog cards support custom media and CTA labels", () => {
   assert.match(cardSource, /cerebro-mycelium\.mp4/)
   assert.match(cardSource, /throttle-dashboard\.png/)
   assert.match(cardSource, /cerebro-dashboard\.png/)
+  assert.match(cardSource, /sector-zero\.jpg/)
   assert.match(source, /entry\.cta \|\|/)
   assert.match(cardSource, /isContainMedia/)
   assert.match(cardSource, /const contained = isContainMedia\(media\)/)
@@ -41,4 +42,14 @@ test("Cerebro floating card media preserves the full screenshot", () => {
   assert.match(cardSource, /CONTAIN_MEDIA[\s\S]*cerebro-dashboard\.png/)
   assert.match(cardSource, /height:\s*getCardMediaHeight\(media\)/)
   assert.match(cardSource, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
+})
+
+test("Sector Zero floating card preserves the portrait cockpit screenshot", () => {
+  const cardSource = fs.readFileSync(
+    path.join(rootDir, "src", "components", "nebula", "cardRendering.ts"),
+    "utf8"
+  )
+
+  assert.match(cardSource, /CONTAIN_MEDIA[\s\S]*sector-zero\.jpg/)
+  assert.match(cardSource, /MEDIA_HEIGHTS[\s\S]*"sector-zero\.jpg":\s*220/)
 })

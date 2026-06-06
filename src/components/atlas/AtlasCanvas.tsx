@@ -24,6 +24,7 @@ import type {
 } from "./atlasShared"
 import { AtlasPanelRouter } from "./AtlasPanels"
 import type { AtlasPanelState } from "./AtlasPanels"
+import { ProjectRail } from "./ProjectRail"
 import type {
   SceneState,
   Scene,
@@ -40,6 +41,13 @@ import type {
 } from "./sceneTypes"
 
 const R = 310
+const ENTERED_ORBIT_BASE = 42
+const ENTERED_ORBIT_GAP = 22
+const ENTERED_ORBIT_JITTER = 6
+const SHELLED_ORBIT_BASE = 28
+const SHELLED_ORBIT_GAP = 16
+const SHELLED_ORBIT_JITTER = 4
+const ORBIT_ANGLE_STEP = Math.PI * (3 - Math.sqrt(5))
 
 // Per-planet color: blend the cluster hue toward a varied tint so siblings differ.
 const ORB_TINTS = ["#8fd4ff", "#ff9ec9", "#ffd089", "#b59cff", "#8effc4", "#ff8f7a", "#9fb4ff"]
@@ -240,14 +248,16 @@ function buildScene(domains: AtlasDomain[]): Scene {
       const sh = wk.shell || 0
       perShell[sh] = perShell[sh] || 0
       const idxInShell = perShell[sh]++
-      const orbitR = h.shells ? 16 + idxInShell * 10 + rnd() * 3 : 24 + i * 15 + rnd() * 5
+      const orbitR = h.shells
+        ? SHELLED_ORBIT_BASE + idxInShell * SHELLED_ORBIT_GAP + rnd() * SHELLED_ORBIT_JITTER
+        : ENTERED_ORBIT_BASE + i * ENTERED_ORBIT_GAP + rnd() * ENTERED_ORBIT_JITTER
       return {
         work: wk,
         c: h.c,
         rgb: varyRGB(h.c, i, rnd),
         shell: sh,
         orbitR,
-        ang: rnd() * 6.28,
+        ang: (h.shells ? idxInShell : i) * ORBIT_ANGLE_STEP + rnd() * 0.35,
         speed: (0.1 + rnd() * 0.14) * (i % 2 ? -1 : 1) * (h.shells ? 0.7 : 1),
         size: 2.6 + rnd() * 1.6,
         inc: (rnd() - 0.5) * 0.6,
@@ -833,13 +843,20 @@ export default function AtlasCanvas({
             ldy = cpr.sy - pr.sy
           const lm = Math.hypot(ldx, ldy) || 1
           drawOrb(ctx, pr.sx, pr.sy, rad, pl.rgb, { x: ldx / lm, y: ldy / lm }, ep, hovd, now + pl.seed, pl)
+          let labelBox: PlanetHit["label"] | undefined
           if (ep > 0.45) {
             const la = Math.min(1, (ep - 0.4) * 2) * (hovd ? 1 : 0.82)
             ctx.font = `${hovd ? 600 : 500} ${hovd ? 12 : 10.5}px ${MONO}`
+            ctx.textAlign = "left"
+            const labelX = pr.sx + rad * 1.5 + 6
+            const labelY = pr.sy + 3
+            const labelW = ctx.measureText(pl.work.t).width
+            const labelH = hovd ? 14 : 12
+            labelBox = { x: labelX - 6, y: labelY - 10, w: labelW + 12, h: labelH + 14 }
             ctx.fillStyle = `rgba(232,242,255,${la})`
-            ctx.fillText(pl.work.t, pr.sx + rad * 1.5 + 6, pr.sy + 3)
+            ctx.fillText(pl.work.t, labelX, labelY)
           }
-          hits.push({ x: pr.sx, y: pr.sy, r: Math.max(18, rad * 1.4), pi })
+          hits.push({ x: pr.sx, y: pr.sy, r: Math.max(22, rad * 1.65), pi, label: labelBox })
         })
         s._planetHits = hits
         if (ep > 0.4) {
@@ -988,8 +1005,16 @@ export default function AtlasCanvas({
         bd = 999
       s._planetHits.forEach((ph: PlanetHit) => {
         const d = Math.hypot(ph.x - mx, ph.y - my)
-        if (d < ph.r && d < bd) {
-          bd = d
+        const inBody = d < ph.r
+        const inLabel =
+          !!ph.label &&
+          mx >= ph.label.x &&
+          mx <= ph.label.x + ph.label.w &&
+          my >= ph.label.y &&
+          my <= ph.label.y + ph.label.h
+        const rank = inBody ? d : inLabel ? d + 0.01 : 999
+        if (rank < bd) {
+          bd = rank
           best = ph.pi
         }
       })
@@ -1298,6 +1323,12 @@ export default function AtlasCanvas({
         </div>
       </div>
 
+      <ProjectRail
+        domains={domains}
+        hidden={entered >= 0 || !!panel}
+        onOpen={(work, domain) => setPanel({ type: "project", work, domain })}
+      />
+
       <div
         style={{
           position: "absolute",
@@ -1374,7 +1405,7 @@ function AtlasTerminal({ onClose }: { onClose: () => void }) {
     about: "Seattle → Berlin → Madrid. Composer turned engineer. The medium changed; the discipline didn't.",
     work: "7 mediums indexed. Drag the atlas, or type a name: web, ai, games, music...",
     obsidian: "Brain Atlas + Cerebro Mycelium. Vault visualizers, live in the community store.",
-    web: "Job Toast · Hoop.It.App · Fire Store · Gigzilla. Web apps, live.",
+    web: "Job Toast · Fire Store. Web apps, live and archived.",
     tools: "El Form · Claude Skills · Swash Flag · Bot Battle · Regexplain · Throttle. Libraries, SDKs, and dev tooling.",
     ai: "Cerebro. A native macOS multi-agent workspace orchestrating coding agents.",
     music: "Alex's Hand · 10 years · 10 albums · 12 countries → alexshand.bandcamp.com",

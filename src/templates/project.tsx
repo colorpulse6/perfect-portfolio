@@ -15,6 +15,9 @@ interface ProjectNode {
   slug: string
   description: string
   link: string
+  cta?: string | null
+  secondaryLink?: string | null
+  secondaryCta?: string | null
   github: string | null
   medium: string
   status: string
@@ -53,6 +56,10 @@ const ProjectTemplate: React.FC<ProjectTemplateProps> = ({
   usePageTransition(transitionStatus, ".project-detail", { enter: 1, exit: 0.3, mount: 1 })
 
   const media = resolveProjectMedia(p.name, p.imgSrc)
+  const isPortraitProject = p.name === "Throttle" || p.name === "Sector Zero"
+  const mediaStyle: React.CSSProperties = isPortraitProject
+    ? { width: "min(420px, 100%)", display: "block", margin: "0 auto 30px", borderRadius: 12 }
+    : { width: "100%", borderRadius: 12, marginBottom: 30 }
   const pageUrl = `${SITE_URL}/projects/${p.slug}/`
   const schema = [
     softwareApplication({
@@ -122,14 +129,14 @@ const ProjectTemplate: React.FC<ProjectTemplateProps> = ({
                 muted
                 playsInline
                 aria-label={`${p.name} preview`}
-                style={{ width: "100%", borderRadius: 12, marginBottom: 30 }}
+                style={mediaStyle}
               />
             ) : (
               <img
                 src={media}
                 alt={`${p.name} screenshot`}
                 loading="lazy"
-                style={{ width: "100%", borderRadius: 12, marginBottom: 30 }}
+                style={mediaStyle}
               />
             ))}
 
@@ -153,7 +160,12 @@ const ProjectTemplate: React.FC<ProjectTemplateProps> = ({
           <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginTop: 36 }}>
             {p.link && (
               <a href={p.link} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-                Visit ↗
+                {p.cta || "Visit"} ↗
+              </a>
+            )}
+            {p.secondaryLink && (
+              <a href={p.secondaryLink} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                {p.secondaryCta || "Site"} ↗
               </a>
             )}
             {p.github && (
@@ -175,6 +187,9 @@ export const query = graphql`
       slug
       description
       link
+      cta
+      secondaryLink
+      secondaryCta
       github
       medium
       status

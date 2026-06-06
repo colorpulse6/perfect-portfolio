@@ -20,6 +20,8 @@ interface MarkdownNode {
     featured: boolean | null
     media: string | null
     cta: string | null
+    secondaryLink: string | null
+    secondaryCta: string | null
   }
   excerpt: string
 }
@@ -64,6 +66,8 @@ const IndexPage: React.FC<IndexPageProps> = ({
       featured: true,
       media: n.frontmatter.media,
       cta: n.frontmatter.cta,
+      secondaryLink: n.frontmatter.secondaryLink,
+      secondaryCta: n.frontmatter.secondaryCta,
     }))
 
   return (
@@ -121,6 +125,8 @@ export const query = graphql`
           featured
           media
           cta
+          secondaryLink
+          secondaryCta
         }
         excerpt(pruneLength: 160)
       }

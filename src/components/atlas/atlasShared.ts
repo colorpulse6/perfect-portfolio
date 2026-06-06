@@ -49,6 +49,11 @@ export function hx(h: string): RGB {
 
 // ── Atlas data model (shared by the page, canvas, and panels) ─────────
 
+export interface AtlasWorkLink {
+  cta: string
+  link: string
+}
+
 /** A body orbiting a cluster hub: a project, an essay, or a fiction story. */
 export interface AtlasWork {
   t: string // title
@@ -61,6 +66,7 @@ export interface AtlasWork {
   status?: string // released | live | in-progress | published | archive
   cta?: string // OPEN | INSTALL | READ ...
   link?: string | null
+  links?: AtlasWorkLink[]
   github?: string | null
   kind?: string // "story" for fiction sub-star entries
   fi?: number // index into the fiction[] array for story works

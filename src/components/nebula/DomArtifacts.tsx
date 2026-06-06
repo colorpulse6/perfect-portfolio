@@ -38,6 +38,8 @@ export interface FeaturedEntry {
   featured: boolean
   media: string | null
   cta: string | null
+  secondaryLink: string | null
+  secondaryCta: string | null
 }
 
 interface DomArtifactsProps {
@@ -561,6 +563,23 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                       }}
                     >
                       {ctaLabel} &#x2192;
+                    </a>
+                  )}
+                  {entry.secondaryLink && (
+                    <a
+                      href={entry.secondaryLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = "rgba(255,255,255,0.8)"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = "rgba(255,255,255,0.5)"
+                      }}
+                    >
+                      {entry.secondaryCta || "Site"} &#x2192;
                     </a>
                   )}
                   <a

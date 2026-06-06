@@ -17,6 +17,9 @@ interface ProjectQueryData {
       ref: string
       description: string
       link: string
+      cta?: string
+      secondaryLink?: string
+      secondaryCta?: string
       github?: string
       imgSrc: string
       id: string
@@ -49,6 +52,9 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
           ref
           description
           link
+          cta
+          secondaryLink
+          secondaryCta
           github
           imgSrc
           id
@@ -93,6 +99,9 @@ const Projects: React.FC<ProjectsProps> = ({ transitionStatus, location }) => {
                 techArray={getImages(project.techArray)}
                 index={i}
                 link={project.link}
+                cta={project.cta}
+                secondaryLink={project.secondaryLink}
+                secondaryCta={project.secondaryCta}
                 slug={project.slug}
                 github={project.github}
                 key={project.id}

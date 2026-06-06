@@ -1,0 +1,187 @@
+/* Left-side slowly-scrolling rail of project cards for the Atlas.
+   Cards drift up and dissolve into the fog at both edges. Hover pauses. */
+
+.atlas-rail {
+  position: absolute;
+  left: 30px;
+  top: 92px;
+  bottom: 70px;
+  width: 244px;
+  overflow: hidden;
+  z-index: 6;
+  pointer-events: auto;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(111, 216, 224, 0.42) transparent;
+}
+.atlas-rail:hover {
+  overflow-y: auto;
+}
+.atlas-rail::-webkit-scrollbar {
+  width: 4px;
+}
+.atlas-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+.atlas-rail::-webkit-scrollbar-thumb {
+  background: rgba(111, 216, 224, 0.35);
+  border-radius: 999px;
+}
+
+.atlas-rail__eyebrow {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #6fd8e0;
+}
+.atlas-rail__eyebrow::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #6fd8e0;
+  box-shadow: 0 0 8px #6fd8e0;
+}
+
+.atlas-rail__track {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-top: 26px;
+  animation: atlas-rail-roll 52s linear infinite;
+}
+@keyframes atlas-rail-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+.atlas-rail:hover .atlas-rail__track {
+  animation-play-state: paused;
+}
+.atlas-rail--manual .atlas-rail__track {
+  position: static;
+  animation: none;
+  transform: none;
+}
+
+.atlas-rail__card {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 10px 11px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(10, 14, 22, 0.66), rgba(7, 7, 18, 0.6));
+  border: 1px solid rgba(111, 216, 224, 0.16);
+  box-shadow: 0 18px 40px -28px #000, inset 0 1px 0 rgba(207, 234, 255, 0.05);
+  cursor: pointer;
+  pointer-events: auto;
+  font: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.atlas-rail__card:hover {
+  border-color: rgba(111, 216, 224, 0.5);
+  transform: translateX(3px);
+  background: linear-gradient(180deg, rgba(14, 20, 30, 0.82), rgba(10, 10, 22, 0.72));
+}
+.atlas-rail__card:focus-visible {
+  outline: 1px solid #6fd8e0;
+  outline-offset: 2px;
+}
+
+.atlas-rail__thumb {
+  position: relative;
+  overflow: hidden;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 7px;
+  border: 1px solid rgba(150, 170, 255, 0.12);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.28);
+}
+.atlas-rail__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.95;
+}
+.atlas-rail__thumb-fallback {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: rgba(207, 234, 255, 0.34);
+  box-shadow: 0 0 18px rgba(111, 216, 224, 0.35);
+}
+
+.atlas-rail__meta {
+  min-width: 0;
+  flex: 1;
+}
+.atlas-rail__nm {
+  display: block;
+  font-family: "Space Grotesk", "Montserrat", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #cfeaff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 16px rgba(111, 216, 224, 0.25);
+}
+.atlas-rail__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(160, 172, 220, 0.55);
+  white-space: nowrap;
+}
+.atlas-rail__sub .d {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: 50%;
+}
+.atlas-rail__sub-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* hide on tablet/mobile; this is a desktop-atmosphere flourish */
+@media (max-width: 900px) {
+  .atlas-rail {
+    display: none;
+  }
+}
+
+/* reduced motion: no auto-scroll, becomes a normal scrollable list */
+@media (prefers-reduced-motion: reduce) {
+  .atlas-rail {
+    overflow-y: auto;
+    pointer-events: auto;
+  }
+  .atlas-rail__track {
+    position: static;
+    animation: none;
+  }
+}

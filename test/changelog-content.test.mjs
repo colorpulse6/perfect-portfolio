@@ -88,3 +88,19 @@ test("Cerebro changelog entry is featured as an in-progress macOS project", () =
   )
   assert.match(markdown, /native macOS multi-agent workspace/i)
 })
+
+test("Sector Zero changelog entry uses the cockpit screenshot", () => {
+  const markdown = readChangelogEntry("sector-zero-new-modes")
+
+  assert.equal(frontmatterValue(markdown, "title"), "Sector Zero: New Playable Modes")
+  assert.equal(frontmatterValue(markdown, "link"), "https://colorpulse6.github.io/knicks-knacks/sector-zero/")
+  assert.equal(frontmatterValue(markdown, "status"), "in-progress")
+  assert.equal(frontmatterValue(markdown, "featured"), "true")
+  assert.equal(frontmatterValue(markdown, "project"), "Knicks Knacks")
+  assert.equal(frontmatterValue(markdown, "media"), "sector-zero.jpg")
+  assert.equal(
+    fs.existsSync(path.join(rootDir, "src", "images", frontmatterValue(markdown, "media"))),
+    true
+  )
+  assert.match(markdown, /three new playable modes/i)
+})

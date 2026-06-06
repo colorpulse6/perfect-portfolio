@@ -111,7 +111,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       tech: ["Claude Code", "Python", "Bash"],
       link: "https://github.com/colorpulse6/claude-skills",
       github: "https://github.com/colorpulse6/claude-skills",
-      techArray: [31, 18, 30],
+      techArray: [18, 30],
       ref: "claudeSkillsRef",
       imgSrc: "claude-skills.png",
       description:
@@ -148,6 +148,23 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "A browser-based arcade platform featuring classic and modern games with player profiles and persistent stat tracking.",
     },
     {
+      name: "Sector Zero",
+      cluster: "games",
+      status: "in-progress",
+      medium: "BROWSER GAME",
+      tech: ["TypeScript", "Canvas"],
+      link: "https://colorpulse6.github.io/knicks-knacks/sector-zero/",
+      cta: "Play",
+      secondaryLink: "https://colorpulse6.github.io/sector-zero/site/",
+      secondaryCta: "Site",
+      github: "https://github.com/colorpulse6/knicks-knacks",
+      techArray: [14, 8],
+      ref: "sectorZeroRef",
+      imgSrc: "sector-zero.jpg",
+      description:
+        "Procedural space survival with drop-in co-op. New modes in active development.",
+    },
+    {
       name: "Regexplain",
       cluster: "tools",
       status: "live",
@@ -179,6 +196,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Hoop.It.App",
+      disabled: true,
       cluster: "web",
       status: "archive",
       medium: "WEB + MOBILE",
@@ -209,6 +227,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     },
     {
       name: "Gigzilla",
+      disabled: true,
       cluster: "web",
       status: "archive",
       medium: "WEB APP",
@@ -238,13 +257,16 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
         "Mad Science is a game where the player must click on the appropriate balls falling from the screen to fill his beakers with ingredients. Each beaker will hold 3 ingredients. If the player fills 4 beakers he will advance to the next level. The player starts with 10 lives and will loose a life if a target ball falls to the floor before he is able to catch it. He will also gain a life as well as score points if he clicks on a target ball.",
     },
   ]
-  projects.forEach(project => {
+  projects.filter(project => project.disabled !== true).forEach(project => {
     const node = {
       name: project.name,
       slug: slugify(project.name),
       techArray: project.techArray,
       description: project.description,
       link: project.link,
+      cta: project.cta,
+      secondaryLink: project.secondaryLink,
+      secondaryCta: project.secondaryCta,
       github: project.github,
       imgSrc: project.imgSrc,
       ref: project.ref,
@@ -252,6 +274,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       status: project.status,
       medium: project.medium,
       tech: project.tech,
+      disabled: project.disabled === true,
       id: createNodeId(`Project-${project.name}`),
       internal: {
         type: "Project",

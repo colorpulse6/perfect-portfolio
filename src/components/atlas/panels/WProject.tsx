@@ -25,6 +25,7 @@ export function WProject({
   const tech = work && work.tech
   const link = work && work.link
   const cta = (work && work.cta) || "OPEN"
+  const links = work?.links?.length ? work.links : link ? [{ cta, link }] : []
   const github = work && work.github
   const meta = [date, medium].filter(Boolean).join(" · ")
   return (
@@ -115,7 +116,7 @@ export function WProject({
           ))}
         </div>
       )}
-      {link && (
+      {links.length > 0 && (
         <div
           style={{
             display: "flex",
@@ -125,14 +126,17 @@ export function WProject({
             marginTop: 22,
           }}
         >
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ ...linkS(accent), display: "inline-block" }}
-          >
-            {cta.toUpperCase()} →
-          </a>
+          {links.map(({ cta, link }) => (
+            <a
+              key={`${cta}-${link}`}
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...linkS(accent), display: "inline-block" }}
+            >
+              {cta.toUpperCase()} →
+            </a>
+          ))}
           {github && (
             <a
               href={github}

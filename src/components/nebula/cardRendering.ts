@@ -3,6 +3,7 @@ import BrainAtlasVid from "../../images/brain-atlas-spin.mp4"
 import CerebroMyceliumVid from "../../images/cerebro-mycelium.mp4"
 import ThrottleDashboard from "../../images/throttle-dashboard.png"
 import CerebroDashboard from "../../images/cerebro-dashboard.png"
+import SectorZeroImg from "../../images/sector-zero.jpg"
 import { isVideo } from "../../helpers/projectImages"
 import { FloatingItem } from "./floatingPhysics"
 
@@ -25,12 +26,14 @@ export const MEDIA_ASSETS: Record<string, string> = {
   "cerebro-mycelium.mp4": CerebroMyceliumVid,
   "throttle-dashboard.png": ThrottleDashboard,
   "cerebro-dashboard.png": CerebroDashboard,
+  "sector-zero.jpg": SectorZeroImg,
 }
 
-export const CONTAIN_MEDIA = new Set(["throttle-dashboard.png", "cerebro-dashboard.png"])
+export const CONTAIN_MEDIA = new Set(["throttle-dashboard.png", "cerebro-dashboard.png", "sector-zero.jpg"])
 export const MEDIA_HEIGHTS: Record<string, number> = {
   "throttle-dashboard.png": 220,
   "cerebro-dashboard.png": 150,
+  "sector-zero.jpg": 220,
 }
 
 export function isContainMedia(media: string | null): boolean {

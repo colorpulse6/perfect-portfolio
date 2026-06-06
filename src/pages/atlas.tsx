@@ -19,6 +19,9 @@ interface ProjectNode {
   name: string
   description: string
   link: string
+  cta?: string | null
+  secondaryLink?: string | null
+  secondaryCta?: string | null
   github: string | null
   imgSrc: string
   techArray: number[]
@@ -27,6 +30,7 @@ interface ProjectNode {
   status: string
   medium: string
   tech: string[]
+  disabled?: boolean
 }
 interface WritingNode {
   title: string
@@ -72,7 +76,7 @@ const CTA_NAME: Record<string, string> = {
   "Knicks Knacks": "Open",
 }
 
-// Curated bodies that aren't in allProject (kept atlas-only; /projects unchanged).
+// Curated bodies that aren't in allProject.
 const CURATED: Record<string, AtlasWork[]> = {
   obsidian: [
     {
@@ -85,19 +89,6 @@ const CURATED: Record<string, AtlasWork[]> = {
       status: "released",
       cta: "Install",
       link: "https://community.obsidian.md/plugins/cerebro-mycelium",
-    },
-  ],
-  games: [
-    {
-      t: "Sector Zero",
-      meta: "procedural space survival + co-op",
-      body: "Procedural space survival with drop-in co-op. New modes in active development.",
-      media: null,
-      medium: "BROWSER GAME",
-      tech: ["TypeScript", "Canvas"],
-      status: "in-progress",
-      cta: "Play",
-      link: "https://colorpulse6.github.io/knicks-knacks/sector-zero/",
     },
   ],
   music: [
@@ -120,21 +111,39 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
 
   const { domains, fiction, essays, changelog } = useMemo(() => {
     const projects = data.allProject.nodes
+    const activeProjects = projects.filter(p => p.disabled !== true)
     const md = data.allMarkdownRemark.nodes
 
-    const toWork = (p: ProjectNode): AtlasWork => ({
-      t: p.name,
-      meta: p.description,
-      body: p.description,
-      media: resolveProjectMedia(p.name, p.imgSrc),
-      medium: p.medium,
-      tech: p.tech || [],
-      status: p.status || "released",
-      cta: CTA_NAME[p.name] || CTA_CLUSTER[p.cluster] || "Open",
-      link: p.link,
-      github: p.github || null,
-    })
-    const byCluster = (c: string) => projects.filter(p => p.cluster === c).map(toWork)
+    const toWork = (p: ProjectNode): AtlasWork => {
+      const cta = p.cta || CTA_NAME[p.name] || CTA_CLUSTER[p.cluster] || "Open"
+      const links =
+        p.name === "Sector Zero" && p.secondaryLink
+          ? [
+              { cta: "Play", link: p.link },
+              { cta: "Site", link: p.secondaryLink },
+            ]
+          : p.secondaryLink
+            ? [
+                { cta, link: p.link },
+                { cta: p.secondaryCta || "Site", link: p.secondaryLink },
+              ]
+            : undefined
+
+      return {
+        t: p.name,
+        meta: p.description,
+        body: p.description,
+        media: resolveProjectMedia(p.name, p.imgSrc),
+        medium: p.medium,
+        tech: p.tech || [],
+        status: p.status || "released",
+        cta,
+        link: p.link,
+        links,
+        github: p.github || null,
+      }
+    }
+    const byCluster = (c: string) => activeProjects.filter(p => p.cluster === c).map(toWork)
 
     const essayNodes = md.filter(n => n.frontmatter.type === "writing")
     const essays: EssayItem[] = essayNodes.map(n => ({
@@ -172,7 +181,7 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
 
     const obsidianWorks = [...byCluster("obsidian"), ...CURATED.obsidian]
     const webWorks = byCluster("web")
-    const gamesWorks = [...byCluster("games"), ...CURATED.games]
+    const gamesWorks = byCluster("games")
     const toolsWorks = byCluster("tools")
     const aiWorks = byCluster("ai")
     const sitesWorks = byCluster("sites")
@@ -292,6 +301,9 @@ export const query = graphql`
         name
         description
         link
+        cta
+        secondaryLink
+        secondaryCta
         github
         imgSrc
         techArray
@@ -300,6 +312,7 @@ export const query = graphql`
         status
         medium
         tech
+        disabled
       }
     }
     allWriting {

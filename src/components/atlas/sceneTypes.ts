@@ -86,6 +86,12 @@ export interface PlanetHit {
   y: number
   r: number
   pi: number // planet index within the entered hub's system
+  label?: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
 }
 
 /** A per-frame hit region for the fiction sub-star (screen space). */

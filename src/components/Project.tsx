@@ -4,6 +4,7 @@ import {
   LOCAL_PRIMARY_IMAGES,
   PRIMARY_VIDEOS,
   HOVER_VIDEOS,
+  isVideo,
 } from "../helpers/projectImages"
 import { Fade, Flip } from "react-awesome-reveal"
 import TransitionLink from "gatsby-plugin-transition-link"
@@ -22,6 +23,12 @@ interface ProjectProps {
   name: string
   /** URL link to the live project */
   link: string
+  /** Label for the live project link */
+  cta?: string
+  /** Optional secondary project URL */
+  secondaryLink?: string
+  /** Label for the secondary project URL */
+  secondaryCta?: string
   /** Slug for the project's detail page (/projects/<slug>) */
   slug: string
   /** GitHub repository URL (optional) */
@@ -46,6 +53,9 @@ interface ProjectProps {
 const Project: React.FC<ProjectProps> = ({
   name,
   link,
+  cta,
+  secondaryLink,
+  secondaryCta,
   slug,
   github,
   image,
@@ -67,7 +77,7 @@ const Project: React.FC<ProjectProps> = ({
     setLinkHover({ active: false, index: "" })
   }
 
-  const isPortraitProject = name === "Throttle"
+  const isPortraitProject = name === "Throttle" || name === "Sector Zero"
   const isContainProject = name === "Cerebro"
   const imageClassName = isPortraitProject
     ? "project-images project-images--portrait"
@@ -85,7 +95,7 @@ const Project: React.FC<ProjectProps> = ({
         <video
           className={imageClassName}
           src={video}
-          poster={HOVER_VIDEOS[name] ? image : undefined}
+          poster={HOVER_VIDEOS[name] && !isVideo(image) ? image : undefined}
           muted
           loop
           playsInline
@@ -141,7 +151,6 @@ const Project: React.FC<ProjectProps> = ({
                   >
                     {name}
                   </h3>
-                  <span>{name === "Gigzilla" && " (Deprecated)"}</span>
                 </TransitionLink>
               </Spring>
               <p>{description}</p>
@@ -149,6 +158,48 @@ const Project: React.FC<ProjectProps> = ({
           </Fade>
           <Flip direction="horizontal" cascade duration={500}>
             <div>
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseEnter={() => handleLinkMouseEnter("link")}
+                onMouseLeave={handleLinkMouseLeave}
+              >
+                <Spring isTitle={true}>
+                  <h2
+                    className={
+                      linkHover.active && linkHover.index === "link"
+                        ? "background-video"
+                        : ""
+                    }
+                  >
+                    {cta || "URL"}
+                  </h2>
+                </Spring>
+              </a>
+
+              {secondaryLink && (
+                <a
+                  href={secondaryLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={() => handleLinkMouseEnter("secondary")}
+                  onMouseLeave={handleLinkMouseLeave}
+                >
+                  <Spring isTitle={true}>
+                    <h2
+                      className={
+                        linkHover.active && linkHover.index === "secondary"
+                          ? "background-video"
+                          : ""
+                      }
+                    >
+                      {secondaryCta || "Site"}
+                    </h2>
+                  </Spring>
+                </a>
+              )}
+
               {github && (
                 <a
                   href={github}
@@ -170,26 +221,6 @@ const Project: React.FC<ProjectProps> = ({
                   </Spring>
                 </a>
               )}
-
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                onMouseEnter={() => handleLinkMouseEnter("link")}
-                onMouseLeave={handleLinkMouseLeave}
-              >
-                <Spring isTitle={true}>
-                  <h2
-                    className={
-                      linkHover.active && linkHover.index === "link"
-                        ? "background-video"
-                        : ""
-                    }
-                  >
-                    URL
-                  </h2>
-                </Spring>
-              </a>
             </div>
           </Flip>
         </div>
