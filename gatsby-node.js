@@ -111,7 +111,7 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
       tech: ["Claude Code", "Python", "Bash"],
       link: "https://github.com/colorpulse6/claude-skills",
       github: "https://github.com/colorpulse6/claude-skills",
-      techArray: [29, 18, 30],
+      techArray: [31, 18, 30],
       ref: "claudeSkillsRef",
       imgSrc: "claude-skills.png",
       description:

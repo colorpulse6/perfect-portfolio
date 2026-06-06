@@ -29,6 +29,7 @@ import next from "../images/nextjs.png"
 import cursor from "../images/cursor.png"
 import AI from "../images/AI.jpg"
 import Github from "../images/github.png"
+import claude from "../images/claude.png"
 
 // Type for image file paths (what Gatsby/Webpack returns for static imports)
 type ImagePath = string
@@ -66,6 +67,7 @@ export const techImages: readonly ImagePath[] = [
   cursor, // 28 - Cursor
   AI, // 29 - AI/Machine Learning,
   Github, // 30 - Github
+  claude, // 31 - Claude
 ] as const
 
 // Type for valid tech image indices
