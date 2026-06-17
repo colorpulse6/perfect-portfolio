@@ -77,6 +77,32 @@ export const ARTIFACTS: ArtifactDef[] = [
     externalLink: "https://colorpulse6.github.io/knicks-knacks/",
     viewBox: "0 0 24 24",
   },
+  {
+    id: "galatlas",
+    iconPaths: [
+      "M9 12a3 3 0 1 0 6 0 3 3 0 1 0-6 0z",
+      "M17 5a2 2 0 1 0 4 0 2 2 0 1 0-4 0z",
+      "M3 19a2 2 0 1 0 4 0 2 2 0 1 0-4 0z",
+      "M10.4 21.9a10 10 0 0 0 9.941-15.416",
+      "M13.5 2.1a10 10 0 0 0-9.841 15.416",
+    ],
+    quote: "From one rocky world to the cosmic web.",
+    link: null,
+    externalLink: "https://galatlas.com/",
+    viewBox: "0 0 24 24",
+  },
+  {
+    id: "polis-atlas",
+    iconPaths: [
+      "M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z",
+      "M2 12h20",
+      "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+    ],
+    quote: "Fifty ideologies, from total state to none.",
+    link: null,
+    externalLink: "https://polisatlas.com/",
+    viewBox: "0 0 24 24",
+  },
 ]
 
 /** Quotes that cycle in terminal but are not tied to an artifact */

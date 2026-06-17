@@ -21,6 +21,19 @@ const slugify = s =>
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
   const projects = [
     {
+      name: "GalAtlas",
+      cluster: "sites",
+      status: "live",
+      medium: "WEB APP",
+      tech: ["React", "TypeScript", "Three.js", "Vite"],
+      link: "https://galatlas.com/",
+      techArray: [13, 14, 21],
+      ref: "galatlasRef",
+      imgSrc: "galatlas.jpg",
+      description:
+        "A cinematic 3D atlas of exoplanets and the cosmos: fly from a single rocky world out to its planetary system, the Milky Way, and the cosmic web beyond, with real catalog data, discovery timelines, and habitability readouts over a full-bleed WebGL stage.",
+    },
+    {
       name: "Polis Atlas",
       cluster: "sites",
       status: "live",

@@ -10,7 +10,9 @@ import ElFormLanding from "../images/elform-landing.png"
 import ClaudeSkillsImg from "../images/claude-skills.png"
 import PolisAtlasImg from "../images/polis-atlas.jpg"
 import SectorZeroImg from "../images/sector-zero.jpg"
+import GalatlasImg from "../images/galatlas.jpg"
 import PolisAtlasVid from "../images/polis-atlas.mp4"
+import GalatlasVid from "../images/galatlas.mp4"
 import BrainAtlasVid from "../images/brain-atlas-spin.mp4"
 import ElFormVid from "../images/elform-docs-dark.mp4"
 import CerebroMyceliumVid from "../images/cerebro-mycelium.mp4"
@@ -25,6 +27,7 @@ export const LOCAL_PRIMARY_IMAGES: Record<string, string> = {
   "Claude Skills": ClaudeSkillsImg,
   "Polis Atlas": PolisAtlasImg,
   "Sector Zero": SectorZeroImg,
+  "GalAtlas": GalatlasImg,
 }
 
 /** Always-animated primary clips (rendered as an autoplaying muted <video>). */
@@ -32,6 +35,7 @@ export const PRIMARY_VIDEOS: Record<string, string> = {
   "Brain Atlas": BrainAtlasVid,
   "Cerebro Mycelium": CerebroMyceliumVid,
   "Polis Atlas": PolisAtlasVid,
+  "GalAtlas": GalatlasVid,
 }
 
 /** Animated clips shown on hover (poster = the project's static screenshot). */
