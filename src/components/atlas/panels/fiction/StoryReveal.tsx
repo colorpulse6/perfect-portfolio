@@ -45,19 +45,24 @@ export function StoryReveal({
     }
 
     let wi = 0
+    if (bodyRef.current) bodyRef.current.scrollTop = 0 // start at the top so the reveal is visible from the first word
     const tick = () => {
       if (wi >= allWords.length) {
         setDone(true)
         return
       }
+      const body = bodyRef.current
+      // follow the reveal, but only while the reader is near the bottom — so a
+      // manual scroll-up to re-read isn't yanked back down
+      const stick = body ? body.scrollHeight - body.scrollTop - body.clientHeight < 64 : true
       const { span, isParaEnd } = allWords[wi]
       span.classList.add("visible")
-      if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+      if (body && stick) body.scrollTop = body.scrollHeight
       wi++
       const word = span.textContent || ""
       timerRef.current = window.setTimeout(tick, revealDelay(word, isParaEnd))
     }
-    timerRef.current = window.setTimeout(tick, 300)
+    timerRef.current = window.setTimeout(tick, 80)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
@@ -67,7 +72,9 @@ export function StoryReveal({
     if (timerRef.current) clearTimeout(timerRef.current)
     spansRef.current.forEach(s => s.classList.add("visible"))
     setDone(true)
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+    // reveal everything and jump back to the top so the reader starts from the
+    // beginning of the story and can scroll down through it
+    if (bodyRef.current) bodyRef.current.scrollTop = 0
   }
 
   return (
@@ -117,8 +124,12 @@ export function StoryReveal({
         className="atlas-reader-body"
         style={{
           maxWidth: 560,
-          maxHeight: "44vh",
-          overflow: "hidden",
+          maxHeight: "52vh",
+          overflowY: "auto",
+          // the reader must be interactive even though the centering wrapper sets
+          // pointerEvents:none, or the user can't scroll it during/after the reveal
+          pointerEvents: "auto",
+          overscrollBehavior: "contain",
           padding: "0 8px",
           textAlign: "left",
           WebkitMaskImage:

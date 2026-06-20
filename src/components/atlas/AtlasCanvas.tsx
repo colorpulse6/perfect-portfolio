@@ -1364,12 +1364,21 @@ export default function AtlasCanvas({
       </div>
 
       {entered >= 0 && (
-        <div
+        <button
+          type="button"
           onClick={resetToGalaxy}
           style={{
             position: "absolute",
             top: 72,
             left: 26,
+            // sit above the Wraith panel overlay (zIndex 60) so "back to galaxy"
+            // is clickable even with a project panel open — resetToGalaxy closes
+            // the panel and flies back out in one step
+            zIndex: 70,
+            pointerEvents: "auto",
+            background: "none",
+            border: "none",
+            padding: 0,
             cursor: "pointer",
             fontFamily: MONO,
             fontSize: 11,
@@ -1381,7 +1390,7 @@ export default function AtlasCanvas({
           }}
         >
           ← BACK TO GALAXY
-        </div>
+        </button>
       )}
 
       {term && <AtlasTerminal onClose={() => setTerm(false)} />}
