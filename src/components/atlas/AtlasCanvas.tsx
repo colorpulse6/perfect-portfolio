@@ -1256,7 +1256,7 @@ export default function AtlasCanvas({
         style={{ position: "absolute", inset: 0 }}
       />
 
-      <div style={{ position: "absolute", top: 22, left: 26 }}>
+      <div style={{ position: "absolute", top: 22, left: 26, zIndex: 70 }}>
         <TransitionLink
           to="/"
           exit={{ length: 1 }}
@@ -1279,12 +1279,12 @@ export default function AtlasCanvas({
           }}
           onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
             const b = e.currentTarget.querySelector(".wm-back") as HTMLElement | null
-            if (b) b.style.opacity = "0.55"
+            if (b) b.style.opacity = "0.9"
           }}
         >
           <span style={{ width: 7, height: 7, borderRadius: 99, background: A.cyan, boxShadow: `0 0 10px ${A.cyan}` }} />
           NICHALAS BARNES <span style={{ color: A.fainter }}>– ATLAS</span>
-          <span className="wm-back" style={{ color: A.cyan, opacity: 0.55, transition: "opacity 0.2s", fontSize: 11 }}>
+          <span className="wm-back" style={{ color: A.cyan, opacity: 0.9, transition: "opacity 0.2s", fontSize: 11, fontWeight: 700 }}>
             &nbsp; ← HOME
           </span>
         </TransitionLink>
