@@ -1,0 +1,137 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,700");
+
+.newsletter-index {
+  margin: 150px 150px 0;
+  text-align: center;
+}
+
+.newsletter-index .second-title {
+  margin-top: -100px;
+  font-size: 48px;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.newsletter-index-content {
+  max-width: 720px;
+  margin: -180px auto 0;
+  padding-bottom: 120px;
+  color: #bbb;
+  text-align: left;
+}
+
+.newsletter-index-heading {
+  margin: 0 0 48px;
+  color: rgba(238, 242, 255, 0.96);
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.newsletter-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.newsletter-row {
+  padding: 30px 0 34px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.newsletter-row-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  color: rgba(150, 165, 210, 0.62);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.newsletter-row-title {
+  margin: 0 0 10px;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.newsletter-row-title a {
+  color: rgba(238, 242, 255, 0.96);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.newsletter-row-title a:hover {
+  color: #36e6db;
+}
+
+.newsletter-row-deck {
+  margin: 0;
+  color: rgba(210, 218, 240, 0.66);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.newsletter-empty {
+  margin: 60px 0 0;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .newsletter-index {
+    margin: 100px 50px 0;
+  }
+
+  .newsletter-index .second-title {
+    margin-top: -60px;
+    font-size: 36px;
+  }
+
+  .newsletter-index-content {
+    margin-top: -120px;
+  }
+
+  .newsletter-index-heading {
+    font-size: 30px;
+  }
+}
+
+@media only screen and (max-width: 550px) {
+  .newsletter-index {
+    margin: 60px 15px 0;
+  }
+
+  .newsletter-index .second-title {
+    margin-top: -30px;
+    margin-bottom: 100px;
+    font-size: 24px !important;
+  }
+
+  .newsletter-index-content {
+    margin-top: -60px;
+  }
+
+  .newsletter-index-heading {
+    margin-bottom: 32px;
+    font-size: 26px;
+  }
+
+  .newsletter-row {
+    padding: 24px 0 28px;
+  }
+
+  .newsletter-row-meta {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .newsletter-row-title {
+    font-size: 21px;
+  }
+}

@@ -905,6 +905,28 @@ exports.createPages = async ({ graphql, actions }) => {
       context: { slug: p.slug },
     })
   })
+
+  const newsletterResult = await graphql(`
+    query {
+      allMarkdownRemark(filter: { fields: { sourceInstanceName: { eq: "newsletter" } } }) {
+        nodes {
+          fields {
+            slug
+          }
+        }
+      }
+    }
+  `)
+  if (newsletterResult.errors) throw newsletterResult.errors
+  const issueTemplate = require.resolve("./src/templates/newsletter-issue.tsx")
+  newsletterResult.data.allMarkdownRemark.nodes.forEach(n => {
+    if (!n.fields?.slug) return
+    actions.createPage({
+      path: `/newsletter/${n.fields.slug}`,
+      component: issueTemplate,
+      context: { slug: n.fields.slug },
+    })
+  })
 }
 
 // Tag every MarkdownRemark node with its filesystem source (changelog vs newsletter)
