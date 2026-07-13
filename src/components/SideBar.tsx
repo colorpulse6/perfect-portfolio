@@ -40,7 +40,7 @@ const SideBar: React.FC<SideBarProps> = ({ navOpen, setNavOpen }) => {
     ref: sidebarRef,
   })
 
-  const items = ["Home", "Projects", "Changelog", "About", "Contact"]
+  const items = ["Home", "Projects", "Changelog", "Newsletter", "About", "Contact"]
   const itemsRef = useRef<any>(null)
   const trail = useTransition(navOpen ? items : [], item => item, {
     from: {

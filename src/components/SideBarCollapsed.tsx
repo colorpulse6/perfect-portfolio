@@ -6,7 +6,7 @@ import { IconType } from "react-icons"
 import { AiOutlineHome } from "react-icons/ai"
 import { GoProjectRoadmap } from "react-icons/go"
 import { BsPersonVcard } from "react-icons/bs"
-import { HiOutlineMail } from "react-icons/hi"
+import { HiOutlineMail, HiOutlineNewspaper } from "react-icons/hi"
 import { VscHistory } from "react-icons/vsc"
 
 interface NavItem {
@@ -30,6 +30,7 @@ const SideBarCollapsed: React.FC<SideBarCollapsedProps> = ({ currentWindow }) =>
     { name: "Home", icon: AiOutlineHome },
     { name: "Projects", icon: GoProjectRoadmap },
     { name: "Changelog", icon: VscHistory },
+    { name: "Newsletter", icon: HiOutlineNewspaper },
     { name: "About", icon: BsPersonVcard },
     { name: "Contact", icon: HiOutlineMail },
   ]

@@ -26,6 +26,10 @@ module.exports = {
         name: "writing",
         link: "/writing",
       },
+      {
+        name: "newsletter",
+        link: "/newsletter",
+      },
     ],
   },
   plugins: [
@@ -51,6 +55,13 @@ module.exports = {
       options: {
         name: `changelog`,
         path: `${__dirname}/content/changelog`,
+      },
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `newsletter`,
+        path: `${__dirname}/content/newsletter`,
       },
     },
     {
