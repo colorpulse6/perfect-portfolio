@@ -321,7 +321,10 @@ export const query = graphql`
         content
       }
     }
-    allMarkdownRemark(sort: { frontmatter: { date: DESC } }) {
+    allMarkdownRemark(
+      filter: { fields: { sourceInstanceName: { eq: "changelog" } } }
+      sort: { frontmatter: { date: DESC } }
+    ) {
       nodes {
         frontmatter {
           title

@@ -112,6 +112,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
 export const query = graphql`
   query FeaturedChangelog {
     allMarkdownRemark(
+      filter: { fields: { sourceInstanceName: { eq: "changelog" } } }
       sort: { frontmatter: { date: DESC } }
     ) {
       nodes {

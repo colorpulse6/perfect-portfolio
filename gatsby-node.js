@@ -906,3 +906,35 @@ exports.createPages = async ({ graphql, actions }) => {
     })
   })
 }
+
+// Tag every MarkdownRemark node with its filesystem source (changelog vs newsletter)
+// so pages can filter. Newsletter issues also get a stable slug from their directory.
+exports.onCreateNode = ({ node, getNode, actions }) => {
+  if (node.internal.type !== "MarkdownRemark") return
+  const parent = getNode(node.parent)
+  const sourceInstanceName = parent.sourceInstanceName || ""
+  actions.createNodeField({ node, name: "sourceInstanceName", value: sourceInstanceName })
+  if (sourceInstanceName === "newsletter") {
+    // content/newsletter/<week>/index.md → slug "<week>"
+    actions.createNodeField({ node, name: "slug", value: parent.relativeDirectory })
+  }
+}
+
+exports.createSchemaCustomization = ({ actions }) => {
+  actions.createTypes(`
+    type MarkdownRemarkFields {
+      sourceInstanceName: String
+      slug: String
+    }
+    type MarkdownRemarkFrontmatter {
+      issue: Int
+      deck: String
+      hero: String
+      week: String
+    }
+    type MarkdownRemark implements Node {
+      fields: MarkdownRemarkFields
+      frontmatter: MarkdownRemarkFrontmatter
+    }
+  `)
+}

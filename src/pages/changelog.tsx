@@ -165,7 +165,10 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({
 
 export const query = graphql`
   query ChangelogEntries {
-    allMarkdownRemark(sort: { frontmatter: { date: DESC } }) {
+    allMarkdownRemark(
+      filter: { fields: { sourceInstanceName: { eq: "changelog" } } }
+      sort: { frontmatter: { date: DESC } }
+    ) {
       nodes {
         frontmatter {
           title
