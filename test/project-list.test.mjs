@@ -19,11 +19,20 @@ function loadProjects() {
   return nodes.filter(node => node.internal.type === "Project")
 }
 
-test("Polis Atlas is the first portfolio project", () => {
+test("GalAtlas is the first portfolio project", () => {
   const projects = loadProjects()
-  const polisAtlas = projects[0]
+  const galAtlas = projects[0]
 
-  assert.equal(polisAtlas.name, "Polis Atlas")
+  assert.equal(galAtlas.name, "GalAtlas")
+  assert.equal(galAtlas.link, "https://galatlas.com/")
+  assert.equal(galAtlas.imgSrc, "galatlas.jpg")
+})
+
+test("Polis Atlas remains in the portfolio", () => {
+  const projects = loadProjects()
+  const polisAtlas = projects.find(project => project.name === "Polis Atlas")
+
+  assert.ok(polisAtlas)
   assert.equal(polisAtlas.link, "https://polisatlas.com/")
   assert.equal(polisAtlas.imgSrc, "polis-atlas.jpg")
 })
