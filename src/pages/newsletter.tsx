@@ -67,7 +67,6 @@ const NewsletterPage: React.FC<NewsletterPageProps> = ({
         </p>
 
         <div className="newsletter-index-content">
-          <h1 className="newsletter-index-heading">Newsletter</h1>
 
           {issues.length === 0 ? (
             <p className="newsletter-empty">First issue coming soon.</p>
