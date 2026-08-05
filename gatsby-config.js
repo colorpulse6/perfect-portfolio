@@ -4,6 +4,7 @@ module.exports = {
     title: `Nichalas Barnes`,
     description: `Software engineer and composer. Obsidian plugins, web apps, developer tools, AI systems, and a decade of music across the US and Europe.`,
     author: `Nichalas Barnes`,
+    twitterUsername: `@bathtubbarnes`,
     siteUrl: "https://nichalasbarnes.com/",
     menuLinks: [
       {

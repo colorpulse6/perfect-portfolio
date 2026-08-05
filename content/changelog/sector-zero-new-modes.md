@@ -2,7 +2,7 @@
 title: "Sector Zero: New Playable Modes"
 date: "2026-04-01"
 type: "project"
-link: "https://colorpulse6.github.io/knicks-knacks/sector-zero/"
+link: "https://colorpulse6.github.io/sector-zero/"
 cta: "Play"
 secondaryLink: "https://colorpulse6.github.io/sector-zero/site/"
 secondaryCta: "Site"

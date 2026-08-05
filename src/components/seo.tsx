@@ -18,6 +18,7 @@ interface SiteMetadataQuery {
       description: string
       author: string
       siteUrl: string
+      twitterUsername: string
     }
   }
 }
@@ -56,6 +57,7 @@ const SEO: React.FC<SEOProps> = ({
           description
           author
           siteUrl
+          twitterUsername
         }
       }
     }
@@ -65,7 +67,8 @@ const SEO: React.FC<SEOProps> = ({
   const defaultTitle = site.siteMetadata?.title
   const siteUrl = (site.siteMetadata?.siteUrl || "").replace(/\/+$/, "")
   const url = pathname ? `${siteUrl}${pathname}` : siteUrl
-  const ogImage = `${siteUrl}${image || "/og-image.png"}`
+  const ogImage = `${siteUrl}${image || "/og-card.png"}`
+  const twitterUsername = site.siteMetadata?.twitterUsername || ""
   const jsonLd = buildGraph(schema)
 
   return (
@@ -84,9 +87,13 @@ const SEO: React.FC<SEOProps> = ({
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
         { property: "og:image", content: ogImage },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: title },
         { property: "og:site_name", content: defaultTitle },
-        { name: "twitter:card", content: "summary" },
-        { name: "twitter:creator", content: site.siteMetadata?.author || "" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: twitterUsername },
+        { name: "twitter:creator", content: twitterUsername },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: metaDescription },
         { name: "twitter:image", content: ogImage },
