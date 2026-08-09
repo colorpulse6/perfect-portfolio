@@ -6,6 +6,7 @@ import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
 import MediumIcon from "../images/medium.webp"
 import NpmIcon from "../images/npm.png"
+import BrandMark from "../images/nic-barnes-logo.png"
 import { SiBuymeacoffee } from "react-icons/si"
 import "./header.css"
 
@@ -45,14 +46,11 @@ const Header: React.FC<HeaderProps> = ({
             <div style={{ display: "flex", alignSelf: "center" }}>
               <Link
                 to="/"
-                style={{
-                  marginLeft: atlas ? "0px" : "150px",
-                  display: "block",
-                  width: "20px",
-                  height: "20px",
-                }}
+                className={`brand-home-link${atlas ? " brand-home-link--atlas" : ""}`}
                 aria-label="Home"
-              />
+              >
+                <img className="brand-mark" src={BrandMark} alt="" />
+              </Link>
             </div>
           </Spring>
           <Spring isTitle={false}>
