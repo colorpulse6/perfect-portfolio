@@ -25,9 +25,22 @@ test("the header exposes the brand mark as the home link", () => {
   const header = fs.readFileSync("src/components/header.tsx", "utf8")
   const styles = fs.readFileSync("src/components/header.css", "utf8")
 
-  assert.match(header, /import BrandMark from "\.\.\/images\/nic-barnes-logo\.png"/)
+  assert.match(header, /import BrandMark from "\.\.\/images\/nic-barnes-logo-192\.png"/)
   assert.match(header, /<Link[\s\S]*aria-label="Home"[\s\S]*<img[\s\S]*className="brand-mark"[\s\S]*src=\{BrandMark\}/)
   assert.match(styles, /\.brand-mark\s*{[\s\S]*object-fit:\s*cover/)
+})
+
+test("the header ships a small derivative, not the full-size master", () => {
+  const master = fs.statSync("src/images/nic-barnes-logo.png").size
+  const derivative = fs.statSync("src/images/nic-barnes-logo-192.png").size
+
+  // The header renders the mark at a few dozen pixels. Serving the master cost
+  // roughly a megabyte on every page load for no visible gain.
+  assert.ok(
+    derivative < master / 10,
+    `header asset ${derivative}B should be far smaller than the ${master}B master`,
+  )
+  assert.ok(derivative < 100_000, `header asset should stay under 100KB, got ${derivative}B`)
 })
 
 test("the large social card carries the selected mark's cyan accent", async () => {

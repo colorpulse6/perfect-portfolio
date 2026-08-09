@@ -89,7 +89,7 @@ test("Sector Zero is a regular portfolio project and Claude Skills does not rend
 
   assert.ok(sectorZero)
   assert.equal(sectorZero.cluster, "games")
-  assert.equal(sectorZero.link, "https://colorpulse6.github.io/knicks-knacks/sector-zero/")
+  assert.equal(sectorZero.link, "https://colorpulse6.github.io/sector-zero/")
   assert.equal(sectorZero.cta, "Play")
   assert.equal(sectorZero.secondaryLink, "https://colorpulse6.github.io/sector-zero/site/")
   assert.equal(sectorZero.secondaryCta, "Site")

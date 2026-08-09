@@ -93,7 +93,7 @@ test("Sector Zero changelog entry uses the cockpit screenshot", () => {
   const markdown = readChangelogEntry("sector-zero-new-modes")
 
   assert.equal(frontmatterValue(markdown, "title"), "Sector Zero: New Playable Modes")
-  assert.equal(frontmatterValue(markdown, "link"), "https://colorpulse6.github.io/knicks-knacks/sector-zero/")
+  assert.equal(frontmatterValue(markdown, "link"), "https://colorpulse6.github.io/sector-zero/")
   assert.equal(frontmatterValue(markdown, "status"), "in-progress")
   assert.equal(frontmatterValue(markdown, "featured"), "true")
   assert.equal(frontmatterValue(markdown, "project"), "Knicks Knacks")

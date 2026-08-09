@@ -6,7 +6,10 @@ import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
 import MediumIcon from "../images/medium.webp"
 import NpmIcon from "../images/npm.png"
-import BrandMark from "../images/nic-barnes-logo.png"
+// A 192px derivative of the canonical mark. The full-size original stays the
+// favicon and Open Graph source, but the header only ever renders it small, and
+// shipping the 956KB master on every page load bought nothing.
+import BrandMark from "../images/nic-barnes-logo-192.png"
 import { SiBuymeacoffee } from "react-icons/si"
 import "./header.css"
 
