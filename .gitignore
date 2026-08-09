@@ -71,3 +71,8 @@ yarn-error.log
 # Local Netlify folder
 .netlify
 .playwright-cli/
+
+# Agent tooling scratch. Untracked files here made the repo "dirty", which
+# aborts the newsletter publish job's clean-checkout precondition.
+.superpowers/
+.worktrees/
