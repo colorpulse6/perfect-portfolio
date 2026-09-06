@@ -15,7 +15,7 @@ The old record is not innocent because it survived.
 
 ## The archive needs an alibi
 
-The densest thread in [Cerebro](https://github.com/colorpulse6/cerebro-orchestra) this week was interaction recovery, which sounds like the quiet administrative part of a system until you notice that recovery is where yesterday gets permission to change today.
+The densest thread in [Cerebro](https://trycerebro.com/) this week was interaction recovery, which sounds like the quiet administrative part of a system until you notice that recovery is where yesterday gets permission to change today.
 
 The work kept circling the same uncomfortable questions. Did this record belong to the membership root it claims? Can the system prove a member was absent, or did one read merely fail to find it? Is the recovered catalog complete enough to publish? Did a resolution index preserve the newest decision, or did replay order let an older answer crawl on top of it like a wet cat? How much history may be retained before recovery becomes an unbounded storage program wearing a helpful little hat?
 

@@ -31,7 +31,7 @@ The galaxy can look chaotic. The handoff cannot.
 
 ## The machine should sweat in public
 
-The most important sentence in [Cerebro](https://github.com/colorpulse6/cerebro-orchestra) this week may have been the least glamorous: publish live executor rows incrementally.
+The most important sentence in [Cerebro](https://trycerebro.com/) this week may have been the least glamorous: publish live executor rows incrementally.
 
 An agent can be doing real work for six minutes while the interface looks like a dead refrigerator. Files are opening, tools are running, decisions are being made, failures are being classified, and the person watching receives one magnificent piece of information: not done yet. The internal truth is moving while the visible truth has been taxidermied.
 

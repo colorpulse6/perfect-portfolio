@@ -76,7 +76,7 @@ test("Cerebro changelog entry is featured as an in-progress macOS project", () =
 
   assert.equal(frontmatterValue(markdown, "title"), "Cerebro: macOS Agent Workspace")
   assert.equal(frontmatterValue(markdown, "date"), "2026-05-30")
-  assert.equal(frontmatterValue(markdown, "link"), "https://github.com/colorpulse6/cerebro-orchestra")
+  assert.equal(frontmatterValue(markdown, "link"), "https://trycerebro.com/")
   assert.equal(frontmatterValue(markdown, "status"), "in-progress")
   assert.equal(frontmatterValue(markdown, "featured"), "true")
   assert.equal(frontmatterValue(markdown, "project"), "macOS")

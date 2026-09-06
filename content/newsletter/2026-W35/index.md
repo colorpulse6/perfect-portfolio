@@ -15,7 +15,7 @@ Last week I got the machine to show its hands while it worked. This week I disco
 
 ## The question goes first
 
-In one path through [Cerebro](https://github.com/colorpulse6/cerebro-orchestra), a sent message did not enter the visible transcript until the provider had something to say back. If the model thought for forty seconds, the interface held your question somewhere behind the curtain, showed you nothing, and then allowed the answer to arrive carrying its own cause like luggage.
+In one path through [Cerebro](https://trycerebro.com/), a sent message did not enter the visible transcript until the provider had something to say back. If the model thought for forty seconds, the interface held your question somewhere behind the curtain, showed you nothing, and then allowed the answer to arrive carrying its own cause like luggage.
 
 The conversation eventually looked correct. Chronologically, it was nonsense.
 
