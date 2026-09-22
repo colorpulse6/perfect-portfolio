@@ -46,9 +46,13 @@ const Contact: React.FC<ContactProps> = ({ transitionStatus, location }) => {
         </h1>
         <h4 className="lead">
           <Slide direction="right">
-            Have a question or want to work together?
+            Tell me about your project.
           </Slide>
         </h4>
+        <p className="contact-project-guidance">
+          Share what you want to build or improve, your existing stack, and your
+          target timeline. You can also email <a href="mailto:colorpulse@gmail.com">colorpulse@gmail.com</a>.
+        </p>
         {status === "sent" ? (
           <p style={{ color: "#4aba7a", fontSize: 18, marginTop: 20 }}>
             Message sent. I will get back to you soon.
