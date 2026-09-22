@@ -275,3 +275,16 @@ h1 {
 }
 
 
+
+/* A direct hiring path alongside the creative Atlas entry. */
+.home-work-link { pointer-events: auto; display: inline-flex; gap: 18px; align-items: center; padding: 14px 28px; border-radius: 999px; background: #78e4d7; color: #081c20; font: 600 15px/1.5 system-ui, sans-serif; text-decoration: none; }
+.home-work-link:hover { background: #a5f6e9; }
+.home-work-link:focus-visible { outline: 3px solid white; outline-offset: 5px; }
+
+/* Protect the introduction and both routes from the floating project cards. */
+.home-root .hometex { overflow-y: auto; }
+.home-root .title { margin: 0 auto !important; max-width: 950px; height: 100svh; min-height: 640px; padding: 120px 24px 130px; box-sizing: border-box; isolation: isolate; }
+.home-root .title::before { content: ""; position: absolute; inset: 90px -30px 80px; z-index: -1; background: radial-gradient(ellipse, rgba(10, 15, 20, .97) 20%, rgba(10, 15, 20, .86) 55%, transparent 75%); }
+.home-root h1 { font-size: clamp(34px, 5vw, 58px) !important; letter-spacing: 3px; }
+.home-root .home-intro { color: #bec8dc; }
+@media (max-width: 550px) { .home-root .title { padding: 130px 22px 130px; } .home-root h1 { font-size: 34px !important; letter-spacing: 2px; } }

@@ -158,3 +158,7 @@ textarea {
     font-size: 14px;
   }
 }
+
+.contact-project-guidance { max-width: 560px; color: #c0c9d9; font-size: 14px; line-height: 1.7; }
+.contact-project-guidance a { color: #a5f6e9; text-decoration: underline; }
+.contact-project-guidance { margin-left: auto; margin-right: auto; }

@@ -40,7 +40,7 @@ const SideBar: React.FC<SideBarProps> = ({ navOpen, setNavOpen }) => {
     ref: sidebarRef,
   })
 
-  const items = ["Home", "Projects", "Changelog", "Newsletter", "About", "Contact"]
+  const items = ["Home", "Work with me", "Projects", "Changelog", "Newsletter", "About", "Contact"]
   const itemsRef = useRef<any>(null)
   const trail = useTransition(navOpen ? items : [], item => item, {
     from: {
@@ -82,7 +82,7 @@ const SideBar: React.FC<SideBarProps> = ({ navOpen, setNavOpen }) => {
                 }}
                 style={{
                   textShadow:
-                    window.location.pathname === `/${item.toLowerCase()}` ||
+                    window.location.pathname.replace(/\/$/, "") === `/${item.toLowerCase().replace(/ /g, "-")}` ||
                     (window.location.pathname === "/" && item === "Home")
                       ? "0 0 35px white"
                       : "",
@@ -91,7 +91,7 @@ const SideBar: React.FC<SideBarProps> = ({ navOpen, setNavOpen }) => {
                   length: 1,
                 }}
                 entry={{ length: 1 }}
-                to={item != "Home" ? `/${item.toLowerCase()}` : "/"}
+                to={item != "Home" ? `/${item.toLowerCase().replace(/ /g, "-")}/` : "/"}
               >
                 {item}
               </TransitionLink>
