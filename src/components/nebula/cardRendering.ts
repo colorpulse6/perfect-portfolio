@@ -8,6 +8,7 @@ import CerebroDashboard from "../../images/cerebro-dashboard.png"
 import CerebroMission from "../../images/cerebro-mission.jpg"
 import CosmosAtlasImg from "../../images/cosmos-atlas.jpg"
 import SectorZeroImg from "../../images/sector-zero.jpg"
+import SectorZeroOpeningImg from "../../images/sector-zero-opening.jpg"
 import { isVideo } from "../../helpers/projectImages"
 import { FloatingItem } from "./floatingPhysics"
 
@@ -36,6 +37,7 @@ export const MEDIA_ASSETS: Record<string, string> = {
   "cerebro-mission.jpg": CerebroMission,
   "cosmos-atlas.jpg": CosmosAtlasImg,
   "sector-zero.jpg": SectorZeroImg,
+  "sector-zero-opening.jpg": SectorZeroOpeningImg,
 }
 
 export const CONTAIN_MEDIA = new Set([
@@ -50,6 +52,7 @@ export const MEDIA_HEIGHTS: Record<string, number> = {
   "cerebro-mission.jpg": 150,
   "cosmos-atlas.jpg": 150,
   "sector-zero.jpg": 220,
+  "sector-zero-opening.jpg": 150,
 }
 
 export function isContainMedia(media: string | null): boolean {

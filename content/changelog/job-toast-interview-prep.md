@@ -9,4 +9,4 @@ featured: false
 project: "Web"
 ---
 
-Added interview preparation inside each job in Job Toast. Every job can generate practice questions, and on Pro, AI drafts answers that you can edit before saving.
+Added a Prep tab to every job in Job Toast. It generates likely interview questions from the job description for free, and on Pro, AI drafts answers that you can edit before saving.

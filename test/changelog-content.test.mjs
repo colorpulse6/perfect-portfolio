@@ -118,13 +118,13 @@ test("every featured entry has preview media the home cards can show", () => {
   }
 })
 
-test("Sector Zero changelog entry uses the cockpit screenshot", () => {
+test("the Sector Zero modes entry keeps the cockpit screenshot, off the home cards", () => {
   const markdown = readChangelogEntry("sector-zero-new-modes")
 
   assert.equal(frontmatterValue(markdown, "title"), "Sector Zero: New Playable Modes")
   assert.equal(frontmatterValue(markdown, "link"), "https://colorpulse6.github.io/sector-zero/")
   assert.equal(frontmatterValue(markdown, "status"), "in-progress")
-  assert.equal(frontmatterValue(markdown, "featured"), "true")
+  assert.equal(frontmatterValue(markdown, "featured"), "false")
   assert.equal(frontmatterValue(markdown, "project"), "Knicks Knacks")
   assert.equal(frontmatterValue(markdown, "media"), "sector-zero.jpg")
   assert.equal(
@@ -132,4 +132,15 @@ test("Sector Zero changelog entry uses the cockpit screenshot", () => {
     true
   )
   assert.match(markdown, /three new playable modes/i)
+})
+
+test("the Sector Zero opening is a featured card with the opening screen", () => {
+  const markdown = readChangelogEntry("sector-zero-opening")
+
+  assert.equal(frontmatterValue(markdown, "title"), "Sector Zero: A Cinematic Opening")
+  assert.equal(frontmatterValue(markdown, "date"), "2026-09-06")
+  assert.equal(frontmatterValue(markdown, "link"), "https://colorpulse6.github.io/sector-zero/")
+  assert.equal(frontmatterValue(markdown, "secondaryLink"), "https://colorpulse6.github.io/sector-zero/site/")
+  assert.equal(frontmatterValue(markdown, "featured"), "true")
+  assert.equal(frontmatterValue(markdown, "media"), "sector-zero-opening.jpg")
 })
