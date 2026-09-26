@@ -22,6 +22,8 @@ Scenarios:
                         close-up (videos are blocked, see below).
   clicks                Check that galaxy and project titles, the core title
                         and the hover card open what they name.
+  no-webgl              Run with WebGL turned off: check /atlas shows the
+                        classic Atlas and the home button goes straight there.
   context-loss          Lose and restore the WebGL context on /atlas; check the
                         classic Atlas takes over and the WebGL one returns on
                         the next visit.
@@ -101,7 +103,7 @@ if (opts.help || opts.positional.length === 0) {
   process.exit(opts.help ? 0 : 2)
 }
 const [scenario, ...scenarioArgs] = opts.positional
-const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "clicks", "context-loss", "journey", "longtasks", "audio"]
+const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "clicks", "no-webgl", "context-loss", "journey", "longtasks", "audio"]
 if (!SCENARIOS.includes(scenario)) fail(`unknown scenario "${scenario}"`)
 if (scenario === "atlas-enter" && !scenarioArgs[0]) fail("atlas-enter needs a domain id, for example obsidian")
 const fromHome = ["journey", "longtasks", "audio"].includes(scenario)
@@ -136,6 +138,8 @@ const chrome = spawn(
     "--enable-unsafe-swiftshader",
     "--ignore-gpu-blocklist",
     "--enable-gpu",
+    // WebGL off, as in browsers where the visitor or a policy disabled it.
+    ...(scenario === "no-webgl" ? ["--disable-webgl", "--disable-webgl2", "--disable-3d-apis"] : []),
     "--autoplay-policy=no-user-gesture-required",
     "about:blank",
   ],
@@ -366,6 +370,35 @@ async function run() {
     return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : "WebGL2"
   })()`)
   console.log(`renderer: ${renderer}`)
+
+  if (scenario === "no-webgl") {
+    const results = []
+    const check = (name, ok, detail) => {
+      results.push(ok)
+      console.log(`${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : `  (${JSON.stringify(detail)})`}`)
+    }
+    check("WebGL is off in this browser", renderer === "no WebGL2", renderer)
+    await open("/atlas/")
+    await sleep(3500)
+    let s = await evaluate(`({
+      classic: !!document.querySelector(".atlas-page:not(.atlas-page--cosmos) canvas"),
+      cosmos: !!document.querySelector(".atlas-page--cosmos"),
+      mode: document.documentElement.dataset.cosmosMode || "unset",
+      opacity: getComputedStyle(document.querySelector(".atlas-page")).opacity,
+    })`)
+    check("/atlas shows the classic Atlas", s.classic && !s.cosmos && s.opacity === "1", s)
+    await capture("classic-atlas")
+    await open("/")
+    await sleep(4000)
+    const cta = await evaluate(`(() => { const r = document.querySelector(".atlas-enter")?.getBoundingClientRect(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null })()`)
+    await click(cta.x, cta.y)
+    await sleep(3500)
+    s = await evaluate(`({ path: location.pathname, classic: !!document.querySelector(".atlas-page:not(.atlas-page--cosmos) canvas"), mode: document.documentElement.dataset.cosmosMode || "unset" })`)
+    check("the home button goes straight to the classic Atlas", s.path === "/atlas/" && s.classic, s)
+    await capture("from-home")
+    if (results.some((ok) => !ok)) throw new Error("no-webgl checks failed")
+    return
+  }
 
   if (fromHome) {
     await send("Page.addScriptToEvaluateOnNewDocument", {

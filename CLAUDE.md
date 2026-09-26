@@ -60,7 +60,7 @@ node scripts/cosmos-capture.mjs --help   # Headless captures and checks
 - **Quality tiers** (`quality.ts`): `high` on desktops, `balanced` on phones and 4-core devices; the Atlas also adapts its resolution when the black hole fills the view.
 - **Labels** are DOM nodes the stage positions each frame, steering around HUD elements marked `data-cosmos-avoid` (plus the project rail and header). Clicking a label, or the hover preview card, runs `stage.activate()`: the same action as clicking that object in the scene.
 - **Debug hook**: add `?cosmos-debug` to expose `window.__cosmos` (`api`, `mode`, `tier`, `warm`, `frames`, `atlasScale`, `screenOf(kind, id)`, `goto(t)` to hold a running journey).
-- **Harness**: `node scripts/cosmos-capture.mjs <scenario>` against `npx gatsby serve -p 9123 -H 127.0.0.1` (scenarios: atlas, atlas-enter, closeup, perf, clicks, context-loss, journey, longtasks, audio). Headless Chrome drops the page to the video frame rate once 2+ videos play, so `perf` blocks videos.
+- **Harness**: `node scripts/cosmos-capture.mjs <scenario>` against `npx gatsby serve -p 9123 -H 127.0.0.1` (scenarios: atlas, atlas-enter, closeup, perf, clicks, no-webgl, context-loss, journey, longtasks, audio). Headless Chrome drops the page to the video frame rate once 2+ videos play, so `perf` blocks videos.
 
 ## Environment Variables
 
