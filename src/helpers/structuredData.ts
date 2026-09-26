@@ -134,7 +134,8 @@ export function changelogEntry(e: ChangelogSchemaInput): JsonLd {
     author: { "@id": PERSON_ID },
     isPartOf: { "@id": WEBSITE_ID },
   }
-  if (e.link) node.url = e.link
+  // A site-relative link (such as the Atlas entry) gets the origin, so the URL is absolute.
+  if (e.link) node.url = e.link.startsWith("/") ? `${SITE_URL}${e.link}` : e.link
   return node
 }
 

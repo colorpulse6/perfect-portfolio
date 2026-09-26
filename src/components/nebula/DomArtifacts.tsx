@@ -78,6 +78,7 @@ const BLOCKING = [
 const BLOCKING_TEXT = ".hometex .title"
 const ENTER_DURATION = 1.1
 const easeOutCubic = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3)
+const isExternal = (href: string) => /^https?:\/\//.test(href)
 
 /**
  * The home page's floating artifacts: glass icons and featured changelog
@@ -349,7 +350,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
     (entry: FeaturedEntry) => {
       playSound("click")
       const href = entry.link || "/changelog/"
-      if (/^https?:\/\//.test(href)) window.open(href, "_blank", "noopener,noreferrer")
+      if (isExternal(href)) window.open(href, "_blank", "noopener,noreferrer")
       else navigate(href)
     },
     [playSound]
@@ -431,6 +432,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
           }
 
           const entry = item.entry
+          const link = entry.link
           const typeColor = TYPE_COLORS[entry.type] || "#888"
           const mediaSrc = entry.media ? MEDIA_ASSETS[entry.media] : null
           const ctaLabel =
@@ -554,12 +556,19 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                     color: "rgba(255,255,255,0.45)",
                   }}
                 >
-                  {entry.link && (
+                  {link && (
                     <a
-                      href={entry.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                      href={link}
+                      target={isExternal(link) ? "_blank" : undefined}
+                      rel={isExternal(link) ? "noopener noreferrer" : undefined}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // A site link (the Atlas) stays in this tab.
+                        if (!isExternal(link)) {
+                          e.preventDefault()
+                          navigate(link)
+                        }
+                      }}
                       style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.color = "rgba(255,255,255,0.8)"

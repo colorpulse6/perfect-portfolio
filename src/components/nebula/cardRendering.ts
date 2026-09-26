@@ -5,6 +5,8 @@ import GalatlasVid from "../../images/galatlas.mp4"
 import PolisAtlasVid from "../../images/polis-atlas.mp4"
 import ThrottleDashboard from "../../images/throttle-dashboard.png"
 import CerebroDashboard from "../../images/cerebro-dashboard.png"
+import CerebroMission from "../../images/cerebro-mission.jpg"
+import CosmosAtlasImg from "../../images/cosmos-atlas.jpg"
 import SectorZeroImg from "../../images/sector-zero.jpg"
 import { isVideo } from "../../helpers/projectImages"
 import { FloatingItem } from "./floatingPhysics"
@@ -31,13 +33,22 @@ export const MEDIA_ASSETS: Record<string, string> = {
   "polis-atlas.mp4": PolisAtlasVid,
   "throttle-dashboard.png": ThrottleDashboard,
   "cerebro-dashboard.png": CerebroDashboard,
+  "cerebro-mission.jpg": CerebroMission,
+  "cosmos-atlas.jpg": CosmosAtlasImg,
   "sector-zero.jpg": SectorZeroImg,
 }
 
-export const CONTAIN_MEDIA = new Set(["throttle-dashboard.png", "cerebro-dashboard.png", "sector-zero.jpg"])
+export const CONTAIN_MEDIA = new Set([
+  "throttle-dashboard.png",
+  "cerebro-dashboard.png",
+  "cerebro-mission.jpg",
+  "sector-zero.jpg",
+])
 export const MEDIA_HEIGHTS: Record<string, number> = {
   "throttle-dashboard.png": 220,
   "cerebro-dashboard.png": 150,
+  "cerebro-mission.jpg": 150,
+  "cosmos-atlas.jpg": 150,
   "sector-zero.jpg": 220,
 }
 

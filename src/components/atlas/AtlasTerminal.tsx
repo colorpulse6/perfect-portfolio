@@ -13,7 +13,7 @@ export function AtlasTerminal({ onClose }: { onClose: () => void }) {
     obsidian: "Brain Atlas + Cerebro Mycelium. Vault visualizers, live in the community store.",
     web: "Job Toast · Fire Store. Web apps, live and archived.",
     tools: "El Form · Claude Skills · Swash Flag · Bot Battle · Regexplain · Throttle. Libraries, SDKs, and dev tooling.",
-    ai: "Cerebro. A native macOS multi-agent workspace orchestrating coding agents.",
+    ai: "Cerebro. Mission control for AI agents, now in public beta for macOS → trycerebro.com",
     music: "Alex's Hand · 10 years · 10 albums · 12 countries → alexshand.bandcamp.com",
     games: "Knicks Knacks · Sector Zero. Procedural space, co-op in progress.",
     writing: "Agile Anarchy: What's Left. A postmortem on process worship.",

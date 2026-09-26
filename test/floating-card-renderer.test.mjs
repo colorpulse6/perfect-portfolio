@@ -21,7 +21,7 @@ test("floating changelog cards support custom media and CTA labels", () => {
   assert.match(cardSource, /brain-atlas-spin\.mp4/)
   assert.match(cardSource, /cerebro-mycelium\.mp4/)
   assert.match(cardSource, /throttle-dashboard\.png/)
-  assert.match(cardSource, /cerebro-dashboard\.png/)
+  assert.match(cardSource, /cerebro-mission\.jpg/)
   assert.match(cardSource, /sector-zero\.jpg/)
   assert.match(source, /entry\.cta \|\|/)
   assert.match(cardSource, /isContainMedia/)
@@ -39,7 +39,7 @@ test("Cerebro floating card media preserves the full screenshot", () => {
     "utf8"
   )
 
-  assert.match(cardSource, /CONTAIN_MEDIA[\s\S]*cerebro-dashboard\.png/)
+  assert.match(cardSource, /CONTAIN_MEDIA[\s\S]*cerebro-mission\.jpg/)
   assert.match(cardSource, /height:\s*getCardMediaHeight\(media\)/)
   assert.match(cardSource, /objectFit:\s*contained\s*\?\s*"contain"\s*:\s*"cover"/)
 })

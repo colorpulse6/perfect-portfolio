@@ -4,7 +4,7 @@ date: "2026-05-30"
 type: "project"
 link: "https://trycerebro.com/"
 status: "in-progress"
-featured: true
+featured: false
 project: "macOS"
 media: "cerebro-dashboard.png"
 cta: "View"

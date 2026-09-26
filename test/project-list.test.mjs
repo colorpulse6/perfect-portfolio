@@ -71,7 +71,7 @@ test("El Form uses the current docs URL and dark-mode docs clip", () => {
   assert.equal(elForm.imgSrc, "elform-docs-dark.mp4")
 })
 
-test("Cerebro appears in the portfolio as a work-in-progress macOS app", () => {
+test("Cerebro appears in the portfolio as a released macOS app with a download link", () => {
   const projects = loadProjects()
   const cerebroIndex = projects.findIndex(project => project.name === "Cerebro")
   const jobToastIndex = projects.findIndex(project => project.name === "Job Toast")
@@ -80,8 +80,13 @@ test("Cerebro appears in the portfolio as a work-in-progress macOS app", () => {
   assert.ok(cerebroIndex >= 0)
   assert.ok(jobToastIndex >= 0)
   assert.ok(cerebroIndex < jobToastIndex)
-  assert.equal(cerebro.link, "https://trycerebro.com/")
+  assert.equal(cerebro.status, "released")
+  assert.equal(cerebro.link, "https://trycerebro.com/download")
+  assert.equal(cerebro.cta, "Download")
+  assert.equal(cerebro.secondaryLink, "https://trycerebro.com/")
+  assert.equal(cerebro.secondaryCta, "Site")
   assert.equal(cerebro.github, undefined)
-  assert.equal(cerebro.imgSrc, "cerebro-dashboard.png")
-  assert.match(cerebro.description, /work-in-progress native macOS/i)
+  assert.equal(cerebro.imgSrc, "cerebro-mission.jpg")
+  assert.match(cerebro.description, /native macOS workspace/i)
+  assert.match(cerebro.description, /public beta/i)
 })
