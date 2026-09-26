@@ -32,6 +32,7 @@ export async function snapshotHome(opts: { dpr: number; cta: Element | null }): 
   b.fillStyle = PAGE_BG
   b.fillRect(0, 0, bw, bh)
   await captureParticles(b, bw, bh)
+  performance.mark("cosmos-particles")
 
   const html = document.documentElement
   html.setAttribute("data-cosmos-snap", "")
@@ -81,13 +82,14 @@ function drawTree(ctx: CanvasRenderingContext2D, el: Element, opacityIn: number,
   const opacity = opacityIn * (parseFloat(cs.opacity) || 0)
   if (opacity < 0.004) return
 
+  const r = el.getBoundingClientRect()
+  if (r.width <= 0 || r.height <= 0) return
+  // An <svg> can carry its own box too (the coffee icon's yellow disc).
+  drawBox(ctx, cs, r, opacity, dpr)
   if (el instanceof SVGSVGElement) {
     drawSvg(ctx, el, opacity)
     return
   }
-  const r = el.getBoundingClientRect()
-  if (r.width <= 0 || r.height <= 0) return
-  drawBox(ctx, cs, r, opacity, dpr)
   if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement || el instanceof HTMLCanvasElement) {
     drawMedia(ctx, el, cs, r, opacity)
     return
@@ -101,6 +103,7 @@ function drawTree(ctx: CanvasRenderingContext2D, el: Element, opacityIn: number,
     roundRectPath(ctx, r.left, r.top, r.width, r.height, radiusOf(cs, r))
     ctx.clip()
   }
+  drawPseudo(ctx, el, cs, r, "::before", opacity, dpr)
   let range: Range | null = null
   for (const node of Array.from(el.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -110,7 +113,36 @@ function drawTree(ctx: CanvasRenderingContext2D, el: Element, opacityIn: number,
       drawTree(ctx, node as Element, opacity, skip, dpr)
     }
   }
+  drawPseudo(ctx, el, cs, r, "::after", opacity, dpr)
   if (clips) ctx.restore()
+}
+
+/**
+ * Decorative ::before/::after boxes (the menu button's outer bars). Only
+ * absolutely positioned ones inside a positioned element, where the computed
+ * top, left, width and height place them exactly; their text is not drawn.
+ */
+function drawPseudo(
+  ctx: CanvasRenderingContext2D,
+  el: Element,
+  cs: CSSStyleDeclaration,
+  r: DOMRect,
+  which: "::before" | "::after",
+  opacity: number,
+  dpr: number
+) {
+  if (cs.position === "static") return
+  const ps = getComputedStyle(el, which)
+  if (!ps.content || ps.content === "none" || ps.content === "normal" || ps.display === "none") return
+  if (ps.position !== "absolute" || ps.visibility === "hidden") return
+  const w = parseFloat(ps.width)
+  const h = parseFloat(ps.height)
+  const top = parseFloat(ps.top)
+  const left = parseFloat(ps.left)
+  if (!(w > 0 && h > 0) || Number.isNaN(top) || Number.isNaN(left)) return
+  const x = r.left + (parseFloat(cs.borderLeftWidth) || 0) + left
+  const y = r.top + (parseFloat(cs.borderTopWidth) || 0) + top
+  drawBox(ctx, ps, new DOMRect(x, y, w, h), opacity * (parseFloat(ps.opacity) || 0), dpr)
 }
 
 // ── Boxes ────────────────────────────────────────────────────────────────
@@ -289,12 +321,15 @@ function drawMedia(
     nh = el.height
   }
   if (!nw || !nh) return
-  const bl = parseFloat(cs.borderLeftWidth) || 0
-  const bt = parseFloat(cs.borderTopWidth) || 0
-  const x = r.left + bl
-  const y = r.top + bt
-  const w = r.width - bl - (parseFloat(cs.borderRightWidth) || 0)
-  const h = r.height - bt - (parseFloat(cs.borderBottomWidth) || 0)
+  // Media fills the content box: the padding shows the element's background
+  // (the header icons' white rings).
+  const px = (v: string) => parseFloat(v) || 0
+  const left = px(cs.borderLeftWidth) + px(cs.paddingLeft)
+  const top = px(cs.borderTopWidth) + px(cs.paddingTop)
+  const x = r.left + left
+  const y = r.top + top
+  const w = r.width - left - px(cs.borderRightWidth) - px(cs.paddingRight)
+  const h = r.height - top - px(cs.borderBottomWidth) - px(cs.paddingBottom)
   if (w <= 0 || h <= 0) return
   ctx.save()
   ctx.globalAlpha = opacity
@@ -387,10 +422,12 @@ function drawSvgChildren(ctx: CanvasRenderingContext2D, parent: Element, opacity
       ctx.fillStyle = cs.fill
       ctx.fill(path, cs.fillRule === "evenodd" ? "evenodd" : "nonzero")
     }
-    if (cs.stroke && cs.stroke !== "none" && !cs.stroke.startsWith("url(")) {
+    // react-icons set stroke="currentColor" with stroke-width 0: no stroke.
+    const strokeWidth = parseFloat(cs.strokeWidth)
+    if (cs.stroke && cs.stroke !== "none" && !cs.stroke.startsWith("url(") && strokeWidth > 0) {
       ctx.globalAlpha = opacity * unit(cs.strokeOpacity)
       ctx.strokeStyle = cs.stroke
-      ctx.lineWidth = parseFloat(cs.strokeWidth) || 1
+      ctx.lineWidth = strokeWidth
       ctx.lineCap = (cs.strokeLinecap as CanvasLineCap) || "butt"
       ctx.lineJoin = (cs.strokeLinejoin as CanvasLineJoin) || "miter"
       ctx.stroke(path)

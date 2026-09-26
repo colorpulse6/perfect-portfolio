@@ -21,16 +21,32 @@ html[data-cosmos-mode="atlas"] .cosmos-stage {
   pointer-events: auto;
 }
 
-/* During the journey the stage covers everything; the live home UI is
-   hidden underneath (the stage shows its snapshot). */
+/* During the journey the stage covers everything. It fades in over the live
+   home UI in 120ms (masking small differences between the page and its
+   snapshot under the ignition flash); then the UI hides underneath. The
+   animation beats the inline visibility GSAP writes on page containers. */
 html[data-cosmos-mode="journey"] .cosmos-stage {
   visibility: visible;
   pointer-events: auto;
   z-index: 10000;
   cursor: pointer;
+  animation: cosmos-stage-in 0.12s ease-out both;
 }
 html[data-cosmos-mode="journey"] .layout-container > :not(.cosmos-stage) {
-  visibility: hidden !important;
+  animation: cosmos-under 0s linear 0.12s both;
+}
+@keyframes cosmos-stage-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cosmos-under {
+  to {
+    visibility: hidden;
+  }
 }
 
 /* Site chrome on the Atlas fades in with the HUD after a journey. */
