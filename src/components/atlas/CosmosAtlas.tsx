@@ -111,6 +111,7 @@ export function CosmosAtlas({ model }: CosmosAtlasProps) {
               textAlign: "right",
             }}
             className="cosmos-hints"
+            data-cosmos-avoid=""
           >
             DRAG <span style={{ color: A.faint }}>– rotate</span>&nbsp;&nbsp;&nbsp;SCROLL <span style={{ color: A.faint }}>– zoom</span>
             <div style={{ marginTop: 6, color: "rgba(140,155,210,0.4)" }}>

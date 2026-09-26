@@ -31,7 +31,8 @@ import { attachAtlasInput } from "./input"
 import type { AtlasKey } from "./input"
 import { pick } from "./picking"
 import type { PickTarget } from "./picking"
-import { placeLabel, placeCoreLabel, LABEL_SAFE } from "./labels"
+import { placeLabel, placeCoreLabel, layoutLabels, LABEL_ANGLES, LABEL_SAFE } from "./labels"
+import type { LayoutItem, LabelPlacement, Rect } from "./labels"
 import { setCosmos, emitCosmosPick } from "../cosmosStore"
 import type { CosmosMode } from "../cosmosStore"
 
@@ -72,6 +73,8 @@ export interface Stage {
 type Proj = { x: number; y: number; z: number }
 
 const DEG = Math.PI / 180
+/** HUD elements that galaxy labels steer around. */
+const LABEL_AVOID = "[data-cosmos-avoid], .atlas-rail, header .header-container > :first-child > *, header button"
 const isAtlasPath = (p: string) => /^\/atlas\/?$/.test(p)
 const isHomePath = (p: string) => p === "/" || p === ""
 const easeOutCubic = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3)
@@ -134,6 +137,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   let labels: LabelNodes | null = null
   const labelSize = new WeakMap<HTMLElement, [number, number]>()
+  const labelPrev = new Map<string, number>()
+  const labelAngle = new Map<string, number>()
+  let obstacles: Rect[] = []
+  let obstaclesFrame = -1e9
   let preview: HTMLElement | null = null
   let detachInput: (() => void) | null = null
   let idleHandle = 0
@@ -242,6 +249,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     }
     if (res) ensureTargets(res, bufW, bufH)
     measureLabels()
+    obstaclesFrame = -1e9
   }
 
   // ── Loop ─────────────────────────────────────────────────────────────
@@ -319,7 +327,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     composite(res, tgt, t, ATLAS_COMPOSITE)
     lastCam = cam
     lastT = t
-    placeLabels(cam, t)
+    placeLabels(cam, t, dt)
     placePreview(cam, t)
   }
 
@@ -398,9 +406,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const hide = (el: HTMLElement | null | undefined) => {
     if (el) el.style.visibility = "hidden"
   }
-  function writeLabel(n: LabelNode, anchor: Proj, center: { x: number; y: number }, radiusPx: number, opacity: number) {
-    const [w, h] = sizeOf(n.label)
-    const p = placeLabel({ anchor, center, radiusPx, labelW: w, labelH: h, viewport: { w: cssW, h: cssH }, safe: LABEL_SAFE })
+  function writeLabel(n: LabelNode, p: LabelPlacement, opacity: number) {
     n.label.style.visibility = opacity > 0.02 ? "visible" : "hidden"
     n.label.style.opacity = opacity.toFixed(3)
     n.label.style.textAlign = p.side === "right" ? "left" : "right"
@@ -414,13 +420,34 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       n.lead.style.transform = `translate(${p.lineFrom[0].toFixed(1)}px, ${p.lineFrom[1].toFixed(1)}px) rotate(${Math.atan2(dy, dx).toFixed(4)}rad)`
     }
   }
+  function hideLabel(key: string, n: LabelNode) {
+    hide(n.label)
+    hide(n.lead)
+    labelAngle.delete(key)
+  }
 
-  function placeLabels(cam: CamBasis, t: number) {
+  // HUD elements labels must not cover. Read at the start of a frame (before
+  // this frame's style writes), at most every 30 frames or when the HUD changes.
+  function refreshObstacles() {
+    obstacles = []
+    document.querySelectorAll<HTMLElement>(LABEL_AVOID).forEach((el) => {
+      const b = el.getBoundingClientRect()
+      if (b.width >= 1 && b.height >= 1) obstacles.push({ l: b.left - 8, t: b.top - 6, r: b.right + 8, b: b.bottom + 6 })
+    })
+    obstaclesFrame = frames
+  }
+
+  function placeLabels(cam: CamBasis, t: number, dt: number) {
     if (!labels || !scene) return
+    if (frames - obstaclesFrame > 30) refreshObstacles()
+    const viewport = { w: cssW, h: cssH }
+    const onScreen = (s: Proj, m: number) => s.x > -m && s.x < cssW + m && s.y > -m && s.y < cssH + m
+    const taken: Rect[] = []
     const core = project(cam, scene.bh.pos)
     const center = core ? { x: core.x, y: core.y } : { x: cssW / 2, y: cssH / 2 }
     if (labels.core) {
-      if (!core) hide(labels.core)
+      // Off screen, a clamped core label would sit in a corner under the HUD.
+      if (!core || !onScreen(core, 0)) hide(labels.core)
       else {
         const [w, h] = sizeOf(labels.core)
         const p = placeCoreLabel({
@@ -428,26 +455,25 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
           diskPx: worldToPx(scene.bh.outer, core.z),
           labelW: w,
           labelH: h,
-          viewport: { w: cssW, h: cssH },
+          viewport,
           narrow: cssW < 600,
         })
+        taken.push({ l: p.left, t: p.top, r: p.left + w, b: p.top + h })
         labels.core.style.visibility = "visible"
         labels.core.style.opacity = entered >= 0 ? "0.45" : "1"
         labels.core.style.transform = `translate(${p.left.toFixed(1)}px, ${p.top.toFixed(1)}px)`
       }
     }
-    scene.galaxies.cPos.forEach((c, gi) => {
-      const n = labels!.domains.get(scene!.domainIds[gi])
-      if (!n) return
-      const s = project(cam, c)
-      if (!s || s.x < -40 || s.x > cssW + 40 || s.y < -40 || s.y > cssH + 40) {
-        hide(n.label)
-        hide(n.lead)
-        return
-      }
-      const opacity = entered < 0 ? 1 : gi === entered ? 0.55 : 0.4
-      writeLabel(n, s, center, worldToPx(scene!.galaxies.sizes[gi], s.z), opacity)
-    })
+
+    // Most important first: the entered galaxy's works, its own label, the rest.
+    const items: LayoutItem[] = []
+    const meta = new Map<string, { node: LabelNode; opacity: number; item: LayoutItem }>()
+    const add = (key: string, node: LabelNode, anchor: Proj, c: { x: number; y: number }, radiusPx: number, opacity: number) => {
+      const [w, h] = sizeOf(node.label)
+      const item = { key, anchor, center: c, radiusPx, labelW: w, labelH: h }
+      items.push(item)
+      meta.set(key, { node, opacity, item })
+    }
     const inEntered = new Set<string>()
     if (entered >= 0) {
       const gc = project(cam, scene.galaxies.cPos[entered])
@@ -456,20 +482,38 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         if (!n) continue
         inEntered.add(st.id)
         const s = project(cam, starPosition(scene, st, t))
-        if (!s || !gc) {
-          hide(n.label)
-          hide(n.lead)
-          continue
-        }
-        writeLabel(n, s, gc, 10, reveal)
+        if (!s || !gc || !onScreen(s, 0)) hideLabel(`w:${st.id}`, n)
+        else add(`w:${st.id}`, n, s, gc, 10, reveal)
       }
     }
+    const order = scene.domainIds.map((_, gi) => gi)
+    if (entered >= 0) order.sort((a, b) => (a === entered ? -1 : b === entered ? 1 : 0))
+    for (const gi of order) {
+      const id = scene.domainIds[gi]
+      const n = labels.domains.get(id)
+      if (!n) continue
+      const s = project(cam, scene.galaxies.cPos[gi])
+      if (!s || !onScreen(s, 40)) hideLabel(`d:${id}`, n)
+      else add(`d:${id}`, n, s, center, worldToPx(scene.galaxies.sizes[gi], s.z), entered < 0 ? 1 : gi === entered ? 0.55 : 0.4)
+    }
     labels.works.forEach((n, id) => {
-      if (!inEntered.has(id)) {
-        hide(n.label)
-        hide(n.lead)
-      }
+      if (!inEntered.has(id)) hideLabel(`w:${id}`, n)
     })
+
+    const laid = layoutLabels(items, { viewport, safe: LABEL_SAFE, obstacles, taken, prev: labelPrev })
+    const k = 1 - Math.exp(-dt * 10)
+    for (const L of laid) {
+      const m = meta.get(L.key)
+      if (!m) continue
+      labelPrev.set(L.key, L.candidate)
+      // Ease the leader angle so a label that changes spot swings instead of jumping.
+      const target = LABEL_ANGLES[L.candidate]
+      const was = labelAngle.get(L.key)
+      const a = was === undefined || reduceMotion ? target : was + (target - was) * k
+      labelAngle.set(L.key, a)
+      const p = Math.abs(a - target) < 1e-3 ? L.placement : placeLabel({ ...m.item, viewport, safe: LABEL_SAFE }, a)
+      writeLabel(m.node, p, m.opacity * (L.crowded ? 0.5 : 1))
+    }
   }
 
   function placePreview(cam: CamBasis, t: number) {
@@ -697,6 +741,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     registerLabels(nodes: LabelNodes | null) {
       labels = nodes
       measureLabels()
+      // Labels re-register when the HUD changes (a galaxy entered or left).
+      obstaclesFrame = -1e9
     },
     registerPreview(el: HTMLElement | null) {
       preview = el

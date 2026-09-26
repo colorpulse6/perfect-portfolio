@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { placeLabel, placeCoreLabel, LABEL_SAFE } from "../src/components/cosmos/engine/labels.ts"
+import { placeLabel, placeCoreLabel, layoutLabels, overlapArea, LABEL_SAFE } from "../src/components/cosmos/engine/labels.ts"
 import { pick } from "../src/components/cosmos/engine/picking.ts"
 import type { PickTarget } from "../src/components/cosmos/engine/picking.ts"
 
@@ -28,6 +28,58 @@ test("the core label moves under the disk when it would run off screen", () => {
   const closeUp = placeCoreLabel({ center: { x: 720, y: 450 }, diskPx: 700, labelW: 170, labelH: 30, viewport, narrow: false })
   assert.ok(Math.abs(closeUp.left + 85 - 720) < 1e-9, "centered under the black hole")
   assert.ok(closeUp.top > 450)
+})
+
+const item = (key: string, anchor: { x: number; y: number }) => ({
+  key,
+  anchor,
+  center: { x: 720, y: 450 },
+  radiusPx: 40,
+  labelW: 120,
+  labelH: 28,
+})
+
+test("an unobstructed label keeps the straight outward leader", () => {
+  const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [] })
+  assert.equal(a.candidate, 0)
+  assert.equal(a.crowded, false)
+})
+
+test("a label swings away from a HUD element", () => {
+  const free = placeLabel({ ...item("a", { x: 400, y: 600 }), viewport, safe: LABEL_SAFE })
+  const rail = { l: free.left - 10, t: free.top - 10, r: free.left + 130, b: free.top + 38 }
+  const [a] = layoutLabels([item("a", { x: 400, y: 600 })], { viewport, safe: LABEL_SAFE, obstacles: [rail] })
+  assert.notEqual(a.candidate, 0)
+  assert.equal(overlapArea(a.rect, rail), 0)
+  assert.equal(a.crowded, false)
+})
+
+test("labels with nearby anchors do not cover each other", () => {
+  const out = layoutLabels([item("a", { x: 1000, y: 450 }), item("b", { x: 1000, y: 462 })], {
+    viewport,
+    safe: LABEL_SAFE,
+    obstacles: [],
+  })
+  assert.equal(overlapArea(out[0].rect, out[1].rect), 0)
+})
+
+test("labels avoid rectangles that are already taken", () => {
+  const first = placeLabel({ ...item("a", { x: 1000, y: 450 }), viewport, safe: LABEL_SAFE })
+  const core = { l: first.left, t: first.top, r: first.left + 120, b: first.top + 28 }
+  const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [], taken: [core] })
+  assert.equal(overlapArea(a.rect, core), 0)
+})
+
+test("a label keeps last frame's angle while that spot is still free", () => {
+  const prev = new Map([["a", 2]])
+  const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [], prev })
+  assert.equal(a.candidate, 2)
+})
+
+test("a label with no free spot is marked crowded", () => {
+  const all = { l: 0, t: 0, r: viewport.w, b: viewport.h }
+  const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [all] })
+  assert.equal(a.crowded, true)
 })
 
 const targets: PickTarget[] = [

@@ -44,7 +44,7 @@ export function AtlasHud({
 }: AtlasHudProps) {
   return (
     <>
-      <div style={{ position: "absolute", top: 22, left: 26, zIndex: 70 }}>
+      <div data-cosmos-avoid="" style={{ position: "absolute", top: 22, left: 26, zIndex: 70 }}>
         <TransitionLink
           to="/"
           exit={{ length: 1 }}
@@ -93,6 +93,7 @@ export function AtlasHud({
 
       {hints ?? (
         <div
+          data-cosmos-avoid=""
           style={{
             position: "absolute",
             top: 22,
@@ -120,6 +121,7 @@ export function AtlasHud({
       />
 
       <div
+        data-cosmos-avoid=""
         style={{
           position: "absolute",
           bottom: 24,
@@ -156,6 +158,7 @@ export function AtlasHud({
       {entered && (
         <button
           type="button"
+          data-cosmos-avoid=""
           onClick={onResetGalaxy}
           style={{
             position: "absolute",
