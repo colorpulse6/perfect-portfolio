@@ -39,16 +39,22 @@ export function createGL(canvas: HTMLCanvasElement): { gl: GL; caps: GLCaps } | 
     gl = null
   }
   if (!gl) return { error: "WebGL2 is unavailable" }
+  const caps = enableCaps(gl)
+  return "error" in caps ? caps : { gl, caps }
+}
+
+/**
+ * Enables the extensions the stage needs. Extensions belong to one context
+ * generation, so call this again after `webglcontextrestored`.
+ */
+export function enableCaps(gl: GL): GLCaps | { error: string } {
   if (!gl.getExtension("EXT_color_buffer_float")) return { error: "Float render targets are unavailable" }
   const aniso = gl.getExtension("EXT_texture_filter_anisotropic")
   const parallel = gl.getExtension("KHR_parallel_shader_compile") as { COMPLETION_STATUS_KHR: number } | null
   return {
-    gl,
-    caps: {
-      aniso,
-      maxAniso: aniso ? (gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number) : 1,
-      parallel,
-    },
+    aniso,
+    maxAniso: aniso ? (gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number) : 1,
+    parallel,
   }
 }
 

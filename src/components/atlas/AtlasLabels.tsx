@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from "react"
 import type { AtlasDomain } from "./atlasShared"
-import { getStage, onStage } from "../cosmos/cosmos"
+import { onStage } from "../cosmos/cosmos"
 import type { LabelNode } from "../cosmos/engine/stage"
 
 interface AtlasLabelsProps {
@@ -43,10 +43,18 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
     })
     const set = { core: coreRef.current, domains: domainNodes, works: workNodes }
     // On a direct /atlas load this runs before the layout mounts the stage.
-    return onStage((stage) => stage.registerLabels(set))
+    // The unregister only clears this set, so a page instance that is still
+    // exiting cannot wipe the labels of the one entering.
+    let unregister: (() => void) | null = null
+    const unsubscribe = onStage((stage) => {
+      unregister?.()
+      unregister = stage.registerLabels(set)
+    })
+    return () => {
+      unsubscribe()
+      unregister?.()
+    }
   }, [entered, domains])
-
-  useLayoutEffect(() => () => getStage()?.registerLabels(null), [])
 
   const core = domains.find((d) => d.core)
   return (

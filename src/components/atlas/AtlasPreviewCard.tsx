@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef } from "react"
 import type { AtlasDomain, AtlasWork } from "./atlasShared"
 import { isVideo } from "../../helpers/projectImages"
-import { getStage, onStage } from "../cosmos/cosmos"
+import { onStage } from "../cosmos/cosmos"
 import { useCosmos } from "../cosmos/cosmosStore"
 
 interface AtlasPreviewCardProps {
@@ -21,10 +21,15 @@ export function AtlasPreviewCard({ workIndex, fictionCount }: AtlasPreviewCardPr
 
   useLayoutEffect(() => {
     const el = ref.current
-    const off = onStage((stage) => stage.registerPreview(el))
+    if (!el) return
+    let unregister: (() => void) | null = null
+    const unsubscribe = onStage((stage) => {
+      unregister?.()
+      unregister = stage.registerPreview(el)
+    })
     return () => {
-      off()
-      getStage()?.registerPreview(null)
+      unsubscribe()
+      unregister?.()
     }
   }, [])
 

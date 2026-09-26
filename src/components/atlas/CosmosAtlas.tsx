@@ -58,8 +58,10 @@ export function CosmosAtlas({ model }: CosmosAtlasProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tgt = e.target as HTMLElement | null
-      const typing = !!tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA" || tgt.isContentEditable)
-      if (!typing && (e.key === "`" || e.key === "t" || e.key === "T")) {
+      const typing =
+        !!tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA" || tgt.tagName === "SELECT" || tgt.isContentEditable)
+      const plain = !e.ctrlKey && !e.metaKey && !e.altKey
+      if (!typing && plain && (e.key === "`" || e.key === "t" || e.key === "T")) {
         e.preventDefault()
         setTerm((v) => !v)
       }

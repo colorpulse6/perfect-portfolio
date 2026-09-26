@@ -13,13 +13,13 @@
  * pick events). Per-frame label and preview positions are written straight
  * to registered DOM nodes.
  */
-import { createGL } from "./gl"
+import { createGL, enableCaps } from "./gl"
 import type { GL, GLCaps } from "./gl"
 import { detectTier, tierSettings } from "./quality"
 import type { TierSettings } from "./quality"
 import { createProgramCompiler, createResources, ensureTargets, atlasTarget, disposeResources, uploadScene } from "./resources"
 import type { Resources, Programs } from "./resources"
-import { buildAtlasScene, starPosition } from "./atlasScene"
+import { buildAtlasScene, starPosition, MAX_GALAXIES } from "./atlasScene"
 import type { AtlasSceneData, SceneTopology, SceneStar } from "./atlasScene"
 import { renderAtlas, bhCoverage, setHoverRing } from "./renderAtlas"
 import { bloomPass, composite, ATLAS_COMPOSITE } from "./post"
@@ -62,8 +62,10 @@ export interface Stage {
   focusCore(): void
   resetView(): void
   setPanelOpen(open: boolean): void
-  registerLabels(nodes: LabelNodes | null): void
-  registerPreview(el: HTMLElement | null): void
+  /** Returns an unregister function that only clears this registration. */
+  registerLabels(nodes: LabelNodes): () => void
+  /** Returns an unregister function that only clears this registration. */
+  registerPreview(el: HTMLElement): () => void
   /** Resolves false when the journey cannot run (unsupported or not ready). */
   startJourney(opts: JourneyStart): Promise<boolean>
   skipJourney(): void
@@ -73,6 +75,8 @@ export interface Stage {
 type Proj = { x: number; y: number; z: number }
 
 const DEG = Math.PI / 180
+/** How long an empty-space tap waits for a possible double-click. */
+const DOUBLE_TAP_MS = 320
 /** HUD elements that galaxy labels steer around. */
 const LABEL_AVOID = "[data-cosmos-avoid], .atlas-rail, header .header-container > :first-child > *, header button"
 const isAtlasPath = (p: string) => /^\/atlas\/?$/.test(p)
@@ -104,6 +108,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let scene: AtlasSceneData | null = null
   let sceneDirty = false
   let failed = false
+  /** The context is lost and not yet restored. */
+  let lost = false
+  /** The last route given to setPath. */
+  let path = ""
 
   let raf = 0
   let lastMs = 0
@@ -123,7 +131,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let introBack = 0
   let entered = -1
   let reveal = 0
-  const galDim = new Float32Array(8).fill(1)
+  const galDim = new Float32Array(MAX_GALAXIES).fill(1)
   let webDim = 1
   let hover: PickTarget | null = null
   let hoverStarIdx = -1
@@ -145,6 +153,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let detachInput: (() => void) | null = null
   let idleHandle = 0
   let releaseTimer = 0
+  let exitTimer = 0
   let coreTimer = 0
 
   const setMode = (m: CosmosMode) => {
@@ -163,8 +172,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   }
 
   function ensureContext(): boolean {
-    if (failed) return false
-    if (gl) return true
+    if (failed || lost) return false
+    if (gl) return !gl.isContextLost()
     const r = createGL(canvas)
     if ("error" in r) {
       markUnsupported(r.error)
@@ -196,9 +205,14 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function ensureScene(): boolean {
     if (!topology) return false
     if (!scene || sceneDirty) {
-      scene = buildAtlasScene(topology, { pointsPerGalaxy: settings.pointsPerGalaxy })
-      sceneDirty = false
-      if (res) uploadScene(res, scene)
+      try {
+        scene = buildAtlasScene(topology, { pointsPerGalaxy: settings.pointsPerGalaxy })
+        sceneDirty = false
+        if (res) uploadScene(res, scene)
+      } catch (e) {
+        markUnsupported(`The Atlas scene could not be built (${(e as Error).message})`)
+        return false
+      }
     }
     return true
   }
@@ -206,22 +220,51 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function ensureResources(blocking: boolean): boolean {
     if (res) return ensureScene()
     if (!ensureContext() || !ensurePrograms(blocking) || !ensureScene()) return false
-    res = createResources(gl!, caps!, settings, programs!, scene!)
-    resize(true)
+    try {
+      res = createResources(gl!, caps!, settings, programs!, scene!)
+      resize(true)
+    } catch (e) {
+      if (res) disposeResources(res)
+      res = null
+      markUnsupported(`GPU resources could not be created (${(e as Error).message})`)
+      return false
+    }
     return true
   }
 
+  // A lost context takes every GPU object with it. Stop, hide the canvas and
+  // let the page fall back to the classic Atlas; preventDefault asks the
+  // browser to restore the context later.
   function onContextLost(e: Event) {
     e.preventDefault()
+    lost = true
     stopLoop()
+    detach()
+    if (idleHandle) cancelIdle(idleHandle)
+    idleHandle = 0
+    window.clearTimeout(releaseTimer)
     res = null
     programs = null
     compiler = null
+    orbit = null
+    setMode("off")
     setCosmos({ support: "lost" })
   }
+  // The Atlas page keeps the classic view until the next visit, so only the
+  // home warm-up resumes here; setPath picks the rest up on the next route.
   function onContextRestored() {
+    lost = false
+    const restored = gl ? enableCaps(gl) : { error: "no context" }
+    if ("error" in restored) {
+      markUnsupported(`The restored context is missing features (${restored.error})`)
+      return
+    }
+    caps = restored
     setCosmos({ support: "ok" })
-    if (mode === "atlas" && ensureResources(true)) startLoop()
+    if (isHomePath(path) && !failed) {
+      setMode("idle")
+      idleHandle = requestIdle(idleWarmup)
+    }
   }
 
   // ── Sizing and camera configuration ─────────────────────────────────
@@ -269,8 +312,14 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const dt = Math.min(0.05, Math.max(0, (ms - lastMs) / 1000))
     lastMs = ms
     const t = ((ms - time0) / 1000) * (reduceMotion ? 0.25 : 1)
-    resize()
-    if (mode === "atlas") atlasFrame(dt, t, ms)
+    try {
+      resize()
+      if (mode === "atlas") atlasFrame(dt, t, ms)
+    } catch (e) {
+      detach()
+      markUnsupported(`The Atlas stopped rendering (${(e as Error).message})`)
+      return
+    }
     frames++
     if (mode === "atlas" || mode === "journey") raf = requestAnimationFrame(frame)
   }
@@ -552,8 +601,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       onTap(x, y, touch) {
         if (!lastCam || panelOpen) return
         const hit = pick(pickTargets(lastCam, lastT), x, y, touch)
+        window.clearTimeout(exitTimer)
         if (!hit) {
-          if (entered >= 0) exitDomain()
+          // Wait out the double-click window: a double-click zooms instead.
+          if (entered >= 0) exitTimer = window.setTimeout(exitDomain, DOUBLE_TAP_MS)
           return
         }
         if (hit.kind === "domain") enterDomain(hit.id)
@@ -566,6 +617,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         emitCosmosPick({ kind: hit.kind, id: hit.id })
       },
       onDoubleTap(x, y) {
+        window.clearTimeout(exitTimer)
         if (!lastCam || !orbit || !orbitCfg || panelOpen) return
         if (pick(pickTargets(lastCam, lastT), x, y, false)) return
         zoomAt(orbit, orbitCfg, lastCam, [(x / cssW) * 2 - 1, 1 - (y / cssH) * 2], [tanX, tanY], 1 / 1.8, 6, performance.now())
@@ -596,6 +648,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function detach() {
     if (detachInput) detachInput()
     detachInput = null
+    window.clearTimeout(exitTimer)
     dragging = false
     setHover(null)
   }
@@ -691,12 +744,13 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   }
 
   const api: Stage = {
-    setPath(path: string) {
+    setPath(next: string) {
+      path = next
       if (idleHandle) cancelIdle(idleHandle)
       idleHandle = 0
       if (mode === "journey") return
       if (isAtlasPath(path)) {
-        if (failed || /atlas-legacy/.test(window.location.search)) {
+        if (failed || lost || /atlas-legacy/.test(window.location.search)) {
           stopLoop()
           detach()
           setMode("off")
@@ -707,8 +761,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         stopLoop()
         detach()
         window.clearTimeout(releaseTimer)
-        setMode("idle")
-        if (!failed) idleHandle = requestIdle(idleWarmup)
+        setMode(lost ? "off" : "idle")
+        if (!failed && !lost) idleHandle = requestIdle(idleWarmup)
       } else {
         stopLoop()
         detach()
@@ -722,9 +776,15 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     setTopology(topo: SceneTopology) {
       topology = topo
       sceneDirty = true
-      if (res) ensureScene()
-      if (mode === "idle" && !idleHandle && !failed) idleHandle = requestIdle(idleWarmup)
-      if (mode === "atlas" && !res && !failed) enterAtlasMode()
+      if (res && ensureScene() && orbit && orbitCfg) {
+        // New galaxies: leave any entered galaxy and re-frame the view.
+        entered = -1
+        galDim.fill(1)
+        resetOrbit(orbit, orbitCfg, true)
+        setCosmos({ entered: null, hover: null })
+      }
+      if (mode === "idle" && !idleHandle && !failed && !lost) idleHandle = requestIdle(idleWarmup)
+      if (mode === "atlas" && !res && !failed && !lost) enterAtlasMode()
     },
     enterDomain,
     exitDomain,
@@ -738,14 +798,20 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       }
       setCosmos({ panelOpen: open })
     },
-    registerLabels(nodes: LabelNodes | null) {
+    registerLabels(nodes: LabelNodes) {
       labels = nodes
       measureLabels()
       // Labels re-register when the HUD changes (a galaxy entered or left).
       obstaclesFrame = -1e9
+      return () => {
+        if (labels === nodes) labels = null
+      }
     },
-    registerPreview(el: HTMLElement | null) {
+    registerPreview(el: HTMLElement) {
       preview = el
+      return () => {
+        if (preview === el) preview = null
+      }
     },
     async startJourney() {
       return false

@@ -64,7 +64,14 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
   useEffect(() => {
     setLegacyFlag(/atlas-legacy/.test(window.location.search))
   }, [])
-  const legacy = legacyFlag || support === "unsupported" || support === "lost"
+  // Once the WebGL Atlas fails on this visit, keep the classic one until the
+  // next visit, so a restored context does not swap views (and drop an open
+  // panel or terminal) under the visitor.
+  const [fellBack, setFellBack] = useState(false)
+  useEffect(() => {
+    if (support === "unsupported" || support === "lost") setFellBack(true)
+  }, [support])
+  const legacy = legacyFlag || fellBack || support === "unsupported" || support === "lost"
 
   const model = useMemo(
     () =>

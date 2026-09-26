@@ -1,5 +1,7 @@
 // Ported verbatim from the approved prototype (docs/superpowers/specs/assets/
 // 2026-09-26-wormhole-study.html) unless a comment marks a delta.
+// Delta: the per-galaxy uniform arrays hold MAX_GALAXIES (16) instead of 8.
+import { MAX_GALAXIES } from "../atlasScene"
 
 export const VS_TRI = `
 layout(location=0) in vec2 aPos;
@@ -16,8 +18,8 @@ export const VS_GAL = `
 layout(location=0) in vec4 aA;
 layout(location=1) in vec4 aB;
 uniform mat4 uVP; uniform float uPxScale; uniform float uTime;
-uniform vec3 uGC[8]; uniform vec3 uGE1[8]; uniform vec3 uGE2[8]; uniform vec3 uGN[8];
-uniform float uGDim[8];
+uniform vec3 uGC[${MAX_GALAXIES}]; uniform vec3 uGE1[${MAX_GALAXIES}]; uniform vec3 uGE2[${MAX_GALAXIES}]; uniform vec3 uGN[${MAX_GALAXIES}];
+uniform float uGDim[${MAX_GALAXIES}];
 out vec3 vCol;
 uniform vec3 uCamPos, uBhPos; uniform float uShadowR;
 float shadowed(vec3 p){
@@ -70,7 +72,7 @@ layout(location=0) in vec4 aA;
 layout(location=1) in vec4 aB;
 layout(location=2) in float aIdx;
 uniform mat4 uVP; uniform float uPxScale; uniform float uTime;
-uniform vec3 uGC[8]; uniform vec3 uGE1[8]; uniform vec3 uGE2[8]; uniform vec3 uGN[8];
+uniform vec3 uGC[${MAX_GALAXIES}]; uniform vec3 uGE1[${MAX_GALAXIES}]; uniform vec3 uGE2[${MAX_GALAXIES}]; uniform vec3 uGN[${MAX_GALAXIES}];
 uniform float uEntered, uReveal, uHover;
 out vec3 vCol;
 uniform vec3 uCamPos, uBhPos; uniform float uShadowR;

@@ -20,6 +20,9 @@ Scenarios:
   closeup               Zoom into the black hole and capture the close-up.
   perf                  Measure the frame rate in the Atlas overview and the
                         close-up (videos are blocked, see below).
+  context-loss          Lose and restore the WebGL context on /atlas; check the
+                        classic Atlas takes over and the WebGL one returns on
+                        the next visit.
   journey <t...>        Capture journey frames at the given times (milestone 2).
   longtasks             Report long tasks during the journey (milestone 2).
   audio                 Report journey audio events (milestone 2).
@@ -89,7 +92,7 @@ if (opts.help || opts.positional.length === 0) {
   process.exit(opts.help ? 0 : 2)
 }
 const [scenario, ...scenarioArgs] = opts.positional
-const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "journey", "longtasks", "audio"]
+const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "context-loss", "journey", "longtasks", "audio"]
 if (!SCENARIOS.includes(scenario)) fail(`unknown scenario "${scenario}"`)
 if (scenario === "atlas-enter" && !scenarioArgs[0]) fail("atlas-enter needs a domain id, for example obsidian")
 if (["journey", "longtasks", "audio"].includes(scenario)) {
@@ -344,6 +347,54 @@ async function run() {
     console.log(`  overview          ${overview.raf} / ${overview.stage}`)
     console.log(`  close-up          ${closeEarly.raf} / ${closeEarly.stage}`)
     console.log(`  close-up adapted  ${closeLate.raf} / ${closeLate.stage}  (resolution scale ${scale.toFixed(2)})`)
+  } else if (scenario === "context-loss") {
+    if (legacy) throw new Error("context-loss drives the WebGL Atlas; drop atlas-legacy from --path")
+    const state = () =>
+      evaluate(`({
+        mode: __cosmos.mode,
+        cosmos: !!document.querySelector(".atlas-page--cosmos"),
+        classic: !!document.querySelector(".atlas-page:not(.atlas-page--cosmos)"),
+        frames: __cosmos.frames,
+      })`)
+    // Keep the extension from before the loss: a lost context returns null
+    // from getExtension.
+    const context = (fn) =>
+      evaluate(`(() => {
+        if (!window.__cosmosLoseExt) {
+          const gl = document.querySelector(".cosmos-stage")?.getContext("webgl2")
+          window.__cosmosLoseExt = gl && gl.getExtension("WEBGL_lose_context")
+        }
+        if (!window.__cosmosLoseExt) return false
+        window.__cosmosLoseExt.${fn}()
+        return true
+      })()`)
+    const results = []
+    const check = (name, ok, detail) => {
+      results.push(ok)
+      console.log(`${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : `  (${JSON.stringify(detail)})`}`)
+    }
+    let s = await state()
+    check("the WebGL Atlas is showing", s.mode === "atlas" && s.cosmos, s)
+    if (!(await context("loseContext"))) throw new Error("WEBGL_lose_context is not available")
+    await sleep(800)
+    s = await state()
+    check("a lost context hands over to the classic Atlas", s.mode === "off" && !s.cosmos && s.classic, s)
+    if (!(await context("restoreContext"))) throw new Error("could not restore the context")
+    await sleep(1200)
+    s = await state()
+    check("a restored context keeps the classic Atlas for this visit", s.mode === "off" && s.classic, s)
+    await evaluate(`window.___navigate("/")`)
+    await sleep(3500)
+    s = await state()
+    check("home warms the stage up again", s.mode === "idle", s)
+    await evaluate(`window.___navigate("/atlas/")`)
+    await sleep(3500)
+    const f0 = (await state()).frames
+    await sleep(600)
+    s = await state()
+    check("the next Atlas visit renders the WebGL Atlas", s.mode === "atlas" && s.cosmos && s.frames > f0, s)
+    await capture("recovered")
+    if (results.some((ok) => !ok)) throw new Error("context-loss checks failed")
   }
 }
 

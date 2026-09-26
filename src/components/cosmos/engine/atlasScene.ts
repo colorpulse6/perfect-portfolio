@@ -99,11 +99,18 @@ function statusColor(status: string): Vec3 {
   return [0.82, 0.9, 1]
 }
 
+/** Galaxies the shaders can hold: the size of the uniform arrays in vertex.ts. */
+export const MAX_GALAXIES = 16
+
 /** Map the Atlas model to the galaxy topology (skips the core domain). */
 export function topologyFromModel(model: { domains: AtlasDomain[]; fiction: FictionStory[] }): SceneTopology {
+  const galaxies = model.domains.filter((d) => !d.core)
+  if (galaxies.length > MAX_GALAXIES) {
+    console.warn(`[cosmos] ${galaxies.length} domains; the Atlas shows the first ${MAX_GALAXIES}.`)
+  }
   return {
-    domains: model.domains
-      .filter((d) => !d.core)
+    domains: galaxies
+      .slice(0, MAX_GALAXIES)
       .map((d) => ({
         id: d.id,
         label: d.label,
@@ -117,6 +124,7 @@ export function topologyFromModel(model: { domains: AtlasDomain[]; fiction: Fict
 }
 
 export function buildAtlasScene(topo: SceneTopology, opts: { pointsPerGalaxy: number; seed?: number }): AtlasSceneData {
+  if (topo.domains.length > MAX_GALAXIES) throw new Error(`at most ${MAX_GALAXIES} galaxies (got ${topo.domains.length})`)
   const seed = opts.seed ?? 20260926
   const bandN = norm([0.32, 1, 0.18])
   const target0: Vec3 = [0, 0.3, 0]

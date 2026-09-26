@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { buildAtlasScene, starPosition, GALAXY_SCALE } from "../src/components/cosmos/engine/atlasScene.ts"
+import { buildAtlasScene, starPosition, topologyFromModel, GALAXY_SCALE, MAX_GALAXIES } from "../src/components/cosmos/engine/atlasScene.ts"
 import type { SceneTopology } from "../src/components/cosmos/engine/atlasScene.ts"
 import { len, sub } from "../src/components/cosmos/engine/vec3.ts"
 
@@ -78,4 +78,29 @@ test("the black hole frame is orthonormal and faces the arrival camera edge-on",
   assert.ok(Math.abs(d(e1, n)) < 1e-9 && Math.abs(d(e1, e2)) < 1e-9 && Math.abs(d(n, e2)) < 1e-9)
   const tilt = Math.asin(Math.abs(d(n, s.arrival.F)))
   assert.ok(tilt > 0.05 && tilt < 0.2, "the camera sits a few degrees above the disk")
+})
+
+test("the scene refuses more galaxies than the shaders hold", () => {
+  const many: SceneTopology = {
+    domains: Array.from({ length: MAX_GALAXIES + 1 }, (_, i) => ({ ...topo.domains[i % topo.domains.length], id: `d${i}` })),
+  }
+  assert.throws(() => buildAtlasScene(many, { pointsPerGalaxy: 50 }), /at most 16 galaxies/)
+})
+
+test("the topology keeps the first MAX_GALAXIES domains and skips the core", () => {
+  const domains = [
+    { id: "core", label: "ME", c: "#fff", p: [0, 0, 0], core: true },
+    ...Array.from({ length: MAX_GALAXIES + 4 }, (_, i) => ({ id: `d${i}`, label: `D${i}`, c: "#abc", p: [i, 0, 0] })),
+  ]
+  const warn = console.warn
+  const warnings: string[] = []
+  console.warn = (m: string) => warnings.push(m)
+  try {
+    const t = topologyFromModel({ domains, fiction: [] } as unknown as Parameters<typeof topologyFromModel>[0])
+    assert.equal(t.domains.length, MAX_GALAXIES)
+    assert.equal(t.domains[0].id, "d0")
+    assert.equal(warnings.length, 1)
+  } finally {
+    console.warn = warn
+  }
 })
