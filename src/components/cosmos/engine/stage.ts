@@ -33,6 +33,10 @@ import { pick } from "./picking"
 import type { PickTarget } from "./picking"
 import { placeLabel, placeCoreLabel, layoutLabels, LABEL_ANGLES, LABEL_SAFE } from "./labels"
 import type { LayoutItem, LabelPlacement, Rect } from "./labels"
+import { J, journeyFrames, journeyParams } from "./journeyTimeline"
+import type { JourneyFrames } from "./journeyTimeline"
+import { createLutState, lensPass, updateLut, uploadPage } from "./renderJourney"
+import type { LutState } from "./renderJourney"
 import { setCosmos, emitCosmosPick } from "../cosmosStore"
 import type { CosmosMode } from "../cosmosStore"
 
@@ -48,9 +52,13 @@ export interface LabelNodes {
 }
 
 export interface JourneyStart {
-  snapshot: HTMLCanvasElement
+  /** The home page at the click, and the same page without the call to action. */
+  snapshot: { page: TexImageSource; pageNoCta: TexImageSource }
+  /** Center of the call to action, in CSS pixels. */
   ctaCenter: { x: number; y: number }
+  /** 1 on the first journey of a session; above 1 plays it faster. */
   speed: number
+  /** Called once at the hand-off (J.switch / speed): navigate to /atlas here. */
   onHandoff: () => void
 }
 
@@ -154,6 +162,26 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let idleHandle = 0
   let releaseTimer = 0
   let exitTimer = 0
+  let hudTimer = 0
+
+  interface Journey {
+    frames: JourneyFrames
+    speed: number
+    /** performance.now() at the first journey frame. */
+    start: number
+    lut: LutState
+    /** Cleared once called. */
+    onHandoff: (() => void) | null
+    /** Wall-clock seconds of the hand-off and of the settled arrival. */
+    switchAt: number
+    endAt: number
+    /** Debug only (__cosmos.goto): hold the journey at this time. */
+    frozenT: number | null
+  }
+  /** The running journey; after the hand-off it lingers until endAt to drive `back`. */
+  let journey: Journey | null = null
+  let detachJourneyInput: (() => void) | null = null
+  const journeyTime = (j: Journey, ms: number) => j.frozenT ?? (ms - j.start) / 1000
   let coreTimer = 0
 
   const setMode = (m: CosmosMode) => {
@@ -238,6 +266,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function onContextLost(e: Event) {
     e.preventDefault()
     lost = true
+    const handoffNow = journey?.onHandoff ?? null
+    if (journey) abortJourney()
     stopLoop()
     detach()
     if (idleHandle) cancelIdle(idleHandle)
@@ -249,6 +279,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     orbit = null
     setMode("off")
     setCosmos({ support: "lost" })
+    // Mid-journey, still go to the Atlas: the page shows the classic one.
+    handoffNow?.()
   }
   // The Atlas page keeps the classic view until the next visit, so only the
   // home warm-up resumes here; setPath picks the rest up on the next route.
@@ -314,7 +346,11 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const t = ((ms - time0) / 1000) * (reduceMotion ? 0.25 : 1)
     try {
       resize()
-      if (mode === "atlas") atlasFrame(dt, t, ms)
+      if (mode === "journey" && journey && journeyTime(journey, ms) < journey.switchAt) journeyFrame(journeyTime(journey, ms), t)
+      else if (mode === "journey" || mode === "atlas") {
+        if (journey?.onHandoff) handOff()
+        atlasFrame(dt, t, ms)
+      }
     } catch (e) {
       detach()
       markUnsupported(`The Atlas stopped rendering (${(e as Error).message})`)
@@ -339,7 +375,13 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       orbit.vEl = 0
     }
     stepOrbit(orbit, dt, { dragging, autoDrift: !reduceMotion && !panelOpen && entered < 0, now: ms })
-    const back = reduceMotion ? 0 : introBack * (1 - easeOutCubic(atlasT / 1.8))
+    let back = reduceMotion ? 0 : introBack * (1 - easeOutCubic(atlasT / 1.8))
+    if (journey) {
+      // Right after the hand-off the camera keeps the journey's dolly and overshoot.
+      const jt = journeyTime(journey, ms)
+      back = journeyParams(jt, journey.frames, journey.speed).back
+      if (jt >= journey.endAt) journey = null
+    }
     const cam = orbitCamera(orbit, orbitCfg, back)
 
     // Adaptive resolution: trade sharpness for smoothness when the GPU falls behind.
@@ -682,8 +724,135 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     if (reduceMotion) orbit.rate = 30
   }
 
+  // ── Journey ──────────────────────────────────────────────────────────
+  // Each frame: the Atlas into the destination target (no sky), the lookup
+  // table for the current throat distance, the lens pass, bloom, composite.
+  function journeyFrame(jt: number, t: number) {
+    const j = journey!
+    const s = res!.sized!
+    const p = journeyParams(jt, j.frames, j.speed)
+    renderAtlas(res!, scene!, s.destRT, {
+      cam: p.dest,
+      tanX: j.frames.RT_TAN,
+      tanY: j.frames.RT_TAN,
+      time: t,
+      withSky: false,
+      entered: -1,
+      reveal: 0,
+      hoverStar: -1,
+      galDim,
+      webDim: 1,
+    })
+    updateLut(res!, j.lut, p.l)
+    lensPass(res!, scene!, p, j.frames, j.lut, t)
+    bloomPass(res!, s.hdr)
+    composite(res!, s.hdr, t, {
+      focus: p.focus,
+      zoom: p.zoom,
+      ca: p.ca,
+      exposure: p.exposure,
+      bloomK: p.bloomK,
+      grain: p.grain,
+      vig: p.vig,
+      flash: p.flash,
+      streak: p.streak,
+    })
+  }
+
+  // At J.switch the lens has faded to identity and the destination camera
+  // equals the orbit camera at the arrival pose, so direct Atlas rendering
+  // takes over with no visible change. The page navigates to /atlas; the
+  // canvas stays on top until that route arrives (finishJourney).
+  function handOff() {
+    const cb = journey?.onHandoff
+    if (!journey || !cb) return
+    journey.onHandoff = null
+    stopJourneyInput()
+    cb()
+  }
+
+  function finishJourney() {
+    setMode("atlas")
+    attachInput()
+    window.clearTimeout(hudTimer)
+    hudTimer = window.setTimeout(() => setCosmos({ hudVisible: true }), 100)
+  }
+
+  function abortJourney() {
+    stopJourneyInput()
+    journey = null
+    window.clearTimeout(hudTimer)
+    setCosmos({ hudVisible: true, viaJourney: false })
+  }
+
+  function skip() {
+    if (!journey || !journey.onHandoff) return
+    const jt = (performance.now() - journey.start) / 1000
+    if (jt < journey.switchAt) journey.start = performance.now() - journey.switchAt * 1000
+  }
+
+  // Click, tap or Escape skips to the hand-off.
+  function startJourneyInput() {
+    stopJourneyInput()
+    const onPointer = (e: PointerEvent) => {
+      e.preventDefault()
+      skip()
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") skip()
+    }
+    canvas.addEventListener("pointerdown", onPointer)
+    window.addEventListener("keydown", onKey)
+    detachJourneyInput = () => {
+      canvas.removeEventListener("pointerdown", onPointer)
+      window.removeEventListener("keydown", onKey)
+    }
+  }
+  function stopJourneyInput() {
+    if (detachJourneyInput) detachJourneyInput()
+    detachJourneyInput = null
+  }
+
+  function startJourney(opts: JourneyStart): boolean {
+    if (mode === "journey" || failed || lost) return false
+    if (idleHandle) cancelIdle(idleHandle)
+    idleHandle = 0
+    window.clearTimeout(releaseTimer)
+    if (!ensureResources(true) || !res || !scene) return false
+    resize()
+    uploadPage(res, res.pageTex, opts.snapshot.page)
+    uploadPage(res, res.pageTexB, opts.snapshot.pageNoCta)
+    const speed = opts.speed > 0 ? opts.speed : 1
+    journey = {
+      frames: journeyFrames({ viewport: { w: cssW, h: cssH }, ctaCenter: opts.ctaCenter, arrival: scene.arrival }),
+      speed,
+      start: performance.now(),
+      lut: createLutState(),
+      onHandoff: opts.onHandoff,
+      switchAt: J.switch / speed,
+      endAt: J.end / speed,
+      frozenT: null,
+    }
+    // The Atlas after the hand-off starts exactly at the arrival pose.
+    if (orbit && orbitCfg) resetOrbit(orbit, orbitCfg, true)
+    entered = -1
+    reveal = 0
+    galDim.fill(1)
+    webDim = 1
+    atlasT = 0
+    introBack = 0
+    detach()
+    setCosmos({ entered: null, hover: null, hudVisible: false, viaJourney: true })
+    setMode("journey")
+    startJourneyInput()
+    startLoop()
+    return true
+  }
+
   function enterAtlasMode() {
     window.clearTimeout(releaseTimer)
+    stopJourneyInput()
+    journey = null
     setMode("atlas")
     // Without topology yet, setTopology() re-enters once the data arrives.
     if (!ensureResources(true)) return
@@ -695,7 +864,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     webDim = 1
     atlasT = 0
     introBack = 5
-    setCosmos({ entered: null, hover: null, hudVisible: true })
+    setCosmos({ entered: null, hover: null, hudVisible: true, viaJourney: false })
     attachInput()
     startLoop()
   }
@@ -748,7 +917,20 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       path = next
       if (idleHandle) cancelIdle(idleHandle)
       idleHandle = 0
-      if (mode === "journey") return
+      if (mode === "journey") {
+        // The hand-off navigated here: show the Atlas page over the canvas.
+        if (isAtlasPath(path) && journey && !journey.onHandoff) {
+          finishJourney()
+          return
+        }
+        if (isAtlasPath(path) && !journey) {
+          finishJourney()
+          return
+        }
+        // Still on home mid-journey: keep going. Anywhere else: stop.
+        if (isHomePath(path)) return
+        abortJourney()
+      }
       if (isAtlasPath(path)) {
         if (failed || lost || /atlas-legacy/.test(window.location.search)) {
           stopLoop()
@@ -813,13 +995,16 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         if (preview === el) preview = null
       }
     },
-    async startJourney() {
-      return false
+    async startJourney(opts: JourneyStart) {
+      return startJourney(opts)
     },
-    skipJourney() {},
+    skipJourney: skip,
     dispose() {
       stopLoop()
       detach()
+      stopJourneyInput()
+      journey = null
+      window.clearTimeout(hudTimer)
       if (idleHandle) cancelIdle(idleHandle)
       window.clearTimeout(releaseTimer)
       window.clearTimeout(coreTimer)
@@ -846,6 +1031,13 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       },
       get orbit() {
         return orbit
+      },
+      /** Hold a running journey at wall-clock time t (seconds), or release it with null. */
+      goto(t: number | null) {
+        if (journey) journey.frozenT = t
+      },
+      get journeyT() {
+        return journey ? journeyTime(journey, performance.now()) : null
       },
       screenOf(kind: "core" | "domain" | "work", id: string) {
         if (!lastCam || !scene) return null
