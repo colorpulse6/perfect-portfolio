@@ -76,3 +76,6 @@ yarn-error.log
 # aborts the newsletter publish job's clean-checkout precondition.
 .superpowers/
 .worktrees/
+
+# cosmos capture harness output
+cosmos-captures/
