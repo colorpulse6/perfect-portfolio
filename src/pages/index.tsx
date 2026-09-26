@@ -1,10 +1,12 @@
 import React from "react"
-import { graphql } from "gatsby"
+import { graphql, navigate, prefetchPathname } from "gatsby"
 import gsap from "gsap"
 import SEO from "../components/seo"
 import HomeScene from "../components/nebula/HomeScene"
 import { FeaturedEntry } from "../components/nebula/DomArtifacts"
-import AtlasDive from "../components/atlas/AtlasDive"
+import { getStage } from "../components/cosmos/cosmos"
+import { getCosmos } from "../components/cosmos/cosmosStore"
+import { snapshotHome } from "../components/cosmos/homeSnapshot"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
 import "./index.css"
@@ -36,19 +38,81 @@ interface IndexPageProps {
   }
 }
 
+/** sessionStorage count of wormhole journeys; repeats play faster. */
+const JOURNEYS_KEY = "cosmos-journeys"
+const REPEAT_SPEED = 1.45
+
 const IndexPage: React.FC<IndexPageProps> = ({
   transitionStatus,
   location,
   data,
 }) => {
-  const [diving, setDiving] = React.useState(false)
+  const launching = React.useRef(false)
 
-  // Hyperspace dive into /atlas: fade the title, play the warp overlay, navigate.
-  const diveToAtlas = (e: React.MouseEvent) => {
+  // Warm the Atlas route while the visitor reads the page.
+  React.useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number
+      cancelIdleCallback?: (h: number) => void
+    }
+    const run = () => prefetchPathname("/atlas/")
+    if (w.requestIdleCallback) {
+      const h = w.requestIdleCallback(run, { timeout: 3000 })
+      return () => w.cancelIdleCallback?.(h)
+    }
+    const t = window.setTimeout(run, 1500)
+    return () => window.clearTimeout(t)
+  }, [])
+
+  // Into the Atlas through the wormhole: snapshot the page as it looks right
+  // now, then let the stage run the journey and navigate at the hand-off.
+  // Without WebGL, or with reduced motion, go there directly.
+  const exploreAtlas = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    if (diving) return
-    setDiving(true)
-    gsap.to(".hometex", { autoAlpha: 0, duration: 0.5 })
+    if (launching.current) return
+    launching.current = true
+    const go = () => navigate("/atlas/")
+    const stage = getStage()
+    const { support } = getCosmos()
+    if (!stage || support === "unsupported" || support === "lost") {
+      go()
+      return
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.to(".hometex", { autoAlpha: 0, duration: 0.35, onComplete: go })
+      return
+    }
+    const cta = e.currentTarget
+    const r = cta.getBoundingClientRect()
+    let journeys = 0
+    try {
+      journeys = Number(sessionStorage.getItem(JOURNEYS_KEY)) || 0
+    } catch {
+      // Storage may be unavailable (private mode); treat as a first visit.
+    }
+    try {
+      performance.mark("cosmos-click")
+      const snapshot = await snapshotHome({ dpr: Math.min(window.devicePixelRatio || 1, 2), cta })
+      performance.measure("cosmos-snapshot", "cosmos-click")
+      const started = await stage.startJourney({
+        snapshot,
+        ctaCenter: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+        speed: journeys > 0 ? REPEAT_SPEED : 1,
+        onHandoff: () => navigate("/atlas/", { state: { viaJourney: true } }),
+      })
+      performance.measure("cosmos-launch", "cosmos-click")
+      if (!started) {
+        go()
+        return
+      }
+      try {
+        sessionStorage.setItem(JOURNEYS_KEY, String(journeys + 1))
+      } catch {
+        // See above.
+      }
+    } catch {
+      go()
+    }
   }
 
   usePageTransition(transitionStatus, ".hometex", { enter: 3.5, exit: 1, mount: 1 })
@@ -88,7 +152,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
             systems, and a decade of music across the US and Europe.
           </p>
           <div className="atlas-cta">
-            <button className="atlas-enter" onClick={diveToAtlas}>
+            <button className="atlas-enter" onClick={exploreAtlas}>
               <span>Explore the Atlas</span>
               <span className="atlas-arrow">↗</span>
             </button>
@@ -96,7 +160,6 @@ const IndexPage: React.FC<IndexPageProps> = ({
           </div>
         </div>
       </div>
-      {diving && <AtlasDive />}
       <style>{`
         .home-intro { max-width: 560px; margin: 16px auto 0; color: rgba(190,200,230,0.68); font-size: 14px; line-height: 1.6; font-weight: 300; }
         .atlas-cta { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }

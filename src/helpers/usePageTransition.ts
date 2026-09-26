@@ -8,6 +8,11 @@ interface PageTransitionDurations {
   exit?: number
   /** Fade-in duration on initial mount. */
   mount?: number
+  /**
+   * Run the fade-in (mount and entering). False when something else reveals
+   * the page, such as the Atlas after the wormhole journey.
+   */
+  intro?: boolean
 }
 
 /**
@@ -19,18 +24,18 @@ interface PageTransitionDurations {
 export function usePageTransition(
   transitionStatus: string | undefined,
   selector: string,
-  { enter = 1, exit = 0.4, mount = 1 }: PageTransitionDurations = {}
+  { enter = 1, exit = 0.4, mount = 1, intro = true }: PageTransitionDurations = {}
 ): void {
   useEffect(() => {
-    if (transitionStatus === "entering") {
+    if (transitionStatus === "entering" && intro) {
       gsap.to(selector, { autoAlpha: 1, duration: enter })
     }
     if (transitionStatus === "exiting") {
       gsap.to(selector, { autoAlpha: 0, duration: exit })
     }
-  }, [transitionStatus, selector, enter, exit])
+  }, [transitionStatus, selector, enter, exit, intro])
 
   useEffect(() => {
-    gsap.to(selector, { autoAlpha: 1, duration: mount })
-  }, [selector, mount])
+    if (intro) gsap.to(selector, { autoAlpha: 1, duration: mount })
+  }, [selector, mount, intro])
 }

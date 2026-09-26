@@ -819,9 +819,16 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     idleHandle = 0
     window.clearTimeout(releaseTimer)
     if (!ensureResources(true) || !res || !scene) return false
+    performance.mark("cosmos-resources")
     resize()
-    uploadPage(res, res.pageTex, opts.snapshot.page)
-    uploadPage(res, res.pageTexB, opts.snapshot.pageNoCta)
+    try {
+      uploadPage(res, res.pageTex, opts.snapshot.page)
+      uploadPage(res, res.pageTexB, opts.snapshot.pageNoCta)
+    } catch {
+      // A tainted snapshot (a cross-origin image without CORS) cannot upload.
+      return false
+    }
+    performance.mark("cosmos-upload")
     const speed = opts.speed > 0 ? opts.speed : 1
     journey = {
       frames: journeyFrames({ viewport: { w: cssW, h: cssH }, ctaCenter: opts.ctaCenter, arrival: scene.arrival }),

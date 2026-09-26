@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { graphql } from "gatsby"
+import gsap from "gsap"
 import SEO from "../components/seo"
 import AtlasCanvas from "../components/atlas/AtlasCanvas"
 import { CosmosAtlas } from "../components/atlas/CosmosAtlas"
@@ -55,7 +56,14 @@ interface AtlasPageProps {
 }
 
 const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data }) => {
-  usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1 })
+  // After the wormhole journey the stage reveals the HUD (hudVisible) once
+  // the hand-off settles, instead of the usual mount fade.
+  const viaJourney = !!(location.state as { viaJourney?: boolean } | null)?.viaJourney
+  const hudVisible = useCosmos((s) => s.hudVisible)
+  usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1, intro: !viaJourney })
+  useEffect(() => {
+    if (viaJourney && hudVisible) gsap.to(".atlas-page", { autoAlpha: 1, duration: 0.6 })
+  }, [viaJourney, hudVisible])
 
   // The WebGL Atlas is the default; the classic Canvas2D Atlas remains the
   // fallback without WebGL2, after a lost context, or with ?atlas-legacy.
