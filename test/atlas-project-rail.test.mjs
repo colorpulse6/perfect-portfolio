@@ -40,11 +40,13 @@ test("project rail uses project domains and renders real image or video thumbnai
 
 test("atlas Sector Zero work uses the cockpit screenshot", () => {
   const atlasPage = readSource("src", "pages", "atlas.tsx")
+  const atlasModel = readSource("src", "components", "atlas", "buildAtlasModel.ts")
   const projectImages = readSource("src", "helpers", "projectImages.ts")
 
   const nodeSource = readSource("gatsby-node.js")
 
-  assert.match(atlasPage, /media: resolveProjectMedia\(p\.name, p\.imgSrc\)/)
+  assert.match(atlasModel, /media: resolveMedia\(p\.name, p\.imgSrc \|\| ""\)/)
+  assert.match(atlasPage, /resolveMedia: resolveProjectMedia/)
   assert.match(nodeSource, /name: "Sector Zero"[\s\S]*imgSrc: "sector-zero\.jpg"/)
   assert.match(projectImages, /import SectorZeroImg from "\.\.\/images\/sector-zero\.jpg"/)
   assert.match(projectImages, /"Sector Zero": SectorZeroImg/)

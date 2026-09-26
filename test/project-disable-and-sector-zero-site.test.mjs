@@ -50,16 +50,16 @@ test("disabled projects stay in source data but are not emitted as portfolio pro
 })
 
 test("atlas defensively filters disabled projects from domain work lists", () => {
-  const atlasPage = readSource("src", "pages", "atlas.tsx")
+  const atlasModel = readSource("src", "components", "atlas", "buildAtlasModel.ts")
 
-  assert.match(atlasPage, /disabled\?: boolean/)
-  assert.match(atlasPage, /const activeProjects = projects\.filter\(p => p\.disabled !== true\)/)
-  assert.match(atlasPage, /activeProjects\.filter\(p => p\.cluster === c\)\.map\(toWork\)/)
+  assert.match(atlasModel, /disabled\?: boolean/)
+  assert.match(atlasModel, /const activeProjects = projects\.filter\(p => p\.disabled !== true\)/)
+  assert.match(atlasModel, /activeProjects\.filter\(p => p\.cluster === c\)\.map\(toWork\)/)
+  assert.match(readSource("src", "pages", "atlas.tsx"), /buildAtlasModel\(/)
 })
 
 test("Sector Zero exposes a Site action next to Play in atlas and featured cards", () => {
   const atlasShared = readSource("src", "components", "atlas", "atlasShared.ts")
-  const atlasPage = readSource("src", "pages", "atlas.tsx")
   const projectComponent = readSource("src", "components", "Project.tsx")
   const projectTemplate = readSource("src", "templates", "project.tsx")
   const wProject = readSource("src", "components", "atlas", "panels", "WProject.tsx")
@@ -68,7 +68,7 @@ test("Sector Zero exposes a Site action next to Play in atlas and featured cards
   const markdown = readChangelogEntry("sector-zero-new-modes")
 
   assert.match(atlasShared, /links\?: AtlasWorkLink\[\]/)
-  assert.match(atlasPage, /p\.name === "Sector Zero"[\s\S]*cta: "Play"[\s\S]*cta: "Site"/)
+  assert.match(readSource("src", "components", "atlas", "buildAtlasModel.ts"), /p\.name === "Sector Zero"[\s\S]*cta: "Play"[\s\S]*cta: "Site"/)
   assert.match(wProject, /const links = work\?\.links\?\.length[\s\S]*work\.links/)
   assert.match(wProject, /links\.map\(\(\{ cta, link \}\) =>/)
   assert.match(projectComponent, /secondaryLink\?: string/)
