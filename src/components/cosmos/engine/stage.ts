@@ -603,19 +603,16 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     startLoop()
   }
 
-  function releaseGL() {
+  /**
+   * Free GPU memory (targets, buffers, textures, programs) while keeping the
+   * context itself: a canvas can only ever hand out one context, so losing it
+   * on purpose would make the next visit fall back to the classic Atlas.
+   */
+  function releaseGPU() {
     if (res) disposeResources(res)
     res = null
     programs = null
     compiler = null
-    const lose = gl?.getExtension("WEBGL_lose_context")
-    if (gl) {
-      canvas.removeEventListener("webglcontextlost", onContextLost)
-      canvas.removeEventListener("webglcontextrestored", onContextRestored)
-    }
-    lose?.loseContext()
-    gl = null
-    caps = null
     orbit = null
   }
 
@@ -669,7 +666,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         setMode("off")
         window.clearTimeout(releaseTimer)
         releaseTimer = window.setTimeout(() => {
-          if (mode === "off") releaseGL()
+          if (mode === "off") releaseGPU()
         }, 10000)
       }
     },
@@ -709,7 +706,11 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       if (idleHandle) cancelIdle(idleHandle)
       window.clearTimeout(releaseTimer)
       window.clearTimeout(coreTimer)
-      releaseGL()
+      releaseGPU()
+      if (gl) {
+        canvas.removeEventListener("webglcontextlost", onContextLost)
+        canvas.removeEventListener("webglcontextrestored", onContextRestored)
+      }
       document.documentElement.removeAttribute("data-cosmos-mode")
     },
   }
