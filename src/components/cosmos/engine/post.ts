@@ -33,7 +33,7 @@ export const ATLAS_COMPOSITE: CompositeParams = {
 export function bloomPass(res: Resources, from: Target): void {
   const { gl, kit, prog } = res
   const blooms = res.sized!.blooms
-  let P = kit.use(prog.down)
+  let P = kit.activate(prog.down)
   let src = from
   blooms.forEach((b, i) => {
     gl.bindFramebuffer(gl.FRAMEBUFFER, b.fb)
@@ -44,7 +44,7 @@ export function bloomPass(res: Resources, from: Target): void {
     kit.drawTri()
     src = b
   })
-  P = kit.use(prog.up)
+  P = kit.activate(prog.up)
   gl.enable(gl.BLEND)
   gl.blendFunc(gl.ONE, gl.ONE)
   for (let i = blooms.length - 2; i >= 0; i--) {
@@ -64,7 +64,7 @@ export function composite(res: Resources, from: Target, time: number, p: Composi
   const s = res.sized!
   gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   gl.viewport(0, 0, s.bufW, s.bufH)
-  const C = kit.use(prog.comp)
+  const C = kit.activate(prog.comp)
   kit.bindTex(C, "uHdr", 0, from.tex)
   kit.bindTex(C, "uBloom", 1, s.blooms[0].tex)
   kit.U.v2(C, "uFocus", p.focus[0], p.focus[1])

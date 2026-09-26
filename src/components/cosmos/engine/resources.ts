@@ -162,7 +162,7 @@ function buildNebula(kit: Kit, prog: Programs, bandN: ArrayLike<number>): WebGLT
   const fb = gl.createFramebuffer()!
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
   gl.viewport(0, 0, size, size)
-  const P = kit.use(prog.neb)
+  const P = kit.activate(prog.neb)
   kit.U.f(P, "uSize", size)
   kit.U.v3(P, "uBandN", bandN)
   for (let f = 0; f < 6; f++) {

@@ -5,15 +5,14 @@
  *
  * Production changes vs the prototype:
  *   - `DOMAINS` / `NB_FICTION` are now the `domains` / `fiction` props.
- *   - Panels come from the imported AtlasPanelRouter (fed essays/changelog too).
- *   - The wordmark links ← HOME via the site's TransitionLink.
+ *   - The HUD (wordmark, rail, nav, terminal, panels) is the shared AtlasHud,
+ *     also used by the WebGL Atlas; this file keeps only the canvas scene.
  *   - a11y: prefers-reduced-motion damps auto-spin + skips the warp; the loop
  *     pauses on visibilitychange (hidden) but keeps running through warps.
  *   - touch: drag to rotate, pinch to zoom, tap to select (≥44px hub targets).
  */
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import TransitionLink from "gatsby-plugin-transition-link"
-import { NB as A, NB_MONO as MONO, NB_DISP as DISP, hx } from "./atlasShared"
+import { NB_MONO as MONO, NB_DISP as DISP, hx } from "./atlasShared"
 import type {
   AtlasDomain,
   AtlasWork,
@@ -22,9 +21,8 @@ import type {
   ChangelogItem,
   RGB,
 } from "./atlasShared"
-import { AtlasPanelRouter } from "./AtlasPanels"
 import type { AtlasPanelState } from "./AtlasPanels"
-import { ProjectRail } from "./ProjectRail"
+import { AtlasHud } from "./AtlasHud"
 import type {
   SceneState,
   Scene,
@@ -37,7 +35,6 @@ import type {
   Signal,
   PlanetHit,
   Projected,
-  ProjFn,
 } from "./sceneTypes"
 
 const R = 310
@@ -266,35 +263,6 @@ function buildScene(domains: AtlasDomain[]): Scene {
     })
   })
   return { hubs, nodes, stars, planets }
-}
-
-function drawGizmo(ctx: CanvasRenderingContext2D, ox: number, oy: number, s: SceneState, proj: ProjFn) {
-  const o = proj([0, 0, 0], { ...s, zoom: 1 })
-  const base = { sx: ox, sy: oy }
-  ;([
-    ["#ff2b46", [40, 0, 0]],
-    ["#2bf0ff", [0, -40, 0]],
-    ["#8c4fd1", [0, 0, 40]],
-  ] as [string, number[]][]).forEach(([col, v]) => {
-    const p = proj(v, { ...s, zoom: 1 })
-    const dx = p.sx - o.sx,
-      dy = p.sy - o.sy
-    ctx.strokeStyle = col
-    ctx.lineWidth = 1.2
-    ctx.beginPath()
-    ctx.moveTo(base.sx, base.sy)
-    ctx.lineTo(base.sx + dx, base.sy + dy)
-    ctx.stroke()
-    ctx.fillStyle = col
-    ctx.beginPath()
-    ctx.arc(base.sx + dx, base.sy + dy, 2, 0, 6.28)
-    ctx.fill()
-  })
-  ctx.strokeStyle = "rgba(150,165,220,0.25)"
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.arc(base.sx, base.sy, 30, 0, 6.28)
-  ctx.stroke()
 }
 
 export interface AtlasCanvasProps {
@@ -943,7 +911,6 @@ export default function AtlasCanvas({
       ctx.globalAlpha = 1
       ctx.globalCompositeOperation = "source-over"
 
-      drawGizmo(ctx, W - 58, H - 58, s, proj)
       if (!paused) raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -1256,283 +1223,18 @@ export default function AtlasCanvas({
         style={{ position: "absolute", inset: 0 }}
       />
 
-      <div style={{ position: "absolute", top: 22, left: 26, zIndex: 70 }}>
-        <TransitionLink
-          to="/"
-          exit={{ length: 1 }}
-          entry={{ length: 1 }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 9,
-            fontFamily: MONO,
-            fontSize: 13,
-            letterSpacing: 2,
-            color: A.paper,
-            fontWeight: 600,
-            textDecoration: "none",
-            cursor: "pointer",
-          }}
-          onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            const b = e.currentTarget.querySelector(".wm-back") as HTMLElement | null
-            if (b) b.style.opacity = "1"
-          }}
-          onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            const b = e.currentTarget.querySelector(".wm-back") as HTMLElement | null
-            if (b) b.style.opacity = "0.9"
-          }}
-        >
-          <span style={{ width: 7, height: 7, borderRadius: 99, background: A.cyan, boxShadow: `0 0 10px ${A.cyan}` }} />
-          NICHALAS BARNES <span style={{ color: A.fainter }}>– ATLAS</span>
-          <span className="wm-back" style={{ color: A.cyan, opacity: 0.9, transition: "opacity 0.2s", fontSize: 11, fontWeight: 700 }}>
-            &nbsp; ← HOME
-          </span>
-        </TransitionLink>
-        <div
-          style={{
-            fontFamily: MONO,
-            fontSize: 10,
-            letterSpacing: 1.5,
-            color: A.fainter,
-            marginTop: 6,
-            paddingLeft: 16,
-            pointerEvents: "none",
-          }}
-        >
-          every medium, one discipline
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          top: 22,
-          right: 26,
-          fontFamily: MONO,
-          fontSize: 11,
-          letterSpacing: 1.5,
-          color: A.fainter,
-          pointerEvents: "none",
-          textAlign: "right",
-        }}
-      >
-        DRAG <span style={{ color: A.faint }}>– rotate</span>&nbsp;&nbsp;&nbsp;SCROLL{" "}
-        <span style={{ color: A.faint }}>– zoom</span>
-        <div style={{ marginTop: 6, color: "rgba(140,155,210,0.4)" }}>
-          CLICK A CLUSTER · PRESS <span style={{ color: A.faint }}>T</span> FOR TERMINAL
-        </div>
-      </div>
-
-      <ProjectRail
+      <AtlasHud
         domains={domains}
-        hidden={entered >= 0 || !!panel}
-        onOpen={(work, domain) => setPanel({ type: "project", work, domain })}
+        fiction={fiction}
+        essays={essays}
+        changelog={changelog}
+        entered={entered >= 0}
+        panel={panel}
+        setPanel={setPanel}
+        term={term}
+        setTerm={setTerm}
+        onResetGalaxy={resetToGalaxy}
       />
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: 24,
-          left: 26,
-          display: "flex",
-          gap: 22,
-          fontFamily: MONO,
-          fontSize: 11,
-          letterSpacing: 2,
-          fontWeight: 600,
-          color: A.fainter,
-        }}
-      >
-        <button type="button" onClick={resetToGalaxy} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.paper, cursor: "pointer" }}>
-          WORK
-        </button>
-        <button type="button" onClick={() => setPanel({ type: "about" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
-          ABOUT
-        </button>
-        <button type="button" onClick={() => setPanel({ type: "writing" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
-          WRITING
-        </button>
-        <button type="button" onClick={() => setPanel({ type: "changelog" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
-          CHANGELOG
-        </button>
-        <button type="button" aria-pressed={term} onClick={() => setTerm(v => !v)} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: term ? A.cyan : A.fainter, cursor: "pointer" }}>
-          TERMINAL
-        </button>
-        <button type="button" onClick={() => setPanel({ type: "contact" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
-          CONTACT
-        </button>
-      </div>
-
-      {entered >= 0 && (
-        <button
-          type="button"
-          onClick={resetToGalaxy}
-          style={{
-            position: "absolute",
-            top: 72,
-            left: 26,
-            // sit above the Wraith panel overlay (zIndex 60) so "back to galaxy"
-            // is clickable even with a project panel open — resetToGalaxy closes
-            // the panel and flies back out in one step
-            zIndex: 70,
-            pointerEvents: "auto",
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            fontFamily: MONO,
-            fontSize: 11,
-            letterSpacing: 1.5,
-            color: A.cyan,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          ← BACK TO GALAXY
-        </button>
-      )}
-
-      {term && <AtlasTerminal onClose={() => setTerm(false)} />}
-
-      {panel && (
-        <AtlasPanelRouter
-          {...panel}
-          fiction={fiction}
-          essays={essays}
-          changelog={changelog}
-          onClose={() => setPanel(null)}
-        />
-      )}
-    </div>
-  )
-}
-
-function AtlasTerminal({ onClose }: { onClose: () => void }) {
-  const CMDS: Record<string, string> = {
-    help: "commands: about · work · obsidian · web · games · tools · ai · music · writing · contact · clear",
-    about: "Seattle → Berlin → Madrid. Composer turned engineer. The medium changed; the discipline didn't.",
-    work: "7 mediums indexed. Drag the atlas, or type a name: web, ai, games, music...",
-    obsidian: "Brain Atlas + Cerebro Mycelium. Vault visualizers, live in the community store.",
-    web: "Job Toast · Fire Store. Web apps, live and archived.",
-    tools: "El Form · Claude Skills · Swash Flag · Bot Battle · Regexplain · Throttle. Libraries, SDKs, and dev tooling.",
-    ai: "Cerebro. A native macOS multi-agent workspace orchestrating coding agents.",
-    music: "Alex's Hand · 10 years · 10 albums · 12 countries → alexshand.bandcamp.com",
-    games: "Knicks Knacks · Sector Zero. Procedural space, co-op in progress.",
-    writing: "Agile Anarchy: What's Left. A postmortem on process worship.",
-    contact: "open the CONTACT panel (bottom-left) to send a transmission.",
-  }
-  const QUOTES = [
-    "The silence between the notes is where the meaning lives.",
-    "Troubleshooting is troubleshooting. The domain is irrelevant.",
-    "Arrangement is architecture.",
-  ]
-  const [lines, setLines] = useState<{ t: string; c: string }[]>(() => [
-    { t: "CEREBRO ATLAS // terminal", c: A.cyan },
-    { t: QUOTES[Math.floor(Math.random() * QUOTES.length)], c: A.fainter },
-    { t: "type 'help' for commands.", c: A.faint },
-  ])
-  const [val, setVal] = useState("")
-  const inRef = useRef<HTMLInputElement>(null)
-  const bodyRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    inRef.current && inRef.current.focus()
-  }, [])
-  useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
-  }, [lines])
-  const run = (raw: string) => {
-    const cmd = raw.trim().toLowerCase()
-    if (!cmd) return
-    if (cmd === "clear") {
-      setLines([])
-      return
-    }
-    const out = CMDS[cmd] || `command not found: ${cmd}`
-    setLines(l => [
-      ...l,
-      { t: `nic@atlas:~$ ${raw}`, c: A.paper },
-      { t: out, c: CMDS[cmd] ? A.faint : A.pink },
-    ])
-  }
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%,-50%)",
-        width: 560,
-        maxWidth: "86%",
-        height: 320,
-        background: "rgba(6,7,16,0.92)",
-        border: "1px solid rgba(72,226,214,0.22)",
-        borderRadius: 12,
-        boxShadow: "0 0 60px rgba(43,240,255,0.14), inset 0 0 40px rgba(43,240,255,0.03)",
-        backdropFilter: "blur(12px)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        zIndex: 70,
-      }}
-    >
-      <div
-        style={{
-          height: 34,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "0 12px",
-          borderBottom: `1px solid ${A.line}`,
-        }}
-      >
-        <span style={{ width: 9, height: 9, borderRadius: 99, background: A.cyan }} />
-        <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: 2, color: A.faint, flex: 1 }}>TERMINAL</span>
-        <button type="button" aria-label="Close terminal" onClick={onClose} style={{ background: "none", border: "none", padding: 0, fontFamily: MONO, fontSize: 14, color: A.fainter, cursor: "pointer" }}>
-          ✕
-        </button>
-      </div>
-      <div
-        ref={bodyRef}
-        style={{ flex: 1, overflow: "auto", padding: "12px 14px", fontFamily: MONO, fontSize: 12, lineHeight: 1.7 }}
-      >
-        {lines.map((l, i) => (
-          <div key={i} style={{ color: l.c, whiteSpace: "pre-wrap" }}>
-            {l.t}
-          </div>
-        ))}
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 14px",
-          borderTop: `1px solid ${A.line}`,
-        }}
-      >
-        <span style={{ fontFamily: MONO, fontSize: 12, color: A.cyan }}>nic@atlas:~$</span>
-        <input
-          ref={inRef}
-          value={val}
-          onChange={e => setVal(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter") {
-              run(val)
-              setVal("")
-            }
-          }}
-          style={{
-            flex: 1,
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            color: A.paper,
-            fontFamily: MONO,
-            fontSize: 12,
-          }}
-        />
-      </div>
     </div>
   )
 }

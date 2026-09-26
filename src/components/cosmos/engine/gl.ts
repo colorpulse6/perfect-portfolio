@@ -112,7 +112,7 @@ export type Vec3Like = ArrayLike<number>
 
 /** Uniform setters, texture and target helpers, and fullscreen geometry bound to one context. */
 export function makeKit(gl: GL) {
-  const use = (P: Program) => {
+  const activate = (P: Program) => {
     gl.useProgram(P.p)
     return P
   }
@@ -214,7 +214,7 @@ export function makeKit(gl: GL) {
     gl.deleteBuffer(triBuf)
     gl.deleteBuffer(quadBuf)
   }
-  return { gl, use, U, tex2D, target, freeTarget, bindTex, drawTri, drawQuad, dispose }
+  return { gl, activate, U, tex2D, target, freeTarget, bindTex, drawTri, drawQuad, dispose }
 }
 
 export type Kit = ReturnType<typeof makeKit>

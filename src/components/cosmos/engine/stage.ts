@@ -32,7 +32,7 @@ import type { AtlasKey } from "./input"
 import { pick } from "./picking"
 import type { PickTarget } from "./picking"
 import { placeLabel, placeCoreLabel, LABEL_SAFE } from "./labels"
-import { getCosmos, setCosmos, emitCosmosPick } from "../cosmosStore"
+import { setCosmos, emitCosmosPick } from "../cosmosStore"
 import type { CosmosMode } from "../cosmosStore"
 
 export interface LabelNode {

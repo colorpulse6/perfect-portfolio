@@ -79,7 +79,7 @@ export function setHoverRing(res: Resources, scene: AtlasSceneData, star: SceneS
 
 export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, d: AtlasDraw): void {
   const { gl, kit, prog } = res
-  const { use, U, bindTex } = kit
+  const { activate, U, bindTex } = kit
   const { cam, tanX, tanY, time, withSky } = d
   gl.bindFramebuffer(gl.FRAMEBUFFER, tgt.fb)
   gl.viewport(0, 0, tgt.w, tgt.h)
@@ -91,7 +91,7 @@ export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, 
   const bigBh = withSky && !!rect && (rect[2] - rect[0]) * (rect[3] - rect[1]) > 4 * 0.55
   if (bigBh) rect = [-1, -1, 1, 1]
   if (withSky && !bigBh) {
-    const P = use(prog.sky)
+    const P = activate(prog.sky)
     U.m3(P, "uBasis", basis)
     U.v2(P, "uTan2", tanX, tanY)
     U.f(P, "uPx", px)
@@ -108,7 +108,7 @@ export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, 
     gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
   }
   if (rect) {
-    const P = use(prog.bh)
+    const P = activate(prog.bh)
     U.v4(P, "uRect", rect)
     U.m3(P, "uBasis", basis)
     U.v2(P, "uTan2", tanX, tanY)
@@ -131,7 +131,7 @@ export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, 
   const shadowR = scene.bh.rs * 2.6
   const g = scene.galaxies
 
-  let P = use(prog.web)
+  let P = activate(prog.web)
   U.m4(P, "uVP", vp)
   U.f(P, "uPxScale", pxScale)
   U.f(P, "uTime", time)
@@ -147,7 +147,7 @@ export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, 
     gl.drawArrays(gl.POINTS, 0, res.ringCount)
   }
 
-  P = use(prog.gal)
+  P = activate(prog.gal)
   U.m4(P, "uVP", vp)
   U.f(P, "uPxScale", pxScale)
   U.f(P, "uTime", time)
@@ -163,7 +163,7 @@ export function renderAtlas(res: Resources, scene: AtlasSceneData, tgt: Target, 
   gl.drawArrays(gl.POINTS, 0, res.galCount)
 
   if (res.starCount > 0) {
-    P = use(prog.star)
+    P = activate(prog.star)
     U.m4(P, "uVP", vp)
     U.f(P, "uPxScale", pxScale)
     U.f(P, "uTime", time)
