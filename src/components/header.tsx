@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({
   atlas = false,
 }) => {
   return (
-    <header>
+    <header data-cosmos-snapshot="50">
       <div className="header-container">
         <div
           style={

@@ -3,10 +3,6 @@ import { navigate } from "gatsby"
 import { ARTIFACTS, ArtifactDef } from "./artifacts"
 import { useInteractionSounds } from "../audio/useInteractionSounds"
 import {
-  FloatingIcon,
-  FloatingCard,
-  FloatingItem,
-  spawnFromEdge,
   MAX_ICONS,
   ICON_FLOAT_DURATION,
   ICON_COOLDOWN,
@@ -14,7 +10,6 @@ import {
   CARD_FLOAT_DURATION,
   CARD_COOLDOWN,
   DISSOLVE_DURATION,
-  MATERIALIZE_DURATION,
 } from "./floatingPhysics"
 import {
   TYPE_COLORS,
@@ -24,8 +19,9 @@ import {
   getCardMediaStyle,
   glassStyle,
   cardStyle,
-  getItemId,
 } from "./cardRendering"
+import { findSpot, entryPoint, intersects } from "./placement"
+import type { Rect, Spot } from "./placement"
 
 export interface FeaturedEntry {
   title: string
@@ -47,214 +43,242 @@ interface DomArtifactsProps {
   featuredEntries?: FeaturedEntry[]
 }
 
+/** What React renders: which items exist. Their motion lives in refs. */
+type Item =
+  | { kind: "icon"; id: string; artifact: ArtifactDef }
+  | { kind: "card"; id: string; entry: FeaturedEntry }
+
+interface Body {
+  kind: Item["kind"]
+  /** measure: rendered hidden to get its size; then enter, float, dissolve. */
+  phase: "measure" | "enter" | "float" | "dissolve"
+  /** Seconds in the current phase. */
+  t: number
+  /** Seconds floating; stops while the pointer is on the item. */
+  age: number
+  from: Spot
+  spot: Spot
+  w: number
+  h: number
+  bob: number
+  hovered: boolean
+}
+
+/** Page elements the floating items keep clear of, by their boxes. */
+const BLOCKING = [
+  "header .header-container > :first-child > *",
+  "header button",
+  "header .header-work-link",
+  ".hometex .atlas-enter",
+  ".hometex .home-work-link",
+  ".terminal-console",
+  ".terminal-collapsed",
+  ".audio-toggle",
+  ".site-footer",
+].join(", ")
+/** Text they keep clear of, line by line: the title block's boxes span the full width. */
+const BLOCKING_TEXT = ".hometex .title"
+const ENTER_DURATION = 1.1
+const easeOutCubic = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3)
+const isExternal = (href: string) => /^https?:\/\//.test(href)
+
+/**
+ * The home page's floating artifacts: glass icons and featured changelog
+ * cards. Each streaks in from the nearest edge to a spot clear of the title,
+ * the call to action, the header and the terminal (measured live), floats
+ * there, and fades out. Hovering holds an item in place; nothing covers the
+ * content the visitor came for. Motion is written as transforms each frame;
+ * React only renders when an item appears or leaves.
+ */
 const DomArtifacts: React.FC<DomArtifactsProps> = ({
   onArtifactActivate,
   featuredEntries = [],
 }) => {
   const playSound = useInteractionSounds()
-  const [items, setItems] = useState<FloatingItem[]>([])
-  const cooldowns = useRef<Map<string, number>>(new Map())
-  const animRef = useRef<number>(0)
-  const lastTime = useRef<number>(0)
-  const spawnTimer = useRef<number>(0)
-  const cardSpawnTimer = useRef<number>(0)
-  const nextIconSpawn = useRef<number>(1 + Math.random() * 3)
-  const nextCardSpawn = useRef<number>(2 + Math.random() * 3)
+  const [items, setItems] = useState<Item[]>([])
+  const bodies = useRef(new Map<string, Body>())
+  const els = useRef(new Map<string, HTMLDivElement>())
+  const cooldowns = useRef(new Map<string, number>())
+  const entries = useRef(featuredEntries)
 
   useEffect(() => {
-    const initial: FloatingItem[] = []
-    const shuffled = [...ARTIFACTS].sort(() => Math.random() - 0.5)
-    for (let i = 0; i < 2; i++) {
-      const spawn = spawnFromEdge()
-      initial.push({
-        kind: "icon",
-        artifact: shuffled[i],
-        x: spawn.x,
-        y: spawn.y,
-        vx: spawn.vx,
-        vy: spawn.vy,
-        opacity: 0,
-        phase: "shooting",
-        phaseTime: 0,
-        bobPhase: Math.random() * Math.PI * 2,
-      })
+    entries.current = featuredEntries
+  }, [featuredEntries])
+
+  const addItem = useCallback((item: Item) => {
+    bodies.current.set(item.id, {
+      kind: item.kind,
+      phase: "measure",
+      t: 0,
+      age: 0,
+      from: { x: 0, y: 0 },
+      spot: { x: 0, y: 0 },
+      w: 0,
+      h: 0,
+      bob: Math.random() * Math.PI * 2,
+      hovered: false,
+    })
+    setItems((prev) => [...prev, item])
+  }, [])
+
+  const removeItem = useCallback((id: string) => {
+    const b = bodies.current.get(id)
+    bodies.current.delete(id)
+    cooldowns.current.set(id, Date.now() + (b?.kind === "card" ? CARD_COOLDOWN : ICON_COOLDOWN))
+    setItems((prev) => prev.filter((i) => i.id !== id))
+  }, [])
+
+  const dissolve = useCallback((id: string) => {
+    const b = bodies.current.get(id)
+    if (b && b.phase !== "dissolve") {
+      b.phase = "dissolve"
+      b.t = 0
     }
-    setItems(initial)
-    lastTime.current = performance.now()
+  }, [])
+
+  const setHovered = useCallback((id: string, on: boolean) => {
+    const b = bodies.current.get(id)
+    if (b) b.hovered = on
   }, [])
 
   useEffect(() => {
-    const animate = (now: number) => {
-      const delta = Math.min((now - lastTime.current) / 1000, 0.1)
-      lastTime.current = now
-      spawnTimer.current += delta
-      cardSpawnTimer.current += delta
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    let raf = 0
+    let last = performance.now()
+    let iconTimer = 0
+    let cardTimer = 0
+    let nextIcon = 0.4
+    let nextCard = 2 + Math.random() * 2
+    let blocked: Rect[] = []
+    let blockedAge = Infinity
 
-      setItems((prev) => {
-        let updated = prev.map((item) => {
-          const next = { ...item }
-          next.phaseTime += delta
-          next.bobPhase += delta * (next.kind === "card" ? 0.5 : 0.8)
-
-          const isCard = next.kind === "card"
-          const floatDuration = isCard ? CARD_FLOAT_DURATION : ICON_FLOAT_DURATION
-          const frictionBase = isCard ? 0.015 : 0.03
-          const speedThreshold = isCard ? 15 : 20
-
-          switch (next.phase) {
-            case "shooting": {
-              next.x += next.vx * delta
-              next.y += next.vy * delta
-              const friction = Math.pow(frictionBase, delta)
-              next.vx *= friction
-              next.vy *= friction
-              next.opacity = Math.min(0.7, next.phaseTime / 0.3)
-              const speed = Math.sqrt(next.vx * next.vx + next.vy * next.vy)
-              if (speed < speedThreshold) {
-                next.phase = "materializing"
-                next.phaseTime = 0
-                const driftScale = isCard ? 0.6 : 1
-                next.vx = (Math.random() - 0.5) * 15 * driftScale
-                next.vy = (Math.random() - 0.5) * 10 * driftScale
-              }
-              break
-            }
-            case "materializing": {
-              next.opacity = 0.7 + Math.min(0.3, next.phaseTime / MATERIALIZE_DURATION * 0.3)
-              next.x += next.vx * delta
-              next.y += next.vy * delta
-              const mw = window.innerWidth
-              const mh = window.innerHeight
-              const mpad = isCard ? 300 : 80
-              next.x = Math.max(10, Math.min(next.x, mw - mpad))
-              next.y = Math.max(60, Math.min(next.y, mh - 100))
-              if (next.phaseTime > MATERIALIZE_DURATION) {
-                next.phase = "floating"
-                next.phaseTime = 0
-                next.opacity = 1
-              }
-              break
-            }
-            case "floating": {
-              const bobAmp = isCard ? 0.15 : 0.3
-              next.x += next.vx * delta
-              next.y += next.vy * delta + Math.sin(next.bobPhase) * bobAmp
-              const w = window.innerWidth
-              const h = window.innerHeight
-              const pad = isCard ? 300 : 80
-              const minX = 10
-              const maxX = w - pad
-              const minY = 60
-              const maxY = h - 100
-              if (next.x < minX) { next.x = minX; next.vx = Math.abs(next.vx) }
-              if (next.x > maxX) { next.x = maxX; next.vx = -Math.abs(next.vx) }
-              if (next.y < minY) { next.y = minY; next.vy = Math.abs(next.vy) }
-              if (next.y > maxY) { next.y = maxY; next.vy = -Math.abs(next.vy) }
-              if (next.phaseTime > floatDuration) {
-                next.phase = "dissolving"
-                next.phaseTime = 0
-              }
-              break
-            }
-            case "dissolving": {
-              next.opacity = Math.max(0, 1 - next.phaseTime / DISSOLVE_DURATION)
-              next.x += next.vx * delta * 0.5
-              next.y += next.vy * delta * 0.5
-              const cd = next.kind === "card" ? CARD_COOLDOWN : ICON_COOLDOWN
-              if (next.phaseTime > DISSOLVE_DURATION) {
-                next.phase = "hidden"
-                cooldowns.current.set(getItemId(next), Date.now() + cd)
-              }
-              break
-            }
-          }
-          return next
-        })
-
-        updated = updated.filter((i) => i.phase !== "hidden")
-
-        const iconCount = updated.filter((i) => i.kind === "icon").length
-        const cardCount = updated.filter((i) => i.kind === "card").length
-
-        if (spawnTimer.current > nextIconSpawn.current && iconCount < MAX_ICONS) {
-          spawnTimer.current = 0
-          nextIconSpawn.current = 1.5 + Math.random() * 4
-          const usedIds = new Set(
-            updated.filter((i): i is FloatingIcon => i.kind === "icon").map((i) => i.artifact.id)
-          )
-          const now = Date.now()
-          const available = ARTIFACTS.filter(
-            (a) =>
-              !usedIds.has(a.id) &&
-              (!cooldowns.current.has(`icon-${a.id}`) ||
-                now > (cooldowns.current.get(`icon-${a.id}`) ?? 0))
-          )
-          if (available.length > 0) {
-            const pick = available[Math.floor(Math.random() * available.length)]
-            const spawn = spawnFromEdge()
-            updated.push({
-              kind: "icon",
-              artifact: pick,
-              x: spawn.x,
-              y: spawn.y,
-              vx: spawn.vx,
-              vy: spawn.vy,
-              opacity: 0,
-              phase: "shooting",
-              phaseTime: 0,
-              bobPhase: Math.random() * Math.PI * 2,
-            })
-          }
+    const range = document.createRange()
+    const readBlocked = () => {
+      const out: Rect[] = []
+      const add = (r: DOMRect) => {
+        if (r.width > 0 && r.height > 0) out.push({ l: r.left, t: r.top, r: r.right, b: r.bottom })
+      }
+      document.querySelectorAll<HTMLElement>(BLOCKING).forEach((el) => add(el.getBoundingClientRect()))
+      document.querySelectorAll<HTMLElement>(BLOCKING_TEXT).forEach((root) => {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          if (!n.textContent || !n.textContent.trim()) continue
+          range.selectNodeContents(n)
+          Array.from(range.getClientRects()).forEach(add)
         }
-
-        if (
-          cardSpawnTimer.current > nextCardSpawn.current &&
-          cardCount < MAX_CARDS &&
-          featuredEntries.length > 0
-        ) {
-          cardSpawnTimer.current = 0
-          nextCardSpawn.current = 2 + Math.random() * 4
-          const now = Date.now()
-          const visibleCardIds = new Set(
-            updated.filter((i): i is FloatingCard => i.kind === "card").map((i) => i.id)
-          )
-          const available = featuredEntries.filter(
-            (e) => {
-              const cid = `card-${e.title}`
-              return (
-                !visibleCardIds.has(e.title) &&
-                (!cooldowns.current.has(cid) || now > (cooldowns.current.get(cid) ?? 0))
-              )
-            }
-          )
-          if (available.length > 0) {
-            const pick = available[Math.floor(Math.random() * available.length)]
-            const spawn = spawnFromEdge()
-            updated.push({
-              kind: "card",
-              entry: pick,
-              id: pick.title,
-              x: spawn.x,
-              y: spawn.y,
-              vx: spawn.vx,
-              vy: spawn.vy,
-              opacity: 0,
-              phase: "shooting",
-              phaseTime: 0,
-              bobPhase: Math.random() * Math.PI * 2,
-            })
-          }
-        }
-
-        return updated
       })
-
-      animRef.current = requestAnimationFrame(animate)
+      blocked = out
+      blockedAge = 0
     }
+    const otherItems = (except: string) => {
+      const out: Rect[] = []
+      bodies.current.forEach((b, id) => {
+        if (id !== except && b.phase !== "measure") out.push({ l: b.spot.x, t: b.spot.y, r: b.spot.x + b.w, b: b.spot.y + b.h })
+      })
+      return out
+    }
+    const ready = (id: string) => !bodies.current.has(id) && (cooldowns.current.get(id) ?? 0) < Date.now()
 
-    animRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(animRef.current)
-  }, [featuredEntries])
+    const tick = (now: number) => {
+      const dt = Math.min(0.1, (now - last) / 1000)
+      last = now
+      blockedAge += dt
+      if (blockedAge > 0.5) readBlocked()
+      const viewport = { w: window.innerWidth, h: window.innerHeight }
+
+      let icons = 0
+      let cards = 0
+      bodies.current.forEach((b) => (b.kind === "icon" ? icons++ : cards++))
+      iconTimer += dt
+      cardTimer += dt
+      if (iconTimer > nextIcon && icons < MAX_ICONS) {
+        iconTimer = 0
+        nextIcon = 1.5 + Math.random() * 4
+        const pool = ARTIFACTS.filter((a) => ready(`icon-${a.id}`))
+        if (pool.length > 0) {
+          const a = pool[Math.floor(Math.random() * pool.length)]
+          addItem({ kind: "icon", id: `icon-${a.id}`, artifact: a })
+        }
+      }
+      if (cardTimer > nextCard && cards < MAX_CARDS && entries.current.length > 0) {
+        cardTimer = 0
+        nextCard = 2 + Math.random() * 4
+        const pool = entries.current.filter((e) => ready(`card-${e.title}`))
+        if (pool.length > 0) {
+          const e = pool[Math.floor(Math.random() * pool.length)]
+          addItem({ kind: "card", id: `card-${e.title}`, entry: e })
+        }
+      }
+
+      bodies.current.forEach((b, id) => {
+        const el = els.current.get(id)
+        if (!el) return
+        b.t += dt
+        if (b.phase === "measure") {
+          if (!el.offsetWidth || !el.offsetHeight) return
+          b.w = el.offsetWidth
+          b.h = el.offsetHeight
+          const spot = findSpot(b.w, b.h, viewport, [...blocked, ...otherItems(id)], Math.random, {
+            margin: 16,
+            gap: b.kind === "card" ? 28 : 14,
+          })
+          // No room (a phone, a short window): skip this one for now.
+          if (!spot) {
+            removeItem(id)
+            return
+          }
+          b.spot = spot
+          b.from = reduce ? spot : entryPoint(spot, b.w, b.h, viewport)
+          b.phase = "enter"
+          b.t = 0
+          el.style.visibility = "visible"
+        }
+        let x = b.spot.x
+        let y = b.spot.y
+        let opacity = 1
+        let scale = 1
+        if (b.phase === "enter") {
+          const k = easeOutCubic(b.t / ENTER_DURATION)
+          x = b.from.x + (b.spot.x - b.from.x) * k
+          y = b.from.y + (b.spot.y - b.from.y) * k
+          opacity = Math.min(1, b.t / 0.5)
+          if (b.t >= ENTER_DURATION) {
+            b.phase = "float"
+            b.t = 0
+          }
+        } else {
+          if (!b.hovered && !reduce) b.bob += dt
+          x += Math.sin(b.bob * 0.6) * 6
+          y += Math.cos(b.bob * 0.8) * 5
+        }
+        if (b.phase === "float") {
+          if (!b.hovered) b.age += dt
+          const life = b.kind === "card" ? CARD_FLOAT_DURATION : ICON_FLOAT_DURATION
+          // Leave early when the page needs the space (a resize, the terminal).
+          const box = { l: b.spot.x, t: b.spot.y, r: b.spot.x + b.w, b: b.spot.y + b.h }
+          const displaced = blockedAge === 0 && (blocked.some((r) => intersects(box, r)) || box.r > viewport.w || box.b > viewport.h)
+          if ((b.age > life && !b.hovered) || displaced) {
+            b.phase = "dissolve"
+            b.t = 0
+          }
+        } else if (b.phase === "dissolve") {
+          const k = b.t / DISSOLVE_DURATION
+          opacity = Math.max(0, 1 - k)
+          scale = 1 + k * (b.kind === "card" ? 0.3 : 0.5)
+          if (b.t >= DISSOLVE_DURATION) {
+            removeItem(id)
+            return
+          }
+        }
+        el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`
+        el.style.opacity = opacity.toFixed(3)
+        el.style.pointerEvents = b.phase === "dissolve" ? "none" : "auto"
+      })
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [addItem, removeItem])
 
   const triggerScreenGlitch = useCallback(() => {
     const overlay = document.createElement("div")
@@ -300,63 +324,60 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
   }, [])
 
   const handleIconClick = useCallback(
-    (icon: FloatingIcon) => {
-      if (icon.artifact.id === "waveform") {
+    (id: string, artifact: ArtifactDef) => {
+      if (artifact.id === "waveform") {
         triggerScreenGlitch()
         playSound("glitch")
       } else {
         playSound("click")
       }
 
-      window.dispatchEvent(new CustomEvent("terminal-artifact", { detail: icon.artifact }))
-      onArtifactActivate?.(icon.artifact)
-      setItems((prev) =>
-        prev.map((i) =>
-          i.kind === "icon" && i.artifact.id === icon.artifact.id
-            ? { ...i, phase: "dissolving" as const, phaseTime: 0 }
-            : i
-        )
-      )
-      cooldowns.current.set(`icon-${icon.artifact.id}`, Date.now() + ICON_COOLDOWN)
+      window.dispatchEvent(new CustomEvent("terminal-artifact", { detail: artifact }))
+      onArtifactActivate?.(artifact)
+      dissolve(id)
 
-      const link = icon.artifact.link
-      const ext = icon.artifact.externalLink
+      const link = artifact.link
+      const ext = artifact.externalLink
       if (link) {
         setTimeout(() => navigate(link), 1500)
       } else if (ext) {
         setTimeout(() => window.open(ext, "_blank"), 1500)
       }
     },
-    [onArtifactActivate, triggerScreenGlitch, playSound]
+    [onArtifactActivate, triggerScreenGlitch, playSound, dissolve]
   )
 
+  // A card opens what it announces: its main link, else the changelog.
   const handleCardClick = useCallback(
-    (card: FloatingCard) => {
-      const fakeArtifact: ArtifactDef = {
-        id: `changelog-${card.entry.title}`,
-        iconPaths: [],
-        quote: card.entry.excerpt,
-        link: null,
-        externalLink: null,
-        viewBox: "0 0 24 24",
-      }
-      window.dispatchEvent(new CustomEvent("terminal-artifact", { detail: fakeArtifact }))
-      onArtifactActivate?.(fakeArtifact)
+    (entry: FeaturedEntry) => {
       playSound("click")
-      setItems((prev) =>
-        prev.map((i) =>
-          i.kind === "card" && i.id === card.id
-            ? { ...i, phase: "dissolving" as const, phaseTime: 0 }
-            : i
-        )
-      )
-      cooldowns.current.set(`card-${card.id}`, Date.now() + CARD_COOLDOWN)
+      const href = entry.link || "/changelog/"
+      if (isExternal(href)) window.open(href, "_blank", "noopener,noreferrer")
+      else navigate(href)
     },
-    [onArtifactActivate, playSound]
+    [playSound]
   )
+
+  const register = (id: string) => (el: HTMLDivElement | null) => {
+    if (el) els.current.set(id, el)
+    else els.current.delete(id)
+  }
+
+  // Hidden until measured and placed by the frame loop.
+  const itemStyle: React.CSSProperties = {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    visibility: "hidden",
+    opacity: 0,
+    transform: "translate3d(-9999px, 0, 0)",
+    willChange: "transform, opacity",
+    pointerEvents: "none",
+  }
 
   return (
     <div
+      data-cosmos-snapshot="2"
       style={{
         position: "fixed",
         inset: 0,
@@ -364,29 +385,21 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
         pointerEvents: "none",
       }}
     >
-      {items
-        .filter((i) => i.phase !== "hidden")
-        .map((item) => {
-          const id = getItemId(item)
-          const interactive =
-            item.phase !== "hidden" && item.phase !== "dissolving"
+      {items.map((item) => {
+          const id = item.id
 
           if (item.kind === "icon") {
             return (
               <div
                 key={id}
-                style={{
-                  position: "absolute",
-                  left: item.x,
-                  top: item.y,
-                  opacity: item.opacity,
-                  pointerEvents: interactive ? "auto" : "none",
-                  transform: `scale(${item.phase === "dissolving" ? 1 + item.phaseTime * 0.5 : 1})`,
-                }}
+                ref={register(id)}
+                style={itemStyle}
+                onPointerEnter={() => setHovered(id, true)}
+                onPointerLeave={() => setHovered(id, false)}
               >
                 <div
                   style={glassStyle}
-                  onClick={() => handleIconClick(item)}
+                  onClick={() => handleIconClick(id, item.artifact)}
                   onMouseEnter={(e) => {
                     playSound("hover")
                     const el = e.currentTarget
@@ -421,6 +434,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
           }
 
           const entry = item.entry
+          const link = entry.link
           const typeColor = TYPE_COLORS[entry.type] || "#888"
           const mediaSrc = entry.media ? MEDIA_ASSETS[entry.media] : null
           const ctaLabel =
@@ -430,18 +444,14 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
           return (
             <div
               key={id}
-              style={{
-                position: "absolute",
-                left: item.x,
-                top: item.y,
-                opacity: item.opacity,
-                pointerEvents: interactive ? "auto" : "none",
-                transform: `scale(${item.phase === "dissolving" ? 1 + item.phaseTime * 0.3 : 1})`,
-              }}
+              ref={register(id)}
+              style={itemStyle}
+              onPointerEnter={() => setHovered(id, true)}
+              onPointerLeave={() => setHovered(id, false)}
             >
               <div
                 style={cardStyle}
-                onClick={() => handleCardClick(item)}
+                onClick={() => handleCardClick(entry)}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget
                   el.style.background = "rgba(255,255,255,0.07)"
@@ -548,12 +558,19 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
                     color: "rgba(255,255,255,0.45)",
                   }}
                 >
-                  {entry.link && (
+                  {link && (
                     <a
-                      href={entry.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                      href={link}
+                      target={isExternal(link) ? "_blank" : undefined}
+                      rel={isExternal(link) ? "noopener noreferrer" : undefined}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // A site link (the Atlas) stays in this tab.
+                        if (!isExternal(link)) {
+                          e.preventDefault()
+                          navigate(link)
+                        }
+                      }}
                       style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.color = "rgba(255,255,255,0.8)"

@@ -18,12 +18,16 @@ function ruleBlock(css, selector) {
 }
 
 test("atlas mounts a project rail that opens project wraith panels", () => {
+  const hud = readSource("src", "components", "atlas", "AtlasHud.tsx")
   const canvas = readSource("src", "components", "atlas", "AtlasCanvas.tsx")
 
-  assert.match(canvas, /import \{ ProjectRail \} from "\.\/ProjectRail"/)
-  assert.match(canvas, /<ProjectRail[\s\S]*domains=\{domains\}/)
-  assert.match(canvas, /hidden=\{entered >= 0 \|\| !!panel\}/)
-  assert.match(canvas, /onOpen=\{\(work, domain\) => setPanel\(\{ type: "project", work, domain \}\)\}/)
+  assert.match(hud, /import \{ ProjectRail \} from "\.\/ProjectRail"/)
+  assert.match(hud, /<ProjectRail[\s\S]*domains=\{domains\}/)
+  assert.match(hud, /hidden=\{entered \|\| !!panel\}/)
+  assert.match(hud, /onOpen=\{\(work, domain\) => setPanel\(\{ type: "project", work, domain \}\)\}/)
+  // Both Atlas renderers share the one HUD.
+  assert.match(canvas, /<AtlasHud/)
+  assert.match(canvas, /entered=\{entered >= 0\}/)
 })
 
 test("project rail uses project domains and renders real image or video thumbnails", () => {
@@ -40,11 +44,13 @@ test("project rail uses project domains and renders real image or video thumbnai
 
 test("atlas Sector Zero work uses the cockpit screenshot", () => {
   const atlasPage = readSource("src", "pages", "atlas.tsx")
+  const atlasModel = readSource("src", "components", "atlas", "buildAtlasModel.ts")
   const projectImages = readSource("src", "helpers", "projectImages.ts")
 
   const nodeSource = readSource("gatsby-node.js")
 
-  assert.match(atlasPage, /media: resolveProjectMedia\(p\.name, p\.imgSrc\)/)
+  assert.match(atlasModel, /media: resolveMedia\(p\.name, p\.imgSrc \|\| ""\)/)
+  assert.match(atlasPage, /resolveMedia: resolveProjectMedia/)
   assert.match(nodeSource, /name: "Sector Zero"[\s\S]*imgSrc: "sector-zero\.jpg"/)
   assert.match(projectImages, /import SectorZeroImg from "\.\.\/images\/sector-zero\.jpg"/)
   assert.match(projectImages, /"Sector Zero": SectorZeroImg/)

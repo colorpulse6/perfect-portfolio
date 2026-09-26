@@ -17,11 +17,15 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "What does Nichalas Barnes build?",
-    a: "He builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. Recent work includes Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a macOS usage tracker).",
+    a: "He builds Obsidian plugins, web applications, browser games, developer tools, and AI agent systems. Recent work includes Cerebro (a macOS workspace for AI coding agents), Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a macOS usage tracker).",
   },
   {
     q: "What is Brain Atlas?",
     a: "Brain Atlas is an Obsidian plugin by Nichalas Barnes that renders an Obsidian vault as an animated 3D anatomical brain: notes become nodes, links become neural pathways, and note types are grouped into brain regions.",
+  },
+  {
+    q: "What is Cerebro?",
+    a: "Cerebro is a native macOS app by Nichalas Barnes that works as mission control for AI coding agents: a Conductor plans the work and coordinates Claude and Codex agents while you keep the key decisions. It is in public beta for macOS 14 or newer on Apple silicon, at trycerebro.com.",
   },
   {
     q: "What technologies does Nichalas Barnes work with?",

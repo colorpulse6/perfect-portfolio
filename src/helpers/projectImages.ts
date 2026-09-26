@@ -5,7 +5,7 @@
 // resolvers live here and are shared by the projects page and the atlas.
 
 import ThrottleDashboard from "../images/throttle-dashboard.png"
-import CerebroDashboard from "../images/cerebro-dashboard.png"
+import CerebroMission from "../images/cerebro-mission.jpg"
 import ElFormLanding from "../images/elform-landing.png"
 import ClaudeSkillsImg from "../images/claude-skills.png"
 import PolisAtlasImg from "../images/polis-atlas.jpg"
@@ -22,7 +22,7 @@ import MadScienceVid from "../images/mad-science.mp4"
 /** Static local primary screenshots (rendered as <img>). */
 export const LOCAL_PRIMARY_IMAGES: Record<string, string> = {
   Throttle: ThrottleDashboard,
-  Cerebro: CerebroDashboard,
+  Cerebro: CerebroMission,
   "El Form": ElFormLanding,
   "Claude Skills": ClaudeSkillsImg,
   "Polis Atlas": PolisAtlasImg,

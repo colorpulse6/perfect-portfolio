@@ -77,15 +77,18 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     {
       name: "Cerebro",
       cluster: "ai",
-      status: "in-progress",
+      status: "released",
       medium: "macOS APP",
       tech: ["Swift", "SwiftUI", "Multi-agent"],
-      link: "https://trycerebro.com/",
+      link: "https://trycerebro.com/download",
+      cta: "Download",
+      secondaryLink: "https://trycerebro.com/",
+      secondaryCta: "Site",
       techArray: [14, 17, 29, 30],
       ref: "cerebroRef",
-      imgSrc: "cerebro-dashboard.png",
+      imgSrc: "cerebro-mission.jpg",
       description:
-        "A work-in-progress native macOS multi-agent workspace for coordinating provider-backed coding agents through a galaxy-style command surface.",
+        "Mission control for AI agents: a native macOS workspace where a Conductor coordinates Claude and Codex agents while you stay in command. Public beta for macOS 14 or newer on Apple silicon.",
     },
     {
       name: "Job Toast",

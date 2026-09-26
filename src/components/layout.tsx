@@ -13,6 +13,8 @@ import SideBar from "../components/SideBar"
 import SideBarCollapsed from "../components/SideBarCollapsed"
 import ParticleBackground from "./nebula/ParticleBackground"
 import TerminalConsole from "./nebula/TerminalConsole"
+import CosmosStage from "./cosmos/CosmosStage"
+import { useCosmos } from "./cosmos/cosmosStore"
 import { resolveTheme } from "./nebula/particleThemes"
 import { AmbientAudioProvider, useAmbientAudio } from "./audio/AmbientAudioProvider"
 import { useInteractionSounds } from "./audio/useInteractionSounds"
@@ -63,6 +65,7 @@ const AudioToggle: React.FC = () => {
   return (
     <button
       className="audio-toggle"
+      data-cosmos-snapshot="20"
       onClick={audio.toggle}
       aria-label={audio.muted ? "Unmute ambient audio" : "Mute ambient audio"}
       title={audio.muted ? "Sound off" : "Sound on"}
@@ -115,6 +118,7 @@ const Layout: React.FC<LayoutProps> = ({
   const trailYSpring = useSpring(cursorY, trailConfig)
 
   const prefersReducedMotion = useReducedMotion()
+  const hudVisible = useCosmos((s) => s.hudVisible)
 
   const cursorTheme = useMemo(() => {
     const theme = resolveTheme(location?.pathname || "/")
@@ -170,18 +174,21 @@ const Layout: React.FC<LayoutProps> = ({
     return (
       <AmbientAudioProvider pagePath={pagePath}>
         <div className="layout-container">
-          <Header
-            navOpen={navOpen}
-            setNavOpen={setNavOpen}
-            siteTitle={data.site.siteMetadata.title || "Title"}
-            atlas
-          />
-          <SideBar
-            navOpen={navOpen}
-            setNavOpen={setNavOpen}
-            transitionStatus={transitionStatus}
-            key="sidebar"
-          />
+          <CosmosStage key="cosmos-stage" path={pagePath} />
+          <div className="atlas-chrome" data-hidden={hudVisible ? "false" : "true"}>
+            <Header
+              navOpen={navOpen}
+              setNavOpen={setNavOpen}
+              siteTitle={data.site.siteMetadata.title || "Title"}
+              atlas
+            />
+            <SideBar
+              navOpen={navOpen}
+              setNavOpen={setNavOpen}
+              transitionStatus={transitionStatus}
+              key="sidebar"
+            />
+          </div>
           <main>{children}</main>
           <TransitionSound transitionStatus={transitionStatus} />
         </div>
@@ -192,6 +199,7 @@ const Layout: React.FC<LayoutProps> = ({
   return (
     <AmbientAudioProvider pagePath={pagePath}>
       <div className="layout-container">
+        <CosmosStage key="cosmos-stage" path={pagePath} />
         <ParticleBackground pagePath={pagePath} />
         {!isTouch && !prefersReducedMotion && (
           <>
@@ -233,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({
           }}
         >
           <main>{children}</main>
-          <footer className="site-footer">
+          <footer className="site-footer" data-cosmos-snapshot="15">
             &copy; Nichalas Barnes {new Date().getFullYear()}
           </footer>
         </div>

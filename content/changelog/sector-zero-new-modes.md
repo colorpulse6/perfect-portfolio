@@ -7,7 +7,7 @@ cta: "Play"
 secondaryLink: "https://colorpulse6.github.io/sector-zero/site/"
 secondaryCta: "Site"
 status: "in-progress"
-featured: true
+featured: false
 project: "Knicks Knacks"
 media: "sector-zero.jpg"
 ---

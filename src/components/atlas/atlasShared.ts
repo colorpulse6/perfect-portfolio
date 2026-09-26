@@ -56,6 +56,7 @@ export interface AtlasWorkLink {
 
 /** A body orbiting a cluster hub: a project, an essay, or a fiction story. */
 export interface AtlasWork {
+  id?: string // stable id `${domainId}:${slug}`, assigned by buildAtlasModel
   t: string // title
   meta?: string // short one-line descriptor
   body?: string // full description (panel prose)

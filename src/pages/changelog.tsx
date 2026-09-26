@@ -140,8 +140,9 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({
                   {fm.link ? (
                     <a
                       href={fm.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      {...(/^https?:\/\//.test(fm.link)
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
                     >
                       {fm.title}
                     </a>

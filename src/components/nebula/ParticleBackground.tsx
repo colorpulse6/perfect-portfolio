@@ -1,9 +1,11 @@
 import React, { useState, Suspense, useMemo } from "react"
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import ParticleField from "./ParticleField"
 import { useCursorPosition } from "./useCursorPosition"
 import { resolveTheme, ParticleTheme } from "./particleThemes"
+import { registerParticleCanvas } from "../cosmos/particleCapture"
+import { useCosmos } from "../cosmos/cosmosStore"
 
 interface SceneContentProps {
   theme: ParticleTheme
@@ -32,6 +34,21 @@ const SceneContent: React.FC<SceneContentProps> = ({ theme }) => {
       )}
     </>
   )
+}
+
+/**
+ * Lets the wormhole journey capture this canvas in the frame it renders, and
+ * stops drawing particles while the journey covers the page.
+ */
+const ParticleCaptureBridge: React.FC = () => {
+  const gl = useThree((s) => s.gl)
+  const setFrameloop = useThree((s) => s.setFrameloop)
+  const journey = useCosmos((s) => s.mode === "journey")
+  React.useEffect(() => registerParticleCanvas(() => gl.domElement), [gl])
+  React.useEffect(() => {
+    setFrameloop(journey ? "never" : "always")
+  }, [journey, setFrameloop])
+  return null
 }
 
 function hasWebGL(): boolean {
@@ -79,6 +96,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
       gl={{ antialias: true, alpha: true }}
       dpr={[1, 2]}
     >
+      <ParticleCaptureBridge />
       <Suspense fallback={null}>
         <SceneContent theme={theme} />
       </Suspense>
