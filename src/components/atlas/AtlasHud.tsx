@@ -93,11 +93,14 @@ export function AtlasHud({
 
       {hints ?? (
         <div
+          className="cosmos-hints"
           data-cosmos-avoid=""
           style={{
             position: "absolute",
-            top: 22,
-            right: 26,
+            // below the header's "Work with me" link, clear of the site
+            // menu button in the top-right corner
+            top: 92,
+            right: 84,
             fontFamily: MONO,
             fontSize: 11,
             letterSpacing: 1.5,

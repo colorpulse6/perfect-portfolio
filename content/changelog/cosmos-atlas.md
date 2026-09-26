@@ -1,6 +1,6 @@
 ---
 title: "The Atlas: A Galaxy Around a Black Hole"
-date: "2026-09-26"
+date: "2026-09-27"
 type: "update"
 link: "/atlas/"
 cta: "Explore"

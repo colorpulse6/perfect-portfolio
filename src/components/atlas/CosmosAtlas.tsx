@@ -101,8 +101,9 @@ export function CosmosAtlas({ model }: CosmosAtlasProps) {
           <div
             style={{
               position: "absolute",
-              top: 22,
-              // clear of the site menu button in the top-right corner
+              // below the header's "Work with me" link, clear of the site
+              // menu button in the top-right corner
+              top: 92,
               right: 84,
               fontFamily: MONO,
               fontSize: 11,

@@ -5,11 +5,13 @@
  *
  * It reads live geometry and computed styles and draws, in stacking order,
  * the elements marked `data-cosmos-snapshot="<order>"`: boxes (background,
- * border, radius, outer shadow), text one character at a time from Range
- * rects (so letter spacing and wrapping match), images, video frames,
- * canvases and inline SVG. `backdrop-filter` blur is not reproduced.
+ * border, radius, outer shadow, a centered radial gradient), text one
+ * character at a time from Range rects (so letter spacing and wrapping
+ * match), images, video frames, canvases and inline SVG. `backdrop-filter`
+ * blur is not reproduced.
  */
 import { captureParticles } from "./particleCapture"
+import { parseRadialGradient } from "./cssGradient"
 
 export interface HomeSnapshot {
   page: HTMLCanvasElement
@@ -190,14 +192,25 @@ function parseShadow(value: string): Shadow | null {
   return { color, x: nums[0], y: nums[1], blur: nums[2] || 0, spread: nums[3] || 0 }
 }
 
+/** A visible border side: its width and color, or null. */
+function borderSide(cs: CSSStyleDeclaration, side: "top" | "right" | "bottom" | "left") {
+  const w = parseFloat(cs.getPropertyValue(`border-${side}-width`)) || 0
+  const style = cs.getPropertyValue(`border-${side}-style`)
+  const color = cs.getPropertyValue(`border-${side}-color`)
+  return w > 0 && style !== "none" && style !== "hidden" && alphaOf(color) > 0 ? { w, color } : null
+}
+
 function drawBox(ctx: CanvasRenderingContext2D, cs: CSSStyleDeclaration, r: DOMRect, opacity: number, dpr: number) {
   const bg = cs.backgroundColor
-  const bwid = parseFloat(cs.borderTopWidth) || 0
-  const bcol = cs.borderTopColor
   const hasBg = alphaOf(bg) > 0
-  const hasBorder = bwid > 0 && cs.borderTopStyle !== "none" && alphaOf(bcol) > 0
+  const gradient = cs.backgroundImage && cs.backgroundImage !== "none" ? parseRadialGradient(cs.backgroundImage) : null
+  const sides = (["top", "right", "bottom", "left"] as const).map((side) => borderSide(cs, side))
+  const [top, right, bottom, left] = sides
+  // The same border all round follows the radius; anything else (the header
+  // link's underline) is drawn side by side, square.
+  const uniform = sides.every((b) => b && top && b.w === top.w && b.color === top.color)
   const shadow = parseShadow(cs.boxShadow)
-  if (!hasBg && !hasBorder && !shadow) return
+  if (!hasBg && !gradient && !sides.some(Boolean) && !shadow) return
   const rad = radiusOf(cs, r)
   ctx.save()
   ctx.globalAlpha = opacity
@@ -228,12 +241,40 @@ function drawBox(ctx: CanvasRenderingContext2D, cs: CSSStyleDeclaration, r: DOMR
     roundRectPath(ctx, r.left, r.top, r.width, r.height, rad)
     ctx.fill()
   }
-  if (hasBorder) {
-    ctx.strokeStyle = bcol
-    ctx.lineWidth = bwid
+  if (gradient) {
+    // Centered and sized to the farthest corner: an ellipse keeps the box's
+    // proportions and passes through its corners; a circle reaches them.
+    const rx = gradient.shape === "circle" ? Math.hypot(r.width / 2, r.height / 2) : (r.width / 2) * Math.SQRT2
+    const ry = gradient.shape === "circle" ? rx : (r.height / 2) * Math.SQRT2
+    ctx.save()
     ctx.beginPath()
-    roundRectPath(ctx, r.left + bwid / 2, r.top + bwid / 2, r.width - bwid, r.height - bwid, Math.max(0, rad - bwid / 2))
+    roundRectPath(ctx, r.left, r.top, r.width, r.height, rad)
+    ctx.clip()
+    ctx.translate(r.left + r.width / 2, r.top + r.height / 2)
+    ctx.scale(1, ry / rx)
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx)
+    for (const stop of gradient.stops) g.addColorStop(stop.offset, stop.color)
+    ctx.fillStyle = g
+    const k = rx / ry
+    ctx.fillRect(-r.width / 2, (-r.height / 2) * k, r.width, r.height * k)
+    ctx.restore()
+  }
+  if (uniform && top) {
+    ctx.strokeStyle = top.color
+    ctx.lineWidth = top.w
+    ctx.beginPath()
+    roundRectPath(ctx, r.left + top.w / 2, r.top + top.w / 2, r.width - top.w, r.height - top.w, Math.max(0, rad - top.w / 2))
     ctx.stroke()
+  } else {
+    const fill = (b: { w: number; color: string } | null, x: number, y: number, w: number, h: number) => {
+      if (!b) return
+      ctx.fillStyle = b.color
+      ctx.fillRect(x, y, w, h)
+    }
+    fill(top, r.left, r.top, r.width, top?.w ?? 0)
+    fill(bottom, r.left, r.bottom - (bottom?.w ?? 0), r.width, bottom?.w ?? 0)
+    fill(left, r.left, r.top, left?.w ?? 0, r.height)
+    fill(right, r.right - (right?.w ?? 0), r.top, right?.w ?? 0, r.height)
   }
   ctx.restore()
 }
