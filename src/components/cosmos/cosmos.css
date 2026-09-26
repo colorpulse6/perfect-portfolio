@@ -47,3 +47,13 @@ html[data-cosmos-mode="journey"] .layout-container > :not(.cosmos-stage) {
     transition: none;
   }
 }
+
+/* The home snapshot (wormhole hand-off) pauses the title glitch so the
+   raster matches a still frame of the page. */
+html[data-cosmos-snap] .glitch-text {
+  animation: none !important;
+}
+html[data-cosmos-snap] .glitch-text::before,
+html[data-cosmos-snap] .glitch-text::after {
+  display: none !important;
+}

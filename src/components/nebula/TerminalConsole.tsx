@@ -277,14 +277,14 @@ const TerminalConsole: React.FC<TerminalConsoleProps> = ({
 
   if (collapsed) {
     return (
-      <div className="terminal-collapsed" onClick={expandFromCollapsed}>
+      <div className="terminal-collapsed" data-cosmos-snapshot="21" onClick={expandFromCollapsed}>
         &gt;_
       </div>
     )
   }
 
   return (
-    <div className={`terminal-console${visible ? " visible" : ""}`}>
+    <div className={`terminal-console${visible ? " visible" : ""}`} data-cosmos-snapshot="21">
       <button
         className="terminal-dismiss"
         onClick={() => {

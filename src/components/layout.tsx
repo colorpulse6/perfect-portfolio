@@ -65,6 +65,7 @@ const AudioToggle: React.FC = () => {
   return (
     <button
       className="audio-toggle"
+      data-cosmos-snapshot="20"
       onClick={audio.toggle}
       aria-label={audio.muted ? "Unmute ambient audio" : "Mute ambient audio"}
       title={audio.muted ? "Sound off" : "Sound on"}
@@ -240,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({
           }}
         >
           <main>{children}</main>
-          <footer className="site-footer">
+          <footer className="site-footer" data-cosmos-snapshot="15">
             &copy; Nichalas Barnes {new Date().getFullYear()}
           </footer>
         </div>

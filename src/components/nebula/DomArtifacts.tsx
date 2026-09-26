@@ -357,6 +357,7 @@ const DomArtifacts: React.FC<DomArtifactsProps> = ({
 
   return (
     <div
+      data-cosmos-snapshot="2"
       style={{
         position: "fixed",
         inset: 0,
