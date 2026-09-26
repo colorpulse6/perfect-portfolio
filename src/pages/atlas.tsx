@@ -1,7 +1,9 @@
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { graphql } from "gatsby"
 import SEO from "../components/seo"
 import AtlasCanvas from "../components/atlas/AtlasCanvas"
+import { CosmosAtlas } from "../components/atlas/CosmosAtlas"
+import { useCosmos } from "../components/cosmos/cosmosStore"
 import { resolveProjectMedia } from "../helpers/projectImages"
 import { buildAtlasModel } from "../components/atlas/buildAtlasModel"
 import { GatsbyLocation } from "../types/gatsby"
@@ -55,7 +57,16 @@ interface AtlasPageProps {
 const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data }) => {
   usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1 })
 
-  const { domains, fiction, essays, changelog } = useMemo(
+  // The WebGL Atlas is the default; the classic Canvas2D Atlas remains the
+  // fallback without WebGL2, after a lost context, or with ?atlas-legacy.
+  const support = useCosmos((s) => s.support)
+  const [legacyFlag, setLegacyFlag] = useState(false)
+  useEffect(() => {
+    setLegacyFlag(/atlas-legacy/.test(window.location.search))
+  }, [])
+  const legacy = legacyFlag || support === "unsupported" || support === "lost"
+
+  const model = useMemo(
     () =>
       buildAtlasModel(
         {
@@ -68,10 +79,16 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
     [data]
   )
 
+  const { domains, fiction, essays, changelog } = model
+
   return (
-    <div className="atlas-page" style={{ opacity: 0 }}>
+    <div className={legacy ? "atlas-page" : "atlas-page atlas-page--cosmos"} style={{ opacity: 0 }}>
       <SEO title="Atlas" description="A 3D galaxy-map of Nichalas Barnes' work. Drag to rotate, dive into a cluster, and explore projects, essays, and fiction." pathname={location?.pathname} />
-      <AtlasCanvas domains={domains} fiction={fiction} essays={essays} changelog={changelog} />
+      {legacy ? (
+        <AtlasCanvas domains={domains} fiction={fiction} essays={essays} changelog={changelog} />
+      ) : (
+        <CosmosAtlas model={model} />
+      )}
     </div>
   )
 }

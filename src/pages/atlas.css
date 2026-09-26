@@ -96,3 +96,203 @@
 .atlas-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(170, 200, 235, 0.5);
 }
+
+/* ── WebGL Atlas ───────────────────────────────────────────────────────────
+   The cosmos stage (a fixed canvas in the layout) renders the galaxy behind
+   this transparent page. Drags and clicks fall through to the stage; the HUD's
+   controls and live regions (terminal, panels) opt back in. */
+.atlas-page--cosmos {
+  background: transparent;
+  pointer-events: none;
+}
+.atlas-page--cosmos a,
+.atlas-page--cosmos button,
+.atlas-page--cosmos input,
+.atlas-page--cosmos textarea,
+.atlas-page--cosmos select,
+.atlas-page--cosmos label,
+.atlas-page--cosmos .atlas-hud-live > * {
+  pointer-events: auto;
+}
+
+/* Labels: the stage writes transform, opacity and visibility every frame. */
+.cosmos-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cosmos-lbl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  font: 600 11px/1.3 "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  letter-spacing: 2.2px;
+  color: rgba(242, 246, 255, 0.97);
+  text-shadow: 0 0 12px rgba(2, 3, 10, 0.95), 0 0 4px rgba(2, 3, 10, 0.95), 0 1px 2px rgba(0, 0, 0, 0.9);
+  will-change: transform;
+}
+.cosmos-lbl small {
+  display: block;
+  margin-top: 3px;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 1.6px;
+  color: rgba(190, 200, 238, 0.78);
+}
+.cosmos-lbl--core {
+  font-size: 12px;
+  letter-spacing: 3px;
+}
+.cosmos-lbl--work {
+  font-size: 10.5px;
+  letter-spacing: 1.6px;
+}
+.cosmos-lead {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1px;
+  visibility: hidden;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgba(200, 215, 255, 0), rgba(200, 215, 255, 0.5));
+}
+@media (max-width: 560px) {
+  .cosmos-lbl small {
+    display: none;
+  }
+  .cosmos-lbl {
+    font-size: 9.5px;
+    letter-spacing: 1.6px;
+  }
+}
+
+/* Hover preview for a project star; the stage positions it. */
+.cosmos-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  width: 248px;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(8, 9, 18, 0.86);
+  border: 1px solid rgba(150, 170, 255, 0.18);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-9999px, 0);
+  transition: opacity 0.18s ease;
+}
+.cosmos-preview[data-visible="true"] {
+  opacity: 1;
+}
+.cosmos-preview__media {
+  margin-bottom: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: #05060d;
+}
+.cosmos-preview__media img,
+.cosmos-preview__media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cosmos-preview__title {
+  font: 600 13px/1.3 "Space Grotesk", "Montserrat", system-ui, sans-serif;
+  color: rgba(240, 244, 255, 0.97);
+}
+.cosmos-preview__meta {
+  margin-top: 3px;
+  font: 500 9px/1.4 "JetBrains Mono", "Courier New", monospace;
+  letter-spacing: 1.4px;
+  color: rgba(160, 175, 225, 0.72);
+}
+.cosmos-preview__body {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font: 400 11.5px/1.45 "Space Grotesk", system-ui, sans-serif;
+  color: rgba(205, 214, 240, 0.8);
+}
+.cosmos-preview__hint {
+  margin-top: 8px;
+  font: 600 8.5px/1 "JetBrains Mono", "Courier New", monospace;
+  letter-spacing: 1.6px;
+  color: #36e6db;
+}
+
+/* Screen-reader heading and the keyboard route through the Atlas. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.atlas-a11y {
+  position: absolute;
+  left: -10000px;
+  top: 110px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.atlas-a11y:focus-within {
+  left: 26px;
+  z-index: 80;
+  width: auto;
+  height: auto;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(6, 7, 16, 0.94);
+  border: 1px solid rgba(72, 226, 214, 0.3);
+  font: 500 11px/1.8 "JetBrains Mono", "Courier New", monospace;
+  letter-spacing: 1px;
+}
+.atlas-a11y ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.atlas-a11y ul ul {
+  padding-left: 14px;
+}
+.atlas-a11y button {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: rgba(232, 236, 255, 0.9);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.atlas-a11y button:focus-visible {
+  outline: 2px solid #36e6db;
+  outline-offset: 2px;
+}
+
+/* Pointer hints mean nothing on touch screens and collide with the header there. */
+@media (max-width: 768px) {
+  .cosmos-hints {
+    display: none;
+  }
+}

@@ -652,7 +652,12 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       idleHandle = 0
       if (mode === "journey") return
       if (isAtlasPath(path)) {
-        if (failed) return
+        if (failed || /atlas-legacy/.test(window.location.search)) {
+          stopLoop()
+          detach()
+          setMode("off")
+          return
+        }
         enterAtlasMode()
       } else if (isHomePath(path)) {
         stopLoop()

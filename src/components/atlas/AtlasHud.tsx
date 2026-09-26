@@ -183,17 +183,19 @@ export function AtlasHud({
         </button>
       )}
 
-      {term && <AtlasTerminal onClose={() => setTerm(false)} />}
+      <div className="atlas-hud-live">{term && <AtlasTerminal onClose={() => setTerm(false)} />}</div>
 
-      {panel && (
-        <AtlasPanelRouter
-          {...panel}
-          fiction={fiction}
-          essays={essays}
-          changelog={changelog}
-          onClose={() => setPanel(null)}
-        />
-      )}
+      <div className="atlas-hud-live">
+        {panel && (
+          <AtlasPanelRouter
+            {...panel}
+            fiction={fiction}
+            essays={essays}
+            changelog={changelog}
+            onClose={() => setPanel(null)}
+          />
+        )}
+      </div>
     </>
   )
 }
