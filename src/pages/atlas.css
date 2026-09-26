@@ -134,6 +134,18 @@
   color: rgba(242, 246, 255, 0.97);
   text-shadow: 0 0 12px rgba(2, 3, 10, 0.95), 0 0 4px rgba(2, 3, 10, 0.95), 0 1px 2px rgba(0, 0, 0, 0.9);
   will-change: transform;
+  /* Labels open what they name; the rest of the layer lets the canvas drag. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 3px 4px;
+  margin: -3px -4px;
+  transition: color 0.15s;
+}
+.cosmos-lbl:hover {
+  color: #ffffff;
+}
+.cosmos-lbl:hover small {
+  color: rgba(54, 230, 219, 0.95);
 }
 .cosmos-lbl small {
   display: block;
@@ -192,6 +204,8 @@
 }
 .cosmos-preview[data-visible="true"] {
   opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
 }
 .cosmos-preview__media {
   margin-bottom: 8px;

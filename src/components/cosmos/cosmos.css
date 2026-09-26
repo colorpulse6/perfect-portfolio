@@ -53,6 +53,16 @@ html[data-cosmos-mode="journey"] .layout-container > :not(.cosmos-stage) {
 .atlas-chrome {
   transition: opacity 0.6s ease;
 }
+/* The header's container is a transparent band across the top of the Atlas;
+   let clicks and drags through it to the galaxy and its labels, and keep
+   only its links and the menu button clickable. */
+.atlas-chrome .header-container {
+  pointer-events: none;
+}
+.atlas-chrome .header-container a,
+.atlas-chrome .header-container button {
+  pointer-events: auto;
+}
 .atlas-chrome[data-hidden="true"] {
   opacity: 0;
   pointer-events: none;

@@ -20,6 +20,8 @@ Scenarios:
   closeup               Zoom into the black hole and capture the close-up.
   perf                  Measure the frame rate in the Atlas overview and the
                         close-up (videos are blocked, see below).
+  clicks                Check that galaxy and project titles, the core title
+                        and the hover card open what they name.
   context-loss          Lose and restore the WebGL context on /atlas; check the
                         classic Atlas takes over and the WebGL one returns on
                         the next visit.
@@ -99,7 +101,7 @@ if (opts.help || opts.positional.length === 0) {
   process.exit(opts.help ? 0 : 2)
 }
 const [scenario, ...scenarioArgs] = opts.positional
-const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "context-loss", "journey", "longtasks", "audio"]
+const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "clicks", "context-loss", "journey", "longtasks", "audio"]
 if (!SCENARIOS.includes(scenario)) fail(`unknown scenario "${scenario}"`)
 if (scenario === "atlas-enter" && !scenarioArgs[0]) fail("atlas-enter needs a domain id, for example obsidian")
 const fromHome = ["journey", "longtasks", "audio"].includes(scenario)
@@ -489,6 +491,87 @@ async function run() {
     const ok = opts.unmuted ? osc === 9 : osc === 0
     console.log(`${ok ? "PASS" : "FAIL"}  ${opts.unmuted ? "exactly the score graph plays (9 oscillators, no whoosh)" : "a muted journey creates no score nodes"}`)
     if (!ok) throw new Error("audio checks failed")
+  } else if (scenario === "clicks") {
+    if (legacy) throw new Error("clicks drives the WebGL Atlas; drop atlas-legacy from --path")
+    const results = []
+    const check = (name, ok, detail) => {
+      results.push(ok)
+      console.log(`${ok ? "PASS" : "FAIL"}  ${name}${ok ? "" : `  (${JSON.stringify(detail)})`}`)
+    }
+    const labelAt = (text, cls = ".cosmos-lbl") =>
+      evaluate(`(() => {
+        const e = [...document.querySelectorAll(${JSON.stringify(cls)})].find((e) => e.style.visibility === "visible" && e.textContent.startsWith(${JSON.stringify(text)}))
+        if (!e) return null
+        const r = e.getBoundingClientRect()
+        return { x: r.left + Math.min(24, r.width / 2), y: r.top + 7 }
+      })()`)
+    const panelText = () => evaluate(`(document.querySelector(".atlas-hud-live")?.nextElementSibling?.innerText || "").slice(0, 200)`)
+    const escape = async () => {
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 })
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 })
+      await sleep(700)
+    }
+
+    const galaxy = await labelAt("OBSIDIAN")
+    if (!galaxy) throw new Error("the OBSIDIAN label is not visible")
+    await click(galaxy.x, galaxy.y)
+    await sleep(2500)
+    const works = await evaluate(`[...document.querySelectorAll(".cosmos-lbl--work")].filter((e) => e.style.visibility === "visible").map((e) => e.firstChild.textContent)`)
+    check("a galaxy title enters its galaxy", works.includes("Brain Atlas"), works)
+
+    const title = await labelAt("Brain Atlas", ".cosmos-lbl--work")
+    await click(title.x, title.y)
+    await sleep(1200)
+    let text = await panelText()
+    check("a project title opens the project", /Brain Atlas/.test(text), text.slice(0, 80))
+    await escape()
+
+    const star = await screenOf("work", "obsidian:brain-atlas")
+    if (W < 700) {
+      // Touch screens have no hover card: a tap on the star opens the project.
+      console.log("SKIP  hover card checks (touch screens have no hover)")
+      await click(star.x, star.y)
+      await sleep(1200)
+      text = await panelText()
+      check("tapping a project star opens the project", /Brain Atlas/.test(text), text.slice(0, 80))
+      await escape()
+      await escape()
+      await sleep(1800)
+      const coreTitle = await labelAt("NICHALAS BARNES", ".cosmos-lbl--core")
+      await click(coreTitle.x, coreTitle.y)
+      await sleep(1600)
+      text = await panelText()
+      check("the core title opens About", text.length > 40 && !/Brain Atlas/.test(text), text.slice(0, 80))
+      if (results.some((ok) => !ok)) throw new Error("click checks failed")
+      return
+    }
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: star.x, y: star.y })
+    await sleep(150)
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: star.x + 1, y: star.y })
+    await sleep(450)
+    const card = await evaluate(`(() => { const e = document.querySelector(".cosmos-preview"); const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, visible: e.dataset.visible } })()`)
+    // Walk the pointer from the star to the card, as a visitor would.
+    for (let i = 1; i <= 6; i++) {
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: star.x + ((card.x - star.x) * i) / 6, y: star.y + ((card.y - star.y) * i) / 6 })
+      await sleep(25)
+    }
+    await sleep(300)
+    const still = await evaluate(`document.querySelector(".cosmos-preview").dataset.visible`)
+    check("the hover card stays while the pointer moves onto it", card.visible === "true" && still === "true", { before: card.visible, after: still })
+    await click(card.x, card.y)
+    await sleep(1200)
+    text = await panelText()
+    check("clicking the hover card opens the project", /Brain Atlas/.test(text), text.slice(0, 80))
+    await escape()
+    await escape()
+    await sleep(1800)
+
+    const core = await labelAt("NICHALAS BARNES", ".cosmos-lbl--core")
+    await click(core.x, core.y)
+    await sleep(1600)
+    text = await panelText()
+    check("the core title opens About", text.length > 40 && !/Brain Atlas/.test(text), text.slice(0, 80))
+    if (results.some((ok) => !ok)) throw new Error("click checks failed")
   } else if (scenario === "context-loss") {
     if (legacy) throw new Error("context-loss drives the WebGL Atlas; drop atlas-legacy from --path")
     const state = () =>

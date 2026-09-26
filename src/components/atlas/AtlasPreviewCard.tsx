@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef } from "react"
 import type { AtlasDomain, AtlasWork } from "./atlasShared"
 import { isVideo } from "../../helpers/projectImages"
-import { onStage } from "../cosmos/cosmos"
+import { getStage, onStage } from "../cosmos/cosmos"
 import { useCosmos } from "../cosmos/cosmosStore"
 
 interface AtlasPreviewCardProps {
@@ -12,7 +12,9 @@ interface AtlasPreviewCardProps {
 /**
  * Hover preview for a project star: its media (videos play muted while
  * hovered, as in the project rail), title, medium and status. The stage
- * positions it next to the star each frame.
+ * positions it next to the star each frame. The pointer can move onto the
+ * card (the stage keeps the hover while it is there) and click it to open
+ * the project.
  */
 export function AtlasPreviewCard({ workIndex, fictionCount }: AtlasPreviewCardProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -39,7 +41,17 @@ export function AtlasPreviewCard({ workIndex, fictionCount }: AtlasPreviewCardPr
   const media = hit?.work.media || null
 
   return (
-    <div ref={ref} className="cosmos-preview" data-visible={visible ? "true" : "false"} aria-hidden="true">
+    <div
+      ref={ref}
+      className="cosmos-preview"
+      data-visible={visible ? "true" : "false"}
+      aria-hidden="true"
+      onPointerEnter={() => getStage()?.holdHover(true)}
+      onPointerLeave={() => getStage()?.holdHover(false)}
+      onClick={() => {
+        if (hover) getStage()?.activate(hover)
+      }}
+    >
       {hit && (
         <>
           {media && (

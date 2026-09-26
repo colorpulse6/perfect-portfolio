@@ -74,6 +74,14 @@ export interface Stage {
   focusCore(): void
   resetView(): void
   setPanelOpen(open: boolean): void
+  /**
+   * Does what clicking this object in the scene does: enter a galaxy, open
+   * the About panel from the core, open a project or the fiction. Labels and
+   * the preview card call it.
+   */
+  activate(target: { kind: PickTarget["kind"]; id: string }): void
+  /** While held (the pointer is on the preview card) the hover stays put. */
+  holdHover(on: boolean): void
   /** Returns an unregister function that only clears this registration. */
   registerLabels(nodes: LabelNodes): () => void
   /** Returns an unregister function that only clears this registration. */
@@ -91,6 +99,8 @@ type Proj = { x: number; y: number; z: number }
 const DEG = Math.PI / 180
 /** How long an empty-space tap waits for a possible double-click. */
 const DOUBLE_TAP_MS = 320
+/** How long a star's preview outlives the pointer, so the card can be reached. */
+const HOVER_GRACE_MS = 280
 /** HUD elements that galaxy labels steer around. */
 const LABEL_AVOID = "[data-cosmos-avoid], .atlas-rail, header .header-container > :first-child > *, header button"
 const isAtlasPath = (p: string) => /^\/atlas\/?$/.test(p)
@@ -169,6 +179,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let releaseTimer = 0
   let exitTimer = 0
   let hudTimer = 0
+  /** The pointer is on the preview card: canvas hover changes wait. */
+  let hoverHeld = false
+  let hoverGrace = 0
 
   interface Journey {
     frames: JourneyFrames
@@ -628,6 +641,11 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     let x = s.x + 26
     let y = s.y - h / 2
     if (x + w > cssW - 16) x = s.x - 26 - w
+    if (x < 16) {
+      // Too narrow for either side: centre it on the star, above or below.
+      x = Math.max(16, Math.min(cssW - w - 16, s.x - w / 2))
+      y = s.y + 26 + h <= cssH - 64 ? s.y + 26 : s.y - 26 - h
+    }
     y = Math.max(64, Math.min(cssH - h - 64, y))
     preview.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`
   }
@@ -658,14 +676,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
           if (entered >= 0) exitTimer = window.setTimeout(exitDomain, DOUBLE_TAP_MS)
           return
         }
-        if (hit.kind === "domain") enterDomain(hit.id)
-        else if (hit.kind === "core") {
-          focusCore()
-          window.clearTimeout(coreTimer)
-          coreTimer = window.setTimeout(() => emitCosmosPick({ kind: "core", id: "me" }), reduceMotion ? 0 : 650)
-          return
-        }
-        emitCosmosPick({ kind: hit.kind, id: hit.id })
+        activate(hit)
       },
       onDoubleTap(x, y) {
         window.clearTimeout(exitTimer)
@@ -674,11 +685,22 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         zoomAt(orbit, orbitCfg, lastCam, [(x / cssW) * 2 - 1, 1 - (y / cssH) * 2], [tanX, tanY], 1 / 1.8, 6, performance.now())
       },
       onHover(x, y) {
-        if (x === null || y === null || !lastCam || panelOpen) {
-          setHover(null)
+        if (hoverHeld) return
+        const hit = x === null || y === null || !lastCam || panelOpen ? null : pick(pickTargets(lastCam, lastT), x, y, false)
+        if (hit || !hover || panelOpen) {
+          window.clearTimeout(hoverGrace)
+          hoverGrace = 0
+          setHover(hit)
           return
         }
-        setHover(pick(pickTargets(lastCam, lastT), x, y, false))
+        // Leaving a star: keep its preview a moment so the pointer can reach
+        // the card (it sits beside the star) and click it.
+        if (!hoverGrace) {
+          hoverGrace = window.setTimeout(() => {
+            hoverGrace = 0
+            if (!hoverHeld) setHover(null)
+          }, HOVER_GRACE_MS)
+        }
       },
       onKey(key: AtlasKey) {
         if (!orbit || !orbitCfg || !lastCam || panelOpen) return
@@ -700,11 +722,27 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     if (detachInput) detachInput()
     detachInput = null
     window.clearTimeout(exitTimer)
+    window.clearTimeout(hoverGrace)
+    hoverGrace = 0
+    hoverHeld = false
     dragging = false
     setHover(null)
   }
 
   // ── Commands ─────────────────────────────────────────────────────────
+  function activate(t: { kind: PickTarget["kind"]; id: string }) {
+    if (panelOpen || mode !== "atlas") return
+    window.clearTimeout(exitTimer)
+    if (t.kind === "core") {
+      focusCore()
+      window.clearTimeout(coreTimer)
+      coreTimer = window.setTimeout(() => emitCosmosPick({ kind: "core", id: "me" }), reduceMotion ? 0 : 650)
+      return
+    }
+    if (t.kind === "domain") enterDomain(t.id)
+    emitCosmosPick({ kind: t.kind, id: t.id })
+  }
+
   function enterDomain(id: string) {
     if (!scene || !orbit) return
     const gi = scene.domainIds.indexOf(id)
@@ -1010,9 +1048,19 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       panelOpen = open
       if (open) {
         dragging = false
+        hoverHeld = false
+        window.clearTimeout(hoverGrace)
+        hoverGrace = 0
         setHover(null)
       }
       setCosmos({ panelOpen: open })
+    },
+    activate,
+    holdHover(on: boolean) {
+      hoverHeld = on
+      window.clearTimeout(hoverGrace)
+      hoverGrace = 0
+      if (!on) setHover(null)
     },
     registerLabels(nodes: LabelNodes) {
       labels = nodes

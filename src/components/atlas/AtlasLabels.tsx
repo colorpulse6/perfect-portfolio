@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from "react"
 import type { AtlasDomain } from "./atlasShared"
-import { onStage } from "../cosmos/cosmos"
+import { getStage, onStage } from "../cosmos/cosmos"
 import type { LabelNode } from "../cosmos/engine/stage"
 
 interface AtlasLabelsProps {
@@ -16,7 +16,31 @@ const statusText = (s?: string) => (s || "released").replace("-", " ").toUpperCa
  * DOM labels for the WebGL Atlas. React renders the nodes; the stage places
  * them every frame (outward from the black hole, with a leader line, clamped
  * to the safe area) by writing transforms directly, so no per-frame renders.
+ *
+ * Clicking a label does what clicking its object does: a galaxy title enters
+ * the galaxy, a project title opens the project, the core opens About. The
+ * accessible nav (AtlasA11yNav) offers the same actions to keyboards.
  */
+type Target = Parameters<NonNullable<ReturnType<typeof getStage>>["activate"]>[0]
+const activate = (target: Target) => () => getStage()?.activate(target)
+
+/** The wheel zooms the Atlas even while the pointer is over a label. */
+function forwardWheel(e: React.WheelEvent) {
+  const canvas = document.querySelector(".cosmos-stage")
+  if (!canvas) return
+  const n = e.nativeEvent
+  canvas.dispatchEvent(
+    new WheelEvent("wheel", {
+      deltaX: n.deltaX,
+      deltaY: n.deltaY,
+      deltaMode: n.deltaMode,
+      clientX: n.clientX,
+      clientY: n.clientY,
+      bubbles: true,
+      cancelable: true,
+    })
+  )
+}
 export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps) {
   const coreRef = useRef<HTMLDivElement>(null)
   const nodes = useRef(new Map<string, LabelNode>())
@@ -58,9 +82,9 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
 
   const core = domains.find((d) => d.core)
   return (
-    <div className="cosmos-labels" aria-hidden="true">
+    <div className="cosmos-labels" aria-hidden="true" onWheel={forwardWheel}>
       {core && (
-        <div ref={coreRef} className="cosmos-lbl cosmos-lbl--core">
+        <div ref={coreRef} className="cosmos-lbl cosmos-lbl--core" onClick={activate({ kind: "core", id: "me" })}>
           {core.label}
           <small>{(core.tag || "").toUpperCase()}</small>
         </div>
@@ -70,7 +94,7 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
         .map((d) => (
           <React.Fragment key={d.id}>
             <div ref={bind(`d:${d.id}`, "lead")} className="cosmos-lead" />
-            <div ref={bind(`d:${d.id}`, "label")} className="cosmos-lbl">
+            <div ref={bind(`d:${d.id}`, "label")} className="cosmos-lbl" onClick={activate({ kind: "domain", id: d.id })}>
               {d.label}
               <small>
                 {(d.tag || "").toUpperCase()} · {d.count} {(d.unit || "").toUpperCase()}
@@ -83,7 +107,11 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
           w.id ? (
             <React.Fragment key={w.id}>
               <div ref={bind(`w:${w.id}`, "lead")} className="cosmos-lead cosmos-lead--work" />
-              <div ref={bind(`w:${w.id}`, "label")} className="cosmos-lbl cosmos-lbl--work">
+              <div
+                ref={bind(`w:${w.id}`, "label")}
+                className="cosmos-lbl cosmos-lbl--work"
+                onClick={activate({ kind: "work", id: w.id })}
+              >
                 {w.t}
                 <small>
                   {(w.medium || enteredDomain.label).toUpperCase()} · {statusText(w.status)}
@@ -95,7 +123,11 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
       {enteredDomain && enteredDomain.id === "writing" && fictionCount > 0 && (
         <React.Fragment key="writing:fiction">
           <div ref={bind("w:writing:fiction", "lead")} className="cosmos-lead cosmos-lead--work" />
-          <div ref={bind("w:writing:fiction", "label")} className="cosmos-lbl cosmos-lbl--work">
+          <div
+            ref={bind("w:writing:fiction", "label")}
+            className="cosmos-lbl cosmos-lbl--work"
+            onClick={activate({ kind: "fiction", id: "writing:fiction" })}
+          >
             FICTION
             <small>{fictionCount} STORIES · ENTER</small>
           </div>
