@@ -95,6 +95,7 @@ export function AtlasLabels({ domains, entered, fictionCount }: AtlasLabelsProps
           <React.Fragment key={d.id}>
             <div ref={bind(`d:${d.id}`, "lead")} className="cosmos-lead" />
             <div ref={bind(`d:${d.id}`, "label")} className="cosmos-lbl" onClick={activate({ kind: "domain", id: d.id })}>
+              <i className="cosmos-lbl__dot" style={{ background: d.c, boxShadow: `0 0 8px ${d.c}` }} />
               {d.label}
               <small>
                 {(d.tag || "").toUpperCase()} · {d.count} {(d.unit || "").toUpperCase()}

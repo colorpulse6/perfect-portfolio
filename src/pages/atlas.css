@@ -129,10 +129,10 @@
   top: 0;
   visibility: hidden;
   white-space: nowrap;
-  font: 600 11px/1.3 "JetBrains Mono", "Courier New", ui-monospace, monospace;
-  letter-spacing: 2.2px;
-  color: rgba(242, 246, 255, 0.97);
-  text-shadow: 0 0 12px rgba(2, 3, 10, 0.95), 0 0 4px rgba(2, 3, 10, 0.95), 0 1px 2px rgba(0, 0, 0, 0.9);
+  font: 700 14px/1.25 "JetBrains Mono", "Courier New", ui-monospace, monospace;
+  letter-spacing: 2.6px;
+  color: #f4f6ff;
+  text-shadow: 0 0 16px rgb(2, 3, 10), 0 0 6px rgb(2, 3, 10), 0 1px 2px #000;
   will-change: transform;
   /* Labels open what they name; the rest of the layer lets the canvas drag. */
   pointer-events: auto;
@@ -149,19 +149,28 @@
 }
 .cosmos-lbl small {
   display: block;
-  margin-top: 3px;
-  font-size: 8.5px;
+  margin-top: 4px;
+  font-size: 10px;
   font-weight: 500;
-  letter-spacing: 1.6px;
-  color: rgba(190, 200, 238, 0.78);
+  letter-spacing: 1.8px;
+  color: rgba(206, 215, 246, 0.9);
 }
 .cosmos-lbl--core {
-  font-size: 12px;
-  letter-spacing: 3px;
+  font-size: 16px;
+  letter-spacing: 3.4px;
 }
 .cosmos-lbl--work {
-  font-size: 10.5px;
-  letter-spacing: 1.6px;
+  font-size: 13px;
+  letter-spacing: 1.8px;
+}
+/* The galaxy's own color, so each title reads as part of its galaxy. */
+.cosmos-lbl__dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 9px;
+  border-radius: 50%;
+  vertical-align: 2px;
 }
 .cosmos-lead {
   position: absolute;
@@ -170,15 +179,21 @@
   height: 1px;
   visibility: hidden;
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, rgba(200, 215, 255, 0), rgba(200, 215, 255, 0.5));
+  background: linear-gradient(90deg, rgba(200, 215, 255, 0), rgba(200, 215, 255, 0.72));
 }
 @media (max-width: 560px) {
   .cosmos-lbl small {
     display: none;
   }
   .cosmos-lbl {
-    font-size: 9.5px;
-    letter-spacing: 1.6px;
+    font-size: 12px;
+    letter-spacing: 1.8px;
+  }
+  .cosmos-lbl--core {
+    font-size: 12.5px;
+  }
+  .cosmos-lbl--work {
+    font-size: 11.5px;
   }
 }
 

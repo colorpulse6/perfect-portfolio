@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { placeLabel, placeCoreLabel, layoutLabels, overlapArea, LABEL_SAFE } from "../src/components/cosmos/engine/labels.ts"
+import { placeLabel, placeCoreLabel, layoutLabels, overlapArea, LABEL_SAFE, LABEL_GAP } from "../src/components/cosmos/engine/labels.ts"
 import { pick } from "../src/components/cosmos/engine/picking.ts"
 import type { PickTarget } from "../src/components/cosmos/engine/picking.ts"
 
@@ -61,6 +61,9 @@ test("labels with nearby anchors do not cover each other", () => {
     obstacles: [],
   })
   assert.equal(overlapArea(out[0].rect, out[1].rect), 0)
+  const [a, b] = out.map((o) => o.rect)
+  const gap = Math.max(b.l - a.r, a.l - b.r, b.t - a.b, a.t - b.b)
+  assert.ok(gap >= LABEL_GAP - 1e-9, `labels keep ${LABEL_GAP}px apart (got ${gap})`)
 })
 
 test("labels avoid rectangles that are already taken", () => {
@@ -68,6 +71,28 @@ test("labels avoid rectangles that are already taken", () => {
   const core = { l: first.left, t: first.top, r: first.left + 120, b: first.top + 28 }
   const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [], taken: [core] })
   assert.equal(overlapArea(a.rect, core), 0)
+})
+
+test("labels steer off galaxies when a clear spot exists", () => {
+  const free = placeLabel({ ...item("a", { x: 1000, y: 450 }), viewport, safe: LABEL_SAFE })
+  const galaxy = { l: free.left - 20, t: free.top - 20, r: free.left + 140, b: free.top + 48 }
+  const [a] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [], soft: [galaxy] })
+  assert.notEqual(a.candidate, 0)
+  assert.equal(overlapArea(a.rect, galaxy), 0)
+})
+
+test("a galaxy is a softer obstacle than the HUD", () => {
+  // Boxed in: HUD on every side but one spot that only covers a galaxy.
+  const hud = { l: 0, t: 0, r: viewport.w, b: viewport.h }
+  const [hudOnly] = layoutLabels([item("a", { x: 1000, y: 450 })], { viewport, safe: LABEL_SAFE, obstacles: [hud] })
+  const [withSoft] = layoutLabels([item("a", { x: 1000, y: 450 })], {
+    viewport,
+    safe: LABEL_SAFE,
+    obstacles: [],
+    soft: [hud],
+  })
+  assert.equal(hudOnly.crowded, true)
+  assert.equal(withSoft.crowded, false, "soft cover alone does not dim a label")
 })
 
 test("a label keeps last frame's angle while that spot is still free", () => {

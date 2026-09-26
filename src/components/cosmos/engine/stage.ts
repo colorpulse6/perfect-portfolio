@@ -172,6 +172,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const labelPrev = new Map<string, number>()
   const labelAngle = new Map<string, number>()
   let obstacles: Rect[] = []
+  /** Debug only: the last label layout. */
+  let lastLayout: ReturnType<typeof layoutLabels> = []
   let obstaclesFrame = -1e9
   let preview: HTMLElement | null = null
   let detachInput: (() => void) | null = null
@@ -232,6 +234,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     caps = r.caps
     canvas.addEventListener("webglcontextlost", onContextLost, false)
     canvas.addEventListener("webglcontextrestored", onContextRestored, false)
+    document.fonts?.addEventListener("loadingdone", onFontsLoaded)
     setCosmos({ support: "ok" })
     return true
   }
@@ -499,6 +502,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   }
 
   // ── Labels and preview ───────────────────────────────────────────────
+  function onFontsLoaded() {
+    measureLabels()
+    obstaclesFrame = -1e9
+  }
   function measureLabels() {
     if (!labels) return
     const measure = (el: HTMLElement | null) => {
@@ -613,8 +620,18 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       if (!inEntered.has(id)) hideLabel(`w:${id}`, n)
     })
 
-    const laid = layoutLabels(items, { viewport, safe: LABEL_SAFE, obstacles, taken, prev: labelPrev })
-    const k = 1 - Math.exp(-dt * 10)
+    // Galaxies and the black hole's disk: labels steer off them when they can.
+    const soft: Rect[] = []
+    const around = (x: number, y: number, r: number) => soft.push({ l: x - r, t: y - r, r: x + r, b: y + r })
+    if (core && onScreen(core, 0)) around(core.x, core.y, worldToPx(scene.bh.outer, core.z) * 0.8)
+    scene.galaxies.cPos.forEach((c, gi) => {
+      if (gi === entered) return
+      const g = project(cam, c)
+      if (g && onScreen(g, 80)) around(g.x, g.y, worldToPx(scene!.galaxies.sizes[gi], g.z) * 0.55)
+    })
+    const laid = layoutLabels(items, { viewport, safe: LABEL_SAFE, obstacles, soft, taken, prev: labelPrev })
+    lastLayout = laid
+    const k = 1 - Math.exp(-dt * 14)
     for (const L of laid) {
       const m = meta.get(L.key)
       if (!m) continue
@@ -625,7 +642,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       const a = was === undefined || reduceMotion ? target : was + (target - was) * k
       labelAngle.set(L.key, a)
       const p = Math.abs(a - target) < 1e-3 ? L.placement : placeLabel({ ...m.item, viewport, safe: LABEL_SAFE }, a)
-      writeLabel(m.node, p, m.opacity * (L.crowded ? 0.5 : 1))
+      // A label changing spot fades while it swings, so it never sweeps
+      // visibly across its neighbours.
+      const settle = 1 - 0.85 * Math.min(1, Math.abs(a - target) / 0.8)
+      writeLabel(m.node, p, m.opacity * settle * (L.crowded ? 0.5 : 1))
     }
   }
 
@@ -1065,6 +1085,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     registerLabels(nodes: LabelNodes) {
       labels = nodes
       measureLabels()
+      // Label sizes change when the web font arrives after the first measure.
+      document.fonts?.ready.then(onFontsLoaded).catch(() => {})
       // Labels re-register when the HUD changes (a galaxy entered or left).
       obstaclesFrame = -1e9
       return () => {
@@ -1096,6 +1118,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       if (gl) {
         canvas.removeEventListener("webglcontextlost", onContextLost)
         canvas.removeEventListener("webglcontextrestored", onContextRestored)
+        document.fonts?.removeEventListener("loadingdone", onFontsLoaded)
       }
       document.documentElement.removeAttribute("data-cosmos-mode")
     },
@@ -1114,6 +1137,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         return atlasScale
       },
       tier: settings.tier,
+      get layout() {
+        return lastLayout.map((l) => ({ key: l.key, candidate: l.candidate, crowded: l.crowded, rect: l.rect }))
+      },
       /** GPU resources are ready (idle warm-up finished). */
       get warm() {
         return !!res && !!programs

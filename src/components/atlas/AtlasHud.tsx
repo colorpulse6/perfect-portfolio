@@ -138,19 +138,19 @@ export function AtlasHud({
         <button type="button" onClick={onResetGalaxy} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.paper, cursor: "pointer" }}>
           WORK
         </button>
-        <button type="button" onClick={() => setPanel({ type: "about" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
+        <button type="button" onClick={() => setPanel({ type: "about" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.faint, cursor: "pointer" }}>
           ABOUT
         </button>
-        <button type="button" onClick={() => setPanel({ type: "writing" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
+        <button type="button" onClick={() => setPanel({ type: "writing" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.faint, cursor: "pointer" }}>
           WRITING
         </button>
-        <button type="button" onClick={() => setPanel({ type: "changelog" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
+        <button type="button" onClick={() => setPanel({ type: "changelog" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.faint, cursor: "pointer" }}>
           CHANGELOG
         </button>
-        <button type="button" aria-pressed={term} onClick={() => setTerm(v => !v)} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: term ? A.cyan : A.fainter, cursor: "pointer" }}>
+        <button type="button" aria-pressed={term} onClick={() => setTerm(v => !v)} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: term ? A.cyan : A.faint, cursor: "pointer" }}>
           TERMINAL
         </button>
-        <button type="button" onClick={() => setPanel({ type: "contact" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.fainter, cursor: "pointer" }}>
+        <button type="button" onClick={() => setPanel({ type: "contact" })} style={{ background: "none", border: "none", padding: 0, font: "inherit", letterSpacing: "inherit", color: A.faint, cursor: "pointer" }}>
           CONTACT
         </button>
       </div>

@@ -127,6 +127,11 @@ export interface LayoutOptions {
   safe: Safe
   /** HUD rectangles labels must not cover. */
   obstacles: Rect[]
+  /**
+   * Scene areas labels should rather not sit on (galaxies, the black hole's
+   * disk): text over bright particles is hard to read. Weighted below the HUD.
+   */
+  soft?: Rect[]
   /** Rectangles already taken, such as the core label. */
   taken?: Rect[]
   /** The angle index each key used last frame. */
@@ -147,10 +152,15 @@ export interface LaidOutLabel {
 // terms prefer straight outward leaders, labels that stay at the end of their
 // leader, and the angle used last frame (so labels do not flicker).
 const W_OVERLAP = 10
-const W_LABEL_OVERLAP = 1.5
+/** Text over the HUD collides with its text: worse than sitting on a galaxy. */
+const W_HUD = 5
+const W_LABEL_OVERLAP = 4
+const W_SOFT = 0.35
+/** Breathing room kept between labels, in CSS pixels. */
+export const LABEL_GAP = 6
 const W_ANGLE = 0.15
 const W_DETACH = 0.02
-const W_SWITCH = 0.25
+const W_SWITCH = 0.4
 const CROWDED = 0.35
 
 /**
@@ -158,14 +168,13 @@ const CROWDED = 0.35
  * the candidate angle with the lowest score; later labels avoid earlier ones.
  */
 export function layoutLabels(items: LayoutItem[], o: LayoutOptions): LaidOutLabel[] {
-  const placed: Rect[] = [...(o.taken ?? [])]
-  const out: LaidOutLabel[] = []
-  for (const it of items) {
+  const taken = o.taken ?? []
+  const best = (it: LayoutItem, others: Rect[]): LaidOutLabel | null => {
     const area = Math.max(1, it.labelW * it.labelH)
     const prev = o.prev?.get(it.key) ?? 0
-    let best: LaidOutLabel | null = null
-    let bestScore = Infinity
-    let bestCover = 0
+    let pick: LaidOutLabel | null = null
+    let pickScore = Infinity
+    let pickCover = 0
     for (let ci = 0; ci < LABEL_ANGLES.length; ci++) {
       const a = LABEL_ANGLES[ci]
       const p = placeLabel({ ...it, viewport: o.viewport, safe: o.safe }, a)
@@ -173,24 +182,42 @@ export function layoutLabels(items: LayoutItem[], o: LayoutOptions): LaidOutLabe
       let cover = 0
       for (const ob of o.obstacles) cover += overlapArea(rect, ob)
       let labelCover = 0
-      for (const pl of placed) labelCover += overlapArea(rect, pl)
+      for (const pl of others) {
+        labelCover += overlapArea(rect, { l: pl.l - LABEL_GAP, t: pl.t - LABEL_GAP, r: pl.r + LABEL_GAP, b: pl.b + LABEL_GAP })
+      }
+      let softCover = 0
+      for (const sr of o.soft ?? []) softCover += overlapArea(rect, sr)
       const [ex, ey] = p.lineTo
       const detach = Math.hypot(ex - clamp(ex, rect.l, rect.r), ey - clamp(ey, rect.t, rect.b))
       const score =
-        ((cover + labelCover * W_LABEL_OVERLAP) / area) * W_OVERLAP +
+        ((cover * W_HUD + labelCover * W_LABEL_OVERLAP + softCover * W_SOFT) / area) * W_OVERLAP +
         Math.abs(a) * W_ANGLE +
         detach * W_DETACH +
         (ci === prev ? 0 : W_SWITCH)
-      if (score < bestScore) {
-        bestScore = score
-        bestCover = (cover + labelCover) / area
-        best = { key: it.key, candidate: ci, placement: p, rect, crowded: false }
+      if (score < pickScore) {
+        pickScore = score
+        pickCover = (cover + labelCover) / area
+        pick = { key: it.key, candidate: ci, placement: p, rect, crowded: false }
       }
     }
-    if (!best) continue
-    best.crowded = bestCover > CROWDED
-    placed.push(best.rect)
-    out.push(best)
+    if (pick) pick.crowded = pickCover > CROWDED
+    return pick
+  }
+
+  // Greedy first pass in priority order, then one refinement pass in which
+  // every label reconsiders its spot knowing where all the others went (so
+  // an early label can make room for a later one).
+  const out: LaidOutLabel[] = []
+  for (const it of items) {
+    const b = best(it, [...taken, ...out.map((l) => l.rect)])
+    if (b) out.push(b)
+  }
+  const byKey = new Map(items.map((it) => [it.key, it]))
+  for (let i = 0; i < out.length; i++) {
+    const it = byKey.get(out[i].key)!
+    const others = [...taken, ...out.filter((_, j) => j !== i).map((l) => l.rect)]
+    const b = best(it, others)
+    if (b) out[i] = b
   }
   return out
 }

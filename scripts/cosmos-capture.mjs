@@ -317,15 +317,22 @@ async function waitForWarmStage() {
 
 /** Hovers and clicks the call to action; resolves when the journey runs. */
 async function launchJourney() {
+  // The home page fades in (GSAP autoAlpha hides it while transparent): wait
+  // until it is fully shown, or the click lands on nothing.
+  const t0 = Date.now()
+  while (!(await evaluate(`(() => { const e = document.querySelector(".hometex"); if (!e) return false; const cs = getComputedStyle(e); return cs.visibility !== "hidden" && parseFloat(cs.opacity) > 0.95 })()`))) {
+    if (Date.now() - t0 > 8000) throw new Error("the home page did not finish fading in")
+    await sleep(100)
+  }
   const cta = await evaluate(`(() => { const r = document.querySelector(".atlas-enter")?.getBoundingClientRect(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null })()`)
   if (!cta) throw new Error("no call to action (.atlas-enter) on the home page")
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: cta.x, y: cta.y })
   await sleep(500)
   const clickAt = await evaluate(`performance.now()`)
   await click(cta.x, cta.y)
-  const t0 = Date.now()
+  const t1 = Date.now()
   while ((await evaluate(`__cosmos.mode`)) !== "journey") {
-    if (Date.now() - t0 > 5000) throw new Error("the journey did not start within 5s of the click")
+    if (Date.now() - t1 > 5000) throw new Error("the journey did not start within 5s of the click")
     await sleep(5)
   }
   return clickAt

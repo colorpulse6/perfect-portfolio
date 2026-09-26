@@ -107,16 +107,16 @@ export function CosmosAtlas({ model }: CosmosAtlasProps) {
               fontFamily: MONO,
               fontSize: 11,
               letterSpacing: 1.5,
-              color: A.fainter,
+              color: A.faint,
               pointerEvents: "none",
               textAlign: "right",
             }}
             className="cosmos-hints"
             data-cosmos-avoid=""
           >
-            DRAG <span style={{ color: A.faint }}>– rotate</span>&nbsp;&nbsp;&nbsp;SCROLL <span style={{ color: A.faint }}>– zoom</span>
-            <div style={{ marginTop: 6, color: "rgba(140,155,210,0.4)" }}>
-              CLICK A GALAXY · PRESS <span style={{ color: A.faint }}>T</span> FOR TERMINAL
+            DRAG <span style={{ color: A.paper }}>– rotate</span>&nbsp;&nbsp;&nbsp;SCROLL <span style={{ color: A.paper }}>– zoom</span>
+            <div style={{ marginTop: 6, color: "rgba(170,182,230,0.6)" }}>
+              CLICK A GALAXY · PRESS <span style={{ color: A.paper }}>T</span> FOR TERMINAL
             </div>
           </div>
         }
