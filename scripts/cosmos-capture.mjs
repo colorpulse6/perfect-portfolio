@@ -343,6 +343,9 @@ async function run() {
   await send("Page.enable")
   await send("Runtime.enable")
   await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: opts.dpr, mobile: W < 700 })
+  // Phone sizes emulate touch too, so the stage picks its phone quality tier
+  // (pointer: coarse) as it would on the device.
+  if (W < 700) await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 })
   if (opts.blockVideo || scenario === "perf") {
     await send("Network.enable")
     await send("Network.setBlockedURLs", { urls: ["*.mp4", "*.webm", "*.mov", "*.m4v"] })
@@ -381,6 +384,7 @@ async function run() {
     await open(pagePath)
     await waitForAtlas()
   }
+  if (!legacy) console.log(`quality tier: ${await evaluate(`window.__cosmos ? __cosmos.tier : "n/a"`)}`)
 
   if (scenario === "atlas") {
     await capture("arrival")
@@ -422,8 +426,9 @@ async function run() {
     await waitForAtlasRoute()
     await sleep(1400)
     await capture("atlas")
-    const hud = await evaluate(`({ page: getComputedStyle(document.querySelector(".atlas-page")).opacity, labels: document.querySelectorAll(".cosmos-lbl").length })`)
+    const hud = await evaluate(`({ page: getComputedStyle(document.querySelector(".atlas-page")).opacity, labels: document.querySelectorAll(".cosmos-lbl").length, focus: document.activeElement && document.activeElement.id })`)
     console.log(`${hud.page === "1" && hud.labels > 0 ? "PASS" : "FAIL"}  the Atlas HUD and labels show after the hand-off (${JSON.stringify(hud)})`)
+    console.log(`${hud.focus === "atlas-title" ? "PASS" : "FAIL"}  focus arrives on the Atlas heading`)
     await evaluate(`history.back()`)
     await sleep(3500)
     const home = await evaluate(`({
@@ -435,7 +440,34 @@ async function run() {
     await capture("back-home")
     const ok = home.path === "/" && home.mode === "idle" && home.title === "1" && home.particles
     console.log(`${ok ? "PASS" : "FAIL"}  going back restores the home page and particles (${JSON.stringify(home)})`)
-    if (!ok || hud.page !== "1") throw new Error("journey checks failed")
+
+    // A click during the journey skips to the hand-off.
+    await waitForWarmStage()
+    await launchJourney()
+    await sleep(300)
+    const t0 = Date.now()
+    await click(Math.round(W / 2), Math.round(H / 2))
+    let skipped = false
+    try {
+      await waitForAtlasRoute(2000)
+      skipped = true
+    } catch {
+      skipped = false
+    }
+    console.log(`${skipped ? "PASS" : "FAIL"}  a click skips to the hand-off (${Date.now() - t0}ms)`)
+
+    // Leaving for another page mid-journey aborts it: no late jump to /atlas.
+    await evaluate(`history.back()`)
+    await sleep(3500)
+    await waitForWarmStage()
+    await launchJourney()
+    await sleep(300)
+    await evaluate(`window.___navigate("/changelog/")`)
+    await sleep(4500)
+    const away = await evaluate(`({ path: location.pathname, mode: __cosmos.mode })`)
+    const aborted = away.path === "/changelog/" && away.mode === "off"
+    console.log(`${aborted ? "PASS" : "FAIL"}  another route mid-journey aborts it (${JSON.stringify(away)})`)
+    if (!ok || hud.page !== "1" || hud.focus !== "atlas-title" || !skipped || !aborted) throw new Error("journey checks failed")
   } else if (scenario === "longtasks") {
     const clickAt = await launchJourney()
     await waitForAtlasRoute()
@@ -504,6 +536,21 @@ async function run() {
     s = await state()
     check("the next Atlas visit renders the WebGL Atlas", s.mode === "atlas" && s.cosmos && s.frames > f0, s)
     await capture("recovered")
+
+    // Mid-journey: the visitor still lands on the Atlas (the classic one).
+    await evaluate(`window.___navigate("/")`)
+    await sleep(3500)
+    await waitForWarmStage()
+    await launchJourney()
+    await evaluate(`__cosmos.goto(1.0)`)
+    await sleep(300)
+    await context("loseContext")
+    await sleep(2500)
+    s = await state()
+    check("a lost context mid-journey still lands on the (classic) Atlas", (await evaluate(`location.pathname`)) === "/atlas/" && s.classic && !s.cosmos, s)
+    await context("restoreContext")
+    await sleep(800)
+    await capture("journey-loss")
     if (results.some((ok) => !ok)) throw new Error("context-loss checks failed")
   }
 }

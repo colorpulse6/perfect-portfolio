@@ -62,7 +62,15 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
   const hudVisible = useCosmos((s) => s.hudVisible)
   usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1, intro: !viaJourney })
   useEffect(() => {
-    if (viaJourney && hudVisible) gsap.to(".atlas-page", { autoAlpha: 1, duration: 0.6 })
+    if (!viaJourney || !hudVisible) return
+    gsap.to(".atlas-page", { autoAlpha: 1, duration: 0.6 })
+    // The home CTA that had focus is gone: give keyboard and screen-reader
+    // visitors a defined arrival point, unless something else took focus
+    // (Gatsby's router parks focus on its wrapper after every route change).
+    const active = document.activeElement
+    if (!active || active === document.body || active.id === "gatsby-focus-wrapper") {
+      document.getElementById("atlas-title")?.focus({ preventScroll: true })
+    }
   }, [viaJourney, hudVisible])
 
   // The WebGL Atlas is the default; the classic Canvas2D Atlas remains the
@@ -99,6 +107,9 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
   return (
     <div className={legacy ? "atlas-page" : "atlas-page atlas-page--cosmos"} style={{ opacity: 0 }}>
       <SEO title="Atlas" description="A 3D galaxy-map of Nichalas Barnes' work. Drag to rotate, dive into a cluster, and explore projects, essays, and fiction." pathname={location?.pathname} />
+      <h1 id="atlas-title" className="sr-only" tabIndex={-1}>
+        Atlas of Nichalas Barnes' work
+      </h1>
       {legacy ? (
         <AtlasCanvas domains={domains} fiction={fiction} essays={essays} changelog={changelog} />
       ) : (

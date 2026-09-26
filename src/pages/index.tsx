@@ -95,7 +95,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
     }
     try {
       performance.mark("cosmos-click")
-      const snapshot = await snapshotHome({ dpr: Math.min(window.devicePixelRatio || 1, 2), cta })
+      const snapshot = await snapshotHome({ dpr: stage.pageScale(), cta })
       performance.measure("cosmos-snapshot", "cosmos-click")
       const speed = journeys > 0 ? REPEAT_SPEED : 1
       // The score plays on the ambient AudioContext, and only with sound on.
@@ -112,6 +112,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
           navigate("/atlas/", { state: { viaJourney: true } })
         },
         onSkip: () => stopScore?.(0.15),
+        onAbort: () => stopScore?.(0.15),
       })
       performance.measure("cosmos-launch", "cosmos-click")
       if (!started) {

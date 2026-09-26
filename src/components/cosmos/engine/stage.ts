@@ -62,6 +62,8 @@ export interface JourneyStart {
   onHandoff: () => void
   /** Called when the visitor skips to the hand-off (the score stops early). */
   onSkip?: () => void
+  /** Called when the journey stops early: another route, a failure, dispose. */
+  onAbort?: () => void
 }
 
 export interface Stage {
@@ -76,6 +78,8 @@ export interface Stage {
   registerLabels(nodes: LabelNodes): () => void
   /** Returns an unregister function that only clears this registration. */
   registerPreview(el: HTMLElement): () => void
+  /** Pixel ratio for the home snapshot: the device's, capped by the quality tier. */
+  pageScale(): number
   /** Resolves false when the journey cannot run (unsupported or not ready). */
   startJourney(opts: JourneyStart): Promise<boolean>
   skipJourney(): void
@@ -175,6 +179,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     /** Cleared once called. */
     onHandoff: (() => void) | null
     onSkip: (() => void) | null
+    onAbort: (() => void) | null
     /** Wall-clock seconds of the hand-off and of the settled arrival. */
     switchAt: number
     endAt: number
@@ -269,8 +274,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function onContextLost(e: Event) {
     e.preventDefault()
     lost = true
-    const handoffNow = journey?.onHandoff ?? null
-    if (journey) abortJourney()
+    const handoffNow = failJourney()
     stopLoop()
     detach()
     if (idleHandle) cancelIdle(idleHandle)
@@ -356,7 +360,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       }
     } catch (e) {
       detach()
+      const handoffNow = failJourney()
       markUnsupported(`The Atlas stopped rendering (${(e as Error).message})`)
+      handoffNow?.()
       return
     }
     frames++
@@ -782,10 +788,22 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   }
 
   function abortJourney() {
+    const onAbort = journey?.onAbort
     stopJourneyInput()
     journey = null
     window.clearTimeout(hudTimer)
     setCosmos({ hudVisible: true, viaJourney: false })
+    onAbort?.()
+  }
+
+  // The stage cannot go on (lost context, a render failure) in the middle of
+  // a journey: stop it, and if it has not handed off yet, still take the
+  // visitor to the Atlas, which then shows the classic view.
+  function failJourney(): (() => void) | null {
+    if (!journey) return null
+    const handoffNow = journey.onHandoff
+    abortJourney()
+    return handoffNow
   }
 
   function skip() {
@@ -844,6 +862,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       lut: createLutState(),
       onHandoff: opts.onHandoff,
       onSkip: opts.onSkip ?? null,
+      onAbort: opts.onAbort ?? null,
       switchAt: J.switch / speed,
       endAt: J.end / speed,
       frozenT: null,
@@ -1010,6 +1029,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
         if (preview === el) preview = null
       }
     },
+    pageScale() {
+      return Math.min(window.devicePixelRatio || 1, settings.dprCap)
+    },
     async startJourney(opts: JourneyStart) {
       return startJourney(opts)
     },
@@ -1017,8 +1039,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     dispose() {
       stopLoop()
       detach()
-      stopJourneyInput()
-      journey = null
+      if (journey) abortJourney()
       window.clearTimeout(hudTimer)
       if (idleHandle) cancelIdle(idleHandle)
       window.clearTimeout(releaseTimer)
@@ -1044,6 +1065,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       get atlasScale() {
         return atlasScale
       },
+      tier: settings.tier,
       /** GPU resources are ready (idle warm-up finished). */
       get warm() {
         return !!res && !!programs

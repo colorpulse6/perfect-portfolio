@@ -84,7 +84,6 @@ export function CosmosAtlas({ model }: CosmosAtlasProps) {
 
   return (
     <>
-      <h1 className="sr-only">Atlas of Nichalas Barnes' work</h1>
       <AtlasLabels domains={domains} entered={entered} fictionCount={fiction.length} />
       <AtlasPreviewCard workIndex={workIndex} fictionCount={fiction.length} />
       <AtlasHud
