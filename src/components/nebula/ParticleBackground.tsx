@@ -1,9 +1,10 @@
 import React, { useState, Suspense, useMemo } from "react"
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import ParticleField from "./ParticleField"
 import { useCursorPosition } from "./useCursorPosition"
 import { resolveTheme, ParticleTheme } from "./particleThemes"
+import { registerParticleCanvas } from "../cosmos/particleCapture"
 
 interface SceneContentProps {
   theme: ParticleTheme
@@ -32,6 +33,13 @@ const SceneContent: React.FC<SceneContentProps> = ({ theme }) => {
       )}
     </>
   )
+}
+
+/** Lets the wormhole journey capture this canvas in the frame it renders. */
+const ParticleCaptureBridge: React.FC = () => {
+  const gl = useThree((s) => s.gl)
+  React.useEffect(() => registerParticleCanvas(() => gl.domElement), [gl])
+  return null
 }
 
 function hasWebGL(): boolean {
@@ -79,6 +87,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
       gl={{ antialias: true, alpha: true }}
       dpr={[1, 2]}
     >
+      <ParticleCaptureBridge />
       <Suspense fallback={null}>
         <SceneContent theme={theme} />
       </Suspense>
