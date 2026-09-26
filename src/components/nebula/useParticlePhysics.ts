@@ -80,7 +80,6 @@ export function useParticlePhysics(
   const clusters = useRef<
     { cx: number; cy: number; orbitRadius: number; orbitSpeed: number; phase: number; x: number; y: number }[]
   >([])
-  const initialized = useRef(false)
   const timeRef = useRef(0)
   const opacityRef = useRef(theme.opacity)
   const prevThemeRef = useRef(theme)
@@ -90,8 +89,9 @@ export function useParticlePhysics(
     damping: theme.damping,
   })
 
-  if (!initialized.current) {
-    initialized.current = true
+  // Count changes allocate new render buffers. Rebuild their matching physics
+  // state before the next frame, including when returning to mobile density.
+  if (particles.current.length !== count || clusters.current.length !== clusterCount) {
 
     const spreadX = 10
     const spreadY = 6

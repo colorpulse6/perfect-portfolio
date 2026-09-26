@@ -1,0 +1,212 @@
+.work-page {
+  position: relative;
+  z-index: 2;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 64px 28px 120px;
+  color: #edf2fa;
+  font-family: system-ui, sans-serif;
+}
+.work-page p {
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #c0c9d9;
+}
+.work-page .work-eyebrow,
+.work-page .work-project-kind,
+.work-page .work-stack {
+  font-family: "Courier New", monospace;
+}
+.work-page .work-eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #72e6dc;
+  margin: 0 0 22px;
+}
+.work-page h1 {
+  font-family: Montserrat, system-ui, sans-serif;
+  font-size: clamp(36px, 5vw, 64px) !important;
+  line-height: 1.12;
+  letter-spacing: -2px;
+  text-transform: none;
+  margin: 0;
+  max-width: 940px;
+}
+.work-page h1 span {
+  color: #90aaa9;
+}
+.work-page h2 {
+  font-family: Montserrat, system-ui, sans-serif;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+  color: #edf2fa;
+  margin: 0 0 32px;
+}
+.work-page h3 {
+  font-family: inherit;
+  font-size: 21px;
+  line-height: 1.35;
+  color: #edf2fa;
+  margin: 12px 0;
+}
+.work-page .work-intro {
+  max-width: 640px;
+  font-size: 20px;
+  margin: 28px 0 20px;
+}
+.work-page .work-stack {
+  font-size: 13px;
+  color: #a4b8c9;
+}
+.work-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-top: 30px;
+}
+.work-page .work-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 15px 23px;
+  border-radius: 6px;
+  background: #78e4d7;
+  color: #081c20;
+  text-decoration: none;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.work-page .work-button:hover {
+  background: #a5f6e9;
+}
+.work-page .work-text-link {
+  color: #d1f6ee;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  line-height: 1.7;
+}
+.work-page a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 5px;
+}
+.work-page .work-creative {
+  font-size: 13px;
+  color: #94a2b9;
+  margin-top: 28px;
+}
+.work-section {
+  border-top: 1px solid #344249;
+  padding-top: 42px;
+  margin-top: 76px;
+  scroll-margin-top: 30px;
+}
+.work-services {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.work-services article {
+  padding: 26px;
+  background: rgba(12, 24, 29, 0.88);
+  border: 1px solid #30454c;
+  border-radius: 10px;
+}
+.work-number {
+  color: #72e6dc;
+  font:
+    12px "Courier New",
+    monospace;
+}
+.work-page .work-detail {
+  color: #97a9bd;
+  font-size: 14px;
+}
+.work-project {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 45px;
+  padding: 32px 0;
+  border-top: 1px solid #2e3942;
+}
+.work-page .work-project-kind {
+  color: #91b8b7;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.work-project h3 {
+  font-size: 30px;
+}
+.work-process ol {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+  padding-left: 22px;
+}
+.work-process li::marker {
+  color: #72e6dc;
+  font-family: monospace;
+}
+.work-contact {
+  margin-top: 65px;
+  padding: 42px;
+  border: 1px solid #426564;
+  border-radius: 12px;
+  background: linear-gradient(
+    120deg,
+    rgba(22, 55, 53, 0.92),
+    rgba(13, 23, 35, 0.94)
+  );
+}
+.work-contact p {
+  max-width: 650px;
+}
+@media (max-width: 768px) {
+  .work-page {
+    padding: 35px 16px 100px;
+  }
+  .work-services {
+    grid-template-columns: 1fr;
+  }
+  .work-project {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .work-process ol {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+@media (max-width: 550px) {
+  .work-page {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .work-page h1 {
+    letter-spacing: -1px;
+  }
+  .work-page .work-intro {
+    font-size: 18px;
+  }
+  .work-project {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .work-contact {
+    padding: 25px 20px;
+  }
+  .work-section {
+    margin-top: 50px;
+  }
+  .work-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

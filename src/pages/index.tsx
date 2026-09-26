@@ -1,5 +1,5 @@
 import React from "react"
-import { graphql, navigate, prefetchPathname } from "gatsby"
+import { graphql, Link, navigate, prefetchPathname } from "gatsby"
 import gsap from "gsap"
 import SEO from "../components/seo"
 import HomeScene from "../components/nebula/HomeScene"
@@ -158,16 +158,17 @@ const IndexPage: React.FC<IndexPageProps> = ({
         className="hometex"
         data-cosmos-snapshot="1"
       >
-        <SEO title="Home" description="Software engineer and composer Nichalas Barnes. A living map of every medium: developer tools, web apps, games, Obsidian plugins, music, and writing." pathname={location?.pathname} />
+        <SEO title="Home" description="Freelance React, TypeScript, and Node.js development with Nic Barnes. Product features, integrations, and creative software." pathname={location?.pathname} />
         <div className="title">
           <h1 className="glitch-text" data-text="Welcome to Nichalas Barnes">
             Welcome to Nichalas Barnes
           </h1>
           <p className="home-intro">
-            Software engineer and composer. Obsidian plugins, web apps, AI
-            systems, and a decade of music across the US and Europe.
+            Software engineer and composer. I build product features, API
+            integrations, and workflow automation with React, TypeScript, and Node.js.
           </p>
           <div className="atlas-cta">
+            <Link className="home-work-link" to="/work-with-me/">Work with me <span aria-hidden="true">↗</span></Link>
             <button className="atlas-enter" onClick={exploreAtlas}>
               <span>Explore the Atlas</span>
               <span className="atlas-arrow">↗</span>

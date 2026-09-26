@@ -136,3 +136,7 @@ header a[data-tooltip]:focus-visible::after {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+.header-work-link { align-self: center; margin-left: auto; margin-right: 20px; color: #a5f6e9; font: 600 13px/1.5 system-ui, sans-serif; text-decoration: none; border-bottom: 1px solid #78e4d7; padding: 8px 0; white-space: nowrap; }
+.header-work-link:focus-visible { outline: 2px solid #a5f6e9; outline-offset: 5px; }
+@media (max-width: 550px) { .header-container { flex-wrap: wrap; } .header-work-link { order: 3; margin: 8px 10px 0 auto; } }

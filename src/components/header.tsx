@@ -119,6 +119,7 @@ const Header: React.FC<HeaderProps> = ({
             </a>
           </Spring>
         </div>
+        <Link className="header-work-link" to="/work-with-me/">Work with me</Link>
         <Spring isTitle={false}>
           <Hamburger navOpen={navOpen} setNavOpen={setNavOpen} />
         </Spring>

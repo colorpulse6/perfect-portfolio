@@ -68,7 +68,9 @@ interface Body {
 const BLOCKING = [
   "header .header-container > :first-child > *",
   "header button",
+  "header .header-work-link",
   ".hometex .atlas-enter",
+  ".hometex .home-work-link",
   ".terminal-console",
   ".terminal-collapsed",
   ".audio-toggle",
