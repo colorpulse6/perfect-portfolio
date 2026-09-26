@@ -23,9 +23,14 @@ Scenarios:
   context-loss          Lose and restore the WebGL context on /atlas; check the
                         classic Atlas takes over and the WebGL one returns on
                         the next visit.
-  journey <t...>        Capture journey frames at the given times (milestone 2).
-  longtasks             Report long tasks during the journey (milestone 2).
-  audio                 Report journey audio events (milestone 2).
+  journey [t...]        From home, click the call to action and capture the
+                        journey held at each time (default: the storyboard
+                        beats), then the Atlas after the hand-off; finally go
+                        back and check the home page and particles return.
+  longtasks             Report main-thread tasks over 50ms from the click to
+                        the settled Atlas.
+  audio                 Count Web Audio nodes the journey creates (muted by
+                        default; add --unmuted for the score).
 
 Options:
   --url <base>     Site base URL. Default: http://127.0.0.1:9123
@@ -35,6 +40,7 @@ Options:
   --dpr <n>        Device pixel ratio. Default: 1
   --out <dir>      Folder for the JPEG captures. Default: cosmos-captures
   --block-video    Block video downloads (perf always does this).
+  --unmuted        Start with site sound on (audio scenario).
   --chrome <path>  Chrome binary. Default: $CHROME, else system Chrome.
   --help           Show this text.
 
@@ -74,6 +80,7 @@ function parseArgs(argv) {
       if (!(opts.dpr > 0)) fail("--dpr expects a positive number")
     } else if (a === "--out") opts.out = next()
     else if (a === "--block-video") opts.blockVideo = true
+    else if (a === "--unmuted") opts.unmuted = true
     else if (a === "--chrome") opts.chrome = next()
     else if (a.startsWith("--")) fail(`unknown option ${a}`)
     else opts.positional.push(a)
@@ -95,10 +102,7 @@ const [scenario, ...scenarioArgs] = opts.positional
 const SCENARIOS = ["atlas", "atlas-enter", "closeup", "perf", "context-loss", "journey", "longtasks", "audio"]
 if (!SCENARIOS.includes(scenario)) fail(`unknown scenario "${scenario}"`)
 if (scenario === "atlas-enter" && !scenarioArgs[0]) fail("atlas-enter needs a domain id, for example obsidian")
-if (["journey", "longtasks", "audio"].includes(scenario)) {
-  console.error(`cosmos-capture: "${scenario}" arrives with the journey (milestone 2).`)
-  process.exit(2)
-}
+const fromHome = ["journey", "longtasks", "audio"].includes(scenario)
 
 const [W, H] = opts.size
 const legacy = /atlas-legacy/.test(opts.path)
@@ -298,6 +302,41 @@ async function zoomToCore() {
   await sleep(2500)
 }
 
+/** Waits on home until the stage has compiled and built its resources. */
+async function waitForWarmStage() {
+  const t0 = Date.now()
+  for (;;) {
+    if (await evaluate(`!!(window.__cosmos && __cosmos.warm)`)) break
+    if (Date.now() - t0 > 20000) throw new Error("the stage did not warm up on home within 20s")
+    await sleep(200)
+  }
+  await sleep(800)
+}
+
+/** Hovers and clicks the call to action; resolves when the journey runs. */
+async function launchJourney() {
+  const cta = await evaluate(`(() => { const r = document.querySelector(".atlas-enter")?.getBoundingClientRect(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null })()`)
+  if (!cta) throw new Error("no call to action (.atlas-enter) on the home page")
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: cta.x, y: cta.y })
+  await sleep(500)
+  const clickAt = await evaluate(`performance.now()`)
+  await click(cta.x, cta.y)
+  const t0 = Date.now()
+  while ((await evaluate(`__cosmos.mode`)) !== "journey") {
+    if (Date.now() - t0 > 5000) throw new Error("the journey did not start within 5s of the click")
+    await sleep(5)
+  }
+  return clickAt
+}
+
+async function waitForAtlasRoute(timeoutMs = 10000) {
+  const t0 = Date.now()
+  while ((await evaluate(`__cosmos.mode + " " + location.pathname`)) !== "atlas /atlas/") {
+    if (Date.now() - t0 > timeoutMs) throw new Error("the hand-off to /atlas did not happen")
+    await sleep(50)
+  }
+}
+
 // ── Scenarios ────────────────────────────────────────────────────────────
 async function run() {
   await connect()
@@ -315,10 +354,33 @@ async function run() {
     return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : "WebGL2"
   })()`)
   console.log(`renderer: ${renderer}`)
-  console.log(`page: ${opts.url}${pagePath} at ${tag}`)
 
-  await open(pagePath)
-  await waitForAtlas()
+  if (fromHome) {
+    await send("Page.addScriptToEvaluateOnNewDocument", {
+      source: `(() => {
+        ${opts.unmuted ? 'localStorage.setItem("audio-muted", "false")' : 'localStorage.removeItem("audio-muted")'}
+        window.__longTasks = []
+        try {
+          new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__longTasks.push([Math.round(e.startTime), Math.round(e.duration)])))
+            .observe({ type: "longtask", buffered: true })
+        } catch (e) {}
+        window.__audioNodes = {}
+        const P = window.BaseAudioContext && BaseAudioContext.prototype
+        if (P) for (const name of Object.getOwnPropertyNames(P)) {
+          if (!name.startsWith("create") || typeof P[name] !== "function") continue
+          const o = P[name]
+          P[name] = function (...a) { window.__audioNodes[name] = (window.__audioNodes[name] || 0) + 1; return o.apply(this, a) }
+        }
+      })()`,
+    })
+    console.log(`page: ${opts.url}/?cosmos-debug at ${tag}`)
+    await open("/?cosmos-debug")
+    await waitForWarmStage()
+  } else {
+    console.log(`page: ${opts.url}${pagePath} at ${tag}`)
+    await open(pagePath)
+    await waitForAtlas()
+  }
 
   if (scenario === "atlas") {
     await capture("arrival")
@@ -347,6 +409,54 @@ async function run() {
     console.log(`  overview          ${overview.raf} / ${overview.stage}`)
     console.log(`  close-up          ${closeEarly.raf} / ${closeEarly.stage}`)
     console.log(`  close-up adapted  ${closeLate.raf} / ${closeLate.stage}  (resolution scale ${scale.toFixed(2)})`)
+  } else if (scenario === "journey") {
+    const times = scenarioArgs.length ? scenarioArgs.map(Number) : [0, 0.3, 1.0, 1.6, 2.05, 2.25, 2.5, 3.8]
+    await launchJourney()
+    for (const t of times) {
+      await evaluate(`__cosmos.goto(${t})`)
+      await sleep(350)
+      await capture(`t${t.toFixed(2)}`)
+      if (t >= 3.2) break
+    }
+    await evaluate(`__cosmos.goto(null)`)
+    await waitForAtlasRoute()
+    await sleep(1400)
+    await capture("atlas")
+    const hud = await evaluate(`({ page: getComputedStyle(document.querySelector(".atlas-page")).opacity, labels: document.querySelectorAll(".cosmos-lbl").length })`)
+    console.log(`${hud.page === "1" && hud.labels > 0 ? "PASS" : "FAIL"}  the Atlas HUD and labels show after the hand-off (${JSON.stringify(hud)})`)
+    await evaluate(`history.back()`)
+    await sleep(3500)
+    const home = await evaluate(`({
+      path: location.pathname,
+      mode: __cosmos.mode,
+      title: getComputedStyle(document.querySelector(".hometex") || document.body).opacity,
+      particles: [...document.querySelectorAll("canvas")].some((c) => !c.classList.contains("cosmos-stage") && c.width > 0),
+    })`)
+    await capture("back-home")
+    const ok = home.path === "/" && home.mode === "idle" && home.title === "1" && home.particles
+    console.log(`${ok ? "PASS" : "FAIL"}  going back restores the home page and particles (${JSON.stringify(home)})`)
+    if (!ok || hud.page !== "1") throw new Error("journey checks failed")
+  } else if (scenario === "longtasks") {
+    const clickAt = await launchJourney()
+    await waitForAtlasRoute()
+    await sleep(1500)
+    const tasks = await evaluate(`window.__longTasks.filter((t) => t[0] >= ${clickAt} - 1)`)
+    const marks = await evaluate(`(() => { const o = {}; for (const n of ["cosmos-snapshot", "cosmos-launch"]) { const m = performance.getEntriesByName(n)[0]; if (m) o[n] = Math.round(m.duration) } return o })()`)
+    console.log("launch (ms from click):", JSON.stringify(marks))
+    console.log(`long tasks after the click [ms after click, duration]: ${JSON.stringify(tasks.map(([s, d]) => [s - Math.round(clickAt), d]))}`)
+    const over = tasks.filter(([, d]) => d > 50)
+    console.log(`${over.length ? "WARN" : "PASS"}  ${over.length} task(s) over 50ms after the click`)
+  } else if (scenario === "audio") {
+    await launchJourney()
+    await waitForAtlasRoute()
+    await sleep(1000)
+    const nodes = await evaluate(`window.__audioNodes`)
+    console.log(`sound ${opts.unmuted ? "on" : "off"}, Web Audio nodes created: ${JSON.stringify(nodes)}`)
+    const osc = nodes.createOscillator || 0
+    // The score uses 9 oscillators; a transition whoosh would add more.
+    const ok = opts.unmuted ? osc === 9 : osc === 0
+    console.log(`${ok ? "PASS" : "FAIL"}  ${opts.unmuted ? "exactly the score graph plays (9 oscillators, no whoosh)" : "a muted journey creates no score nodes"}`)
+    if (!ok) throw new Error("audio checks failed")
   } else if (scenario === "context-loss") {
     if (legacy) throw new Error("context-loss drives the WebGL Atlas; drop atlas-legacy from --path")
     const state = () =>
@@ -398,6 +508,11 @@ async function run() {
   }
 }
 
+// The home page's production build logs these React hydration errors on
+// master too (text mismatches, 2026-09-26); they are reported, not failed.
+const KNOWN_PROBLEMS = /Minified React error #(418|423|425)\b/
+const known = (p) => p.kind === "exception" && KNOWN_PROBLEMS.test(p.text)
+
 let exitCode = 0
 try {
   await run()
@@ -407,8 +522,8 @@ try {
 } finally {
   if (problems.length) {
     console.log(`page problems (${problems.length}):`)
-    problems.slice(0, 20).forEach((p) => console.log(`  ${p.kind}: ${p.text.split("\n")[0]}`))
-    if (problems.some((p) => p.kind === "exception")) exitCode = 1
+    problems.slice(0, 20).forEach((p) => console.log(`  ${known(p) ? "known " : ""}${p.kind}: ${p.text.split("\n")[0]}`))
+    if (problems.some((p) => p.kind === "exception" && !known(p))) exitCode = 1
   }
   try {
     ws?.close()

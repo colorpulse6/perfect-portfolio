@@ -1044,6 +1044,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       get atlasScale() {
         return atlasScale
       },
+      /** GPU resources are ready (idle warm-up finished). */
+      get warm() {
+        return !!res && !!programs
+      },
       get orbit() {
         return orbit
       },
