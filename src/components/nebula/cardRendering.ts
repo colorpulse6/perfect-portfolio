@@ -1,6 +1,8 @@
 import React from "react"
 import BrainAtlasVid from "../../images/brain-atlas-spin.mp4"
 import CerebroMyceliumVid from "../../images/cerebro-mycelium.mp4"
+import GalatlasVid from "../../images/galatlas.mp4"
+import PolisAtlasVid from "../../images/polis-atlas.mp4"
 import ThrottleDashboard from "../../images/throttle-dashboard.png"
 import CerebroDashboard from "../../images/cerebro-dashboard.png"
 import SectorZeroImg from "../../images/sector-zero.jpg"
@@ -17,6 +19,7 @@ export const TYPE_COLORS: Record<string, string> = {
 
 export const STATUS_LABELS: Record<string, string> = {
   "in-progress": "In Progress",
+  live: "Live",
   released: "Released",
   published: "Published",
 }
@@ -24,6 +27,8 @@ export const STATUS_LABELS: Record<string, string> = {
 export const MEDIA_ASSETS: Record<string, string> = {
   "brain-atlas-spin.mp4": BrainAtlasVid,
   "cerebro-mycelium.mp4": CerebroMyceliumVid,
+  "galatlas.mp4": GalatlasVid,
+  "polis-atlas.mp4": PolisAtlasVid,
   "throttle-dashboard.png": ThrottleDashboard,
   "cerebro-dashboard.png": CerebroDashboard,
   "sector-zero.jpg": SectorZeroImg,

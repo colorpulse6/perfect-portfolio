@@ -79,7 +79,7 @@
     "clean": "gatsby clean",
     "type-check": "tsc --noEmit",
     "test": "node --test test/*.test.mjs && npm run test:cosmos",
-    "test:cosmos": "node --experimental-strip-types --test test/cosmos-*.test.ts"
+    "test:cosmos": "node --experimental-strip-types --test test/cosmos-*.test.ts test/home-*.test.ts"
   },
   "repository": {
     "type": "git",

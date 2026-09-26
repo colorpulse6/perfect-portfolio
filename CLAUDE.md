@@ -46,7 +46,7 @@ npx gatsby build      # Production build
 npx gatsby clean      # Clear cache (required after adding plugins, and after CSS-only
                       # changes: a build can keep stale inlined CSS in page HTML)
 npm test              # All tests (source checks + the cosmos lane)
-npm run test:cosmos   # Pure cosmos engine tests (node --experimental-strip-types)
+npm run test:cosmos   # Pure TypeScript tests: cosmos engine, home placement
 npm run type-check    # tsc --noEmit
 node scripts/cosmos-capture.mjs --help   # Headless captures and checks
 ```
