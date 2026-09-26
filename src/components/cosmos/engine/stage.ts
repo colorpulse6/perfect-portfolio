@@ -60,6 +60,8 @@ export interface JourneyStart {
   speed: number
   /** Called once at the hand-off (J.switch / speed): navigate to /atlas here. */
   onHandoff: () => void
+  /** Called when the visitor skips to the hand-off (the score stops early). */
+  onSkip?: () => void
 }
 
 export interface Stage {
@@ -172,6 +174,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     lut: LutState
     /** Cleared once called. */
     onHandoff: (() => void) | null
+    onSkip: (() => void) | null
     /** Wall-clock seconds of the hand-off and of the settled arrival. */
     switchAt: number
     endAt: number
@@ -788,7 +791,11 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function skip() {
     if (!journey || !journey.onHandoff) return
     const jt = (performance.now() - journey.start) / 1000
-    if (jt < journey.switchAt) journey.start = performance.now() - journey.switchAt * 1000
+    if (jt >= journey.switchAt) return
+    journey.start = performance.now() - journey.switchAt * 1000
+    const cb = journey.onSkip
+    journey.onSkip = null
+    cb?.()
   }
 
   // Click, tap or Escape skips to the hand-off.
@@ -836,6 +843,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       start: performance.now(),
       lut: createLutState(),
       onHandoff: opts.onHandoff,
+      onSkip: opts.onSkip ?? null,
       switchAt: J.switch / speed,
       endAt: J.end / speed,
       frozenT: null,

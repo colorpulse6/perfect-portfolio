@@ -7,6 +7,8 @@ import { FeaturedEntry } from "../components/nebula/DomArtifacts"
 import { getStage } from "../components/cosmos/cosmos"
 import { getCosmos } from "../components/cosmos/cosmosStore"
 import { snapshotHome } from "../components/cosmos/homeSnapshot"
+import { playJourneyScore } from "../components/cosmos/engine/journeyAudio"
+import { useAmbientAudio } from "../components/audio/AmbientAudioProvider"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
 import "./index.css"
@@ -48,6 +50,7 @@ const IndexPage: React.FC<IndexPageProps> = ({
   data,
 }) => {
   const launching = React.useRef(false)
+  const audio = useAmbientAudio()
 
   // Warm the Atlas route while the visitor reads the page.
   React.useEffect(() => {
@@ -94,17 +97,29 @@ const IndexPage: React.FC<IndexPageProps> = ({
       performance.mark("cosmos-click")
       const snapshot = await snapshotHome({ dpr: Math.min(window.devicePixelRatio || 1, 2), cta })
       performance.measure("cosmos-snapshot", "cosmos-click")
+      const speed = journeys > 0 ? REPEAT_SPEED : 1
+      // The score plays on the ambient AudioContext, and only with sound on.
+      // The first click on a page creates that context (the ambient engine's
+      // window listener runs during this click, before the await above).
+      let stopScore: ((fadeSeconds?: number) => void) | null = null
       const started = await stage.startJourney({
         snapshot,
         ctaCenter: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
-        speed: journeys > 0 ? REPEAT_SPEED : 1,
-        onHandoff: () => navigate("/atlas/", { state: { viaJourney: true } }),
+        speed,
+        onHandoff: () => {
+          // Let the resolving chord ring under the Atlas before cleaning up.
+          window.setTimeout(() => stopScore?.(1), 4000)
+          navigate("/atlas/", { state: { viaJourney: true } })
+        },
+        onSkip: () => stopScore?.(0.15),
       })
       performance.measure("cosmos-launch", "cosmos-click")
       if (!started) {
         go()
         return
       }
+      const ctx = audio && !audio.muted ? audio.engine?.getContext() : null
+      if (ctx) stopScore = playJourneyScore(ctx, speed)
       try {
         sessionStorage.setItem(JOURNEYS_KEY, String(journeys + 1))
       } catch {
