@@ -9,6 +9,7 @@ import { resolveProjectMedia } from "../helpers/projectImages"
 import { buildAtlasModel } from "../components/atlas/buildAtlasModel"
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
+import { stopJourneyScore } from "../components/cosmos/engine/journeyAudio"
 import "./atlas.css"
 
 interface ProjectNode {
@@ -61,6 +62,10 @@ const AtlasPage: React.FC<AtlasPageProps> = ({ transitionStatus, location, data 
   const viaJourney = !!(location.state as { viaJourney?: boolean } | null)?.viaJourney
   const hudVisible = useCosmos((s) => s.hudVisible)
   usePageTransition(transitionStatus, ".atlas-page", { enter: 1, exit: 0.4, mount: 1, intro: !viaJourney })
+  // The journey's arrival chord rings on for a few seconds; leaving the Atlas
+  // sooner stops it instead of carrying it onto the next page.
+  useEffect(() => () => stopJourneyScore(0.3), [])
+
   useEffect(() => {
     if (!viaJourney || !hudVisible) return
     gsap.to(".atlas-page", { autoAlpha: 1, duration: 0.6 })

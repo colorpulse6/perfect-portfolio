@@ -9,6 +9,16 @@
  * them for repeat journeys.
  */
 
+type StopScore = (fadeSeconds?: number) => void
+
+/** The score playing now, if any: leaving the Atlas early stops it. */
+let active: StopScore | null = null
+
+/** Fades out and disconnects the score that is playing, if any. */
+export function stopJourneyScore(fadeSeconds?: number): void {
+  active?.(fadeSeconds)
+}
+
 function noiseBuffer(ctx: AudioContext, seconds: number): AudioBuffer {
   const n = Math.floor(ctx.sampleRate * seconds)
   const b = ctx.createBuffer(2, n, ctx.sampleRate)
@@ -37,7 +47,8 @@ function impulse(ctx: AudioContext, seconds: number, decay: number): AudioBuffer
  * Starts the score now. Returns a stop function that fades the score out
  * over `fadeSeconds` and then disconnects it.
  */
-export function playJourneyScore(ctx: AudioContext, speed = 1): (fadeSeconds?: number) => void {
+export function playJourneyScore(ctx: AudioContext, speed = 1): StopScore {
+  active?.(0.1)
   if (ctx.state === "suspended") void ctx.resume()
   const now = ctx.currentTime + 0.02
   const T = (s: number) => now + Math.max(0, s) / speed
@@ -138,9 +149,10 @@ export function playJourneyScore(ctx: AudioContext, speed = 1): (fadeSeconds?: n
   })
 
   let stopped = false
-  return (fadeSeconds = 0.15) => {
+  const stop: StopScore = (fadeSeconds = 0.15) => {
     if (stopped) return
     stopped = true
+    if (active === stop) active = null
     const t = ctx.currentTime
     out.gain.cancelScheduledValues(t)
     out.gain.setValueAtTime(out.gain.value, t)
@@ -155,4 +167,6 @@ export function playJourneyScore(ctx: AudioContext, speed = 1): (fadeSeconds?: n
       }
     }, Math.max(0.01, fadeSeconds) * 1000 + 50)
   }
+  active = stop
+  return stop
 }
