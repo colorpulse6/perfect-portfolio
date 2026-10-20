@@ -939,8 +939,14 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
   const sourceInstanceName = parent.sourceInstanceName || ""
   actions.createNodeField({ node, name: "sourceInstanceName", value: sourceInstanceName })
   if (sourceInstanceName === "newsletter") {
-    // content/newsletter/<week>/index.md → slug "<week>"
-    actions.createNodeField({ node, name: "slug", value: parent.relativeDirectory })
+    // content/newsletter/<week>/index.md → slug "<week>", lowercased. Netlify stores
+    // deployed paths in lowercase and 301s mixed-case requests (2026-W42 → 2026-w42),
+    // so an uppercase slug puts a redirect in the sitemap, canonical and links.
+    actions.createNodeField({
+      node,
+      name: "slug",
+      value: parent.relativeDirectory.toLowerCase(),
+    })
   }
 }
 
