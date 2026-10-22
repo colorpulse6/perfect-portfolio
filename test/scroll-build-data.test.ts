@@ -17,7 +17,8 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
   assert.equal(result.stories[0].link, "/writing/#jerks")
   assert.equal(result.bio[1].includes("Cerebro Mycelium"), false)
   assert.equal(result.letters[0].blocks[1].kind, "image")
-  assert.deepEqual(result.letters[0].blocks[1], { kind: "image", alt: "A picture", src: "/static/x.jpg" })
+  // the source path stays with the picture, so a check can name the file behind a hashed src
+  assert.deepEqual(result.letters[0].blocks[1], { kind: "image", alt: "A picture", src: "/static/x.jpg", file: "2026-W42/img/x.jpg" })
 })
 
 test("selected apps and all sixteen stories resolve from Gatsby nodes", () => {

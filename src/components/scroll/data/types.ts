@@ -45,7 +45,7 @@ export type InlinePart = { kind: "text" | "code" | "link"; text: string; href?: 
 export type LetterBlock =
   | { kind: "heading"; text: string }
   | { kind: "paragraph"; parts: InlinePart[] }
-  | { kind: "image"; alt: string; src: string }
+  | { kind: "image"; alt: string; src: string; file?: string }
 
 export interface Letter {
   num: string

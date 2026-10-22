@@ -2,25 +2,218 @@
 // Checks for the /scroll/ route over the Chrome DevTools Protocol, against a
 // production build (`npx gatsby serve -p 9123 -H 127.0.0.1`). Shell rows read the
 // server-rendered page; engine rows drive the running engine through its debug
-// hook (?ss-debug exposes window.__ss), ported from the prototype's capture.mjs.
-// Rows the prototype has and this script does not run yet are listed as pending.
-import { spawn } from 'node:child_process'
-import { accessSync, constants, mkdtempSync, rmSync } from 'node:fs'
+// hook (?ss-debug exposes window.__ss), ported from the prototype's capture.mjs
+// (docs/features/scroll-scenes-experiment/prototype/capture.mjs, r14) and adapted
+// as PLAN.md section 5.3 says: hybrid only, scoped to the .ss root, data read
+// from the repo (content/newsletter, gatsby-node.js, src/helpers/aboutFaq.ts).
+//
+//   node scripts/scroll-capture.mjs --check                 every row (about 8 minutes)
+//   node scripts/scroll-capture.mjs --check --only=dives,a11y   some groups (names below)
+//   --url=<page>   another server (default http://127.0.0.1:9123/scroll/?ss-debug)
+//
+// Groups: shell, engine, ghosts, copy, marks, stories, orbit, gestures, links,
+// panel, dives, context, a11y, fit, teardown. Needs Node 22 (fetch, WebSocket),
+// Google Chrome ($CHROME overrides the path) and ImageMagick's magick for the
+// pixel safeguard (the row fails without it).
+import { spawn, execFileSync } from 'node:child_process'
+import { accessSync, constants, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 const argv = process.argv.slice(2)
 const page = (argv.find(a => a.startsWith('--url=')) || '--url=http://127.0.0.1:9123/scroll/?ss-debug').slice(6)
 const origin = new URL(page).origin
+const only = (argv.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean)
+const want = group => !only.length || only.includes(group)
 const chromeBin = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-const pendingEngine = ['pixel safeguard', 'live ghost sweep', 'dives', 'orbit and reader', 'wheel and touch gestures', 'context loss', 'a11y focus']
+const repo = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
+const pendingEngine = ['budget (M5)', 'frames mode']
+
+// ------------------------------------------------------------------ what the page must show
 // The legend in scroll order, and each scene's stagger group: its class, step and
 // item count (prototype index.html, r14). Data-driven groups also match __ss.setSizes.
 const LEGEND = ['Intro', 'About', 'Projects', 'Tools and games', 'Writing', 'Essays', 'Newsletter', 'Changelog', 'Work with me', 'Contact', 'Atlas']
 const STAGGER = [['about', 'facts', '0.04', 3], ['projects', 'ring', '0.04', 7], ['tools', 'ring', '0.03', 5], ['writing', 'pieces', '0.02', 16], ['essays', 'pieces', '0.03', 2], ['newsletter', 'pieces index', '0.012', null], ['changelog', 'pieces', '0.03', null], ['contact', 'links', '0.03', 4]]
+const SCENE_IDS = ['hero', 'about', 'projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog', 'work', 'contact', 'atlas']
+const NEWS = LEGEND.indexOf('Newsletter')
+const SIZES = [[1440, 900], [1366, 768], [1280, 720], [1024, 768], [768, 1024], [390, 844]]
+// Nic's links, as the site's header has them, and their names in the row (the last shows its word)
+const SOCIAL_LINKS = ['https://github.com/colorpulse6', 'https://www.linkedin.com/in/nic-barnes-a3297217/', 'https://medium.com/@colorpulse_6839', 'https://www.npmjs.com/~colorpulse', 'https://buymeacoffee.com/nicbarnes']
+const SOCIAL_LABELS = ['GitHub', 'LinkedIn', 'Medium', 'npm', 'Support']
+const SOCIAL_WORDS = ['', '', '', '', 'Support']
+// Words Nic asked to keep out of the copy (round 11); the quoted letters and the
+// marks' own names are exempt. Words and markup that went in rounds 12 and 13.
+const BANNED = /\bReact\b|\bTypeScript\b|\bNode(\.js)?\b/
+const GONE = /\bCoffee\b|Buy me a coffee|All articles|Open the full issue/
+const GONE_MARKUP = '.ss .hud-tech, .ss .tech-row, .ss .hud-bottom, .ss .issue-more'
+// The letters, read from content/newsletter/<week>/index.md, newest first: front
+// matter, and the body as blocks (a "## " heading, a picture with its alt text as
+// the caption, or a paragraph with links and code as plain text). The empty
+// editorial comment in issue 12 has no visible body (letterBlocks.ts drops it too).
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const newsDir = path.join(repo, 'content', 'newsletter')
+const squash = s => s.replace(/\s+/g, ' ').trim()
+const ISSUES = readdirSync(newsDir).filter(d => /^\d{4}-W\d{2}$/.test(d)).sort().reverse().map(week => {
+  const raw = readFileSync(path.join(newsDir, week, 'index.md'), 'utf8')
+  const i1 = raw.indexOf('---'), i2 = raw.indexOf('\n---', i1 + 3)
+  const fm = Object.fromEntries(raw.slice(i1 + 3, i2).trim().split('\n').map(l => { const j = l.indexOf(':'); return [l.slice(0, j).trim(), l.slice(j + 1).trim().replace(/^"|"$/g, '')] }))
+  const d = new Date(fm.date + 'T00:00:00Z'), date = `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`
+  const blocks = raw.slice(i2 + 4).replace(/<!--\s*-->/g, '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean).map(p => {
+    const img = p.match(/^!\[(.*?)\]\(\.\/img\/([^)]+)\)$/)
+    if (p.startsWith('## ')) return { kind: 'h', text: squash(p.slice(3)) }
+    if (img) return { kind: 'img', text: squash(img[1]), file: `${week}/img/${img[2]}` }
+    return { kind: 'p', text: squash(p.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/`([^`]+)`/g, '$1')) }
+  })
+  return { week, num: fm.issue, date, title: fm.title, deck: fm.deck, blocks, meta: `The weekly letter · No. ${fm.issue} · ${date}` }
+})
+// The bio: the two About FAQ answers (src/helpers/aboutFaq.ts), the second trimmed as DESIGN.md says.
+const faq = [...readFileSync(path.join(repo, 'src', 'helpers', 'aboutFaq.ts'), 'utf8').matchAll(/a: "((?:[^"\\]|\\.)*)"/g)].map(m => m[1].replace(/\\"/g, '"'))
+const BIO = [faq.find(a => a.startsWith('Nichalas Barnes is a software engineer')), (faq.find(a => a.startsWith('He builds Obsidian plugins')) || '').replace(', Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a macOS usage tracker).', ', Brain Atlas (an Obsidian plugin), and El Form (a typed form library).')]
+// The stories and the projects' technologies, from gatsby-node.js itself; Chimera's from content.ts (not a node yet).
+const nodes = []
+createRequire(import.meta.url)(path.join(repo, 'gatsby-node.js')).sourceNodes({ actions: { createNode: n => nodes.push(n), createTypes() {} }, createNodeId: s => s, createContentDigest: () => 'x' })
+const STORIES = nodes.filter(n => n.internal.type === 'Writing').map(n => n.title)
+const slug = title => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+const PROJECT_TECH = Object.fromEntries(nodes.filter(n => n.internal.type === 'Project').map(n => [n.name, n.tech]))
+const EXTRA_TECH = { Chimera: ['Unreal Engine 5', 'Astro'] }
+const techOf = name => PROJECT_TECH[name] || EXTRA_TECH[name]
+const CHIMERA = { site: 'https://colorpulse6.github.io/project-chimera/', source: 'https://github.com/colorpulse6/project-chimera', cta: 'Where the game stands' }
+// The marks' files: the sprite in the page is generated from these, one symbol per file.
+const techDir = path.join(repo, 'src', 'components', 'scroll', 'tech')
+const TECH_FILES = Object.fromEntries(readdirSync(techDir).filter(f => f.endsWith('.svg')).map(f => {
+  const s = readFileSync(path.join(techDir, f), 'utf8')
+  return [f.slice(0, -4), { ds: [...s.matchAll(/\sd="([^"]+)"/g)].map(m => m[1]), bytes: s.length, clean: !/<script|<image|<foreignObject|href=|url\(|<style|\son[a-z]+=/i.test(s) && /viewBox="0 0 24 24"/.test(s) }]
+}))
+
+// ------------------------------------------------------------------ page probes (run in the page)
+// ghosts: at a hold only that station is on screen, between two holds only those two
+const GHOSTS = `(() => {
+  const p = __ss.sp, a = Math.floor(p + 1e-6), b = Math.ceil(p - 1e-6), allowed = new Set([a, b]);
+  const pins = [...document.querySelectorAll('.ss .pin')], heads = [...document.querySelectorAll('.ss .scene')].map(x => x.querySelector('h1, h2').textContent.trim());
+  const vis = (el) => { if (getComputedStyle(el).visibility === 'hidden') return 0; let o = 1; for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === 'none') return 0; o *= parseFloat(cs.opacity); } return o; };
+  const on = (r) => r.width > 0 && r.height > 0 && r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight;
+  const out = [];
+  pins.forEach((pin, i) => {
+    if (allowed.has(i)) return;
+    for (const el of pin.querySelectorAll('h1, h2, .lead, .bio, .facts li, .ring li, .pieces li, .index li, .reader, .pill, .links li, .orbit-nav, .hint, .atlas-wrap')) {
+      const o = vis(el), r = el.getBoundingClientRect();
+      if (o > 0.02 && on(r)) out.push(i + ':' + el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + '@' + o.toFixed(2));
+    }
+  });
+  const news = __ss.scenes.findIndex(x => x.id === 'newsletter');
+  if (!allowed.has(news)) for (const tag of document.querySelectorAll('.ss .moon-tag')) { const o = vis(tag); if (o > 0.02 && on(tag.getBoundingClientRect())) out.push(news + ':moon-tag@' + o.toFixed(2)); }
+  if (__ss.dust !== null && __ss.dust !== heads[a] && __ss.dust !== heads[b]) out.push('dust:"' + __ss.dust + '"');
+  for (const B of __ss.bodies) if (B.scene < a && B.alpha > 0.02) out.push('body:' + B.set + '@' + B.alpha);
+  return { p: Number(p.toFixed(2)), out };
+})()`
+// every station shows its own headline: the dust was rasterised from that heading and sits in its box
+const STATION = i => `(() => {
+  const own = document.querySelectorAll('.ss .scene')[${i}].querySelector('h1, h2'), want = own.textContent.trim();
+  const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.5) return false; } return true; };
+  const shown = [...document.querySelectorAll('.ss .pin h1, .ss .pin h2')].filter(vis).map(el => el.textContent.trim());
+  const dust = __ss.dust, box = __ss.dustBox && __ss.dustBox(), r = own.getBoundingClientRect(), pad = 16;
+  const boxOk = dust === null ? null : !!(box && box.n > 0 && box.left >= r.left - pad && box.right <= r.right + pad && box.top >= r.top - pad && box.bottom <= r.bottom + pad);
+  const ok = dust === null ? (shown.length === 1 && shown[0] === want) : (dust === want && boxOk && shown.length === 0);
+  return { want, dust, boxOk, shown: shown.join(' | '), ok };
+})()`
+const NORM = "(s => s.replace(/[^a-z0-9 ]/gi, '').replace(/\\s+/g, ' ').trim().toLowerCase())"
+const SEEN = `(() => {
+  const norm = ${NORM}, vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) return false; } return true; };
+  const out = [...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill')].filter(vis).map((el) => norm(el.textContent));
+  if (__ss.dust) out.push(norm(__ss.dust));
+  const heads = [...document.querySelectorAll('.ss .scene')].map(x => x.querySelector('h1, h2').textContent.trim());
+  const a = Math.floor(__ss.sp), b = Math.min(a + 1, heads.length - 1);
+  return { out, owned: __ss.dust === null || __ss.dust === heads[a] || __ss.dust === heads[b], dust: __ss.dust };
+})()`
+// time frozen, CSS animation paused: two captures of one hold are the same picture
+const PX_FREEZE = "(() => { const st = document.createElement('style'); st.textContent = '*, *::before, *::after { animation-play-state: paused !important; transition: none !important; }'; document.head.appendChild(st); __ss.freeze(true); })()"
+// the copy: banned words in visible and aria text (letters and marks exempt), gone words anywhere
+const WORDS = `(() => {
+  const hits = [], gone = [], root = document.querySelector('.ss');
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    if (n.nodeType === 3) { if (n.parentElement.closest('script, style, noscript')) continue; if (/${GONE.source}/.test(n.textContent)) gone.push(n.textContent.trim().slice(0, 60)); if (n.parentElement.closest('.reader .issue-body, svg.ti')) continue; if (/${BANNED.source}/.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60)); }
+    else { for (const a of ['aria-label', 'alt', 'title']) { const v = n.getAttribute(a); if (!v) continue; if (/${GONE.source}/.test(v)) gone.push(a + '=' + v.slice(0, 60)); if (!n.closest('svg.ti') && /${BANNED.source}/.test(v)) hits.push(a + '=' + v.slice(0, 60)); } }
+  }
+  return { hits, gone, essays: document.querySelector('.ss #essays h2').textContent.trim(), strip: document.querySelectorAll('${GONE_MARKUP}').length };
+})()`
+const SPRITE = `[...document.querySelectorAll('.ss .sprite symbol')].map(s => ({ id: s.id, ds: [...s.querySelectorAll('[d]')].map(e => e.getAttribute('d')), kids: s.children.length }))`
+const CARDS = set => `[...document.querySelectorAll('.ss #${set} .ring li a')].map(a => ({ name: a.querySelector('strong').textContent.trim(), icons: [...a.querySelectorAll('.tech svg.ti')].map(s => { const u = s.querySelector('use'), r = s.getBoundingClientRect(); let b = 0; try { b = u.getBBox().width } catch (e) {} return { name: s.getAttribute('aria-label'), title: (s.querySelector('title') || {}).textContent, ref: u.getAttribute('href'), role: s.getAttribute('role'), w: Math.round(r.width), h: Math.round(r.height), box: Math.round(b), symbol: !!document.querySelector(u.getAttribute('href')) } }), dim: parseFloat(getComputedStyle(a.querySelector('.tech') || a).opacity), pxText: Math.min(...[...a.querySelectorAll('strong, .lab')].map(e => parseFloat(getComputedStyle(e).fontSize))) }))`
+const DETAIL = `(() => { const row = document.getElementById('detail-tech'), card = document.querySelector('.ss .detail-card').getBoundingClientRect(), R = row.getBoundingClientRect(); return { hidden: row.hidden, inside: R.left >= card.left && R.right <= card.right && R.top >= card.top && R.bottom <= card.bottom, items: [...row.querySelectorAll('li')].map(li => { const s = li.querySelector('svg.ti'), u = s.querySelector('use'), r = s.getBoundingClientRect(); let b = 0; try { b = u.getBBox().width } catch (e) {} return { name: li.dataset.name, shown: (li.querySelector('span') || {}).textContent || '', w: Math.round(r.width), box: Math.round(b), px: parseFloat(getComputedStyle(li).fontSize), named: s.getAttribute('aria-hidden') === 'true' ? !!li.querySelector('span') : s.getAttribute('aria-label') === li.dataset.name && (s.querySelector('title') || {}).textContent === li.dataset.name } }) } })()`
+const ORBIT = "(o => ({ planetA: Number(o.planetA.toFixed(2)), theta: o.theta, moons: o.vis.filter(v => v > 0.5).length, tags: o.tags, tagsIn: o.tagsIn, front: o.front, n: o.n }))(__ss.orbit)"
+const REACH = "(o => ({ front: o.front, num: o.num, n: o.n, vis: Number(o.frontVis.toFixed(2)), tag: o.frontTag, row: o.row, pos: o.pos }))(__ss.orbit)"
+// the reader: the article shown, its words block by block, how it is labelled and scrolls
+const READ = `(() => {
+  const open = [...document.querySelectorAll('.ss #newsletter .reader .issue:not([hidden])')], a = open[0], body = a.querySelector('.issue-body');
+  const t = (s) => ((a.querySelector(s) || {}).textContent || '').trim();
+  const sq = (s) => s.replace(/\\s+/g, ' ').trim();
+  const blocks = [...body.children].map(el => el.tagName === 'H4' ? { kind: 'h', text: sq(el.textContent) } : el.tagName === 'FIGURE' ? { kind: 'img', text: sq(el.querySelector('figcaption').textContent), file: el.querySelector('img').dataset.src } : { kind: el.tagName === 'P' ? 'p' : el.tagName, text: sq(el.textContent) });
+  return { k: Number(a.dataset.k), shown: open.length, alpha: getComputedStyle(a.parentElement).opacity, meta: t('.issue-meta'), title: t('h3'), deck: t('.issue-deck'), blocks, week: a.dataset.week, labelled: a.parentElement.getAttribute('aria-labelledby') === a.querySelector('h3').id && a.querySelector('h3').id === a.id + '-title', region: body.getAttribute('role') === 'region' && body.tabIndex === 0 && body.getAttribute('aria-labelledby') === a.querySelector('h3').id, scrollable: body.scrollHeight > body.clientHeight + 1, top: body.scrollTop, emdash: a.textContent.includes('\\u2014'), links: [...body.querySelectorAll('a')].every(x => x.target === '_blank' && /noopener/.test(x.rel)) };
+})()`
+const FRONT_BODY = "document.querySelector('.ss #newsletter .reader .issue:not([hidden]) .issue-body')"
+const STATE = "({ y: scrollY, sp: Number(__ss.sp.toFixed(2)), front: __ss.orbit.front, consumed: __ss.orbit.consumed, ignored: __ss.orbit.ignored, settled: __ss.orbit.settled })"
+const RSTATE = "(o => ({ y: scrollY, front: o.front, scroll: Math.round(o.scroll), wheeled: o.wheeled, held: o.held, passed: o.passed, focused: document.activeElement.classList.contains('issue-body') }))(__ss.orbit)"
+const ANNOUNCE = "(o => ({ announced: o.announced, text: o.announcement, active: o.active, front: o.front, alpha: Number(o.readerAlpha.toFixed(2)) }))(__ss.orbit)"
+const TSTATE = "(o => ({ y: scrollY, front: o.front, consumed: o.consumed, scroll: Math.round(o.scroll) }))(__ss.orbit)"
+// Nic's links: shown, inside the viewport, new tab with noopener, under nothing; marks named and drawn
+const SOCIAL = `(() => {
+  const nav = document.querySelector('.ss .hud-social'), links = [...nav.querySelectorAll('a')];
+  const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.5) return false; } return true; };
+  const R = nav.getBoundingClientRect();
+  const inside = links.every(a => { const r = a.getBoundingClientRect(); return r.width > 0 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; });
+  const hit = (r) => r.width > 0 && r.left < R.right && R.left < r.right && r.top < R.bottom && R.top < r.bottom;
+  const over = [...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .lead, .ss .pin .bio, .ss .pin .pill, .ss .pin li, .ss .moon-tag, .ss .hud-nav, .ss .orbit-nav, .ss .reader, .ss .detail-card')].filter(vis).filter(el => hit(el.getBoundingClientRect())).map(el => el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : ''));
+  const box = __ss.dustBox && __ss.dustBox();
+  if (box && box.n > 0 && hit({ width: 1, left: box.left, right: box.right, top: box.top, bottom: box.bottom })) over.push('dust');
+  const hrefs = links.map(a => a.getAttribute('href')), newTab = links.every(a => a.target === '_blank' && /noopener/.test(a.rel));
+  const labels = links.map(a => a.getAttribute('aria-label')), titles = links.map(a => a.getAttribute('title')), words = links.map(a => a.textContent.trim());
+  const marks = links.every(a => { const s = a.querySelector('svg.ti'), u = s && s.querySelector('use'); if (!u || !document.querySelector(u.getAttribute('href')) || s.getAttribute('aria-hidden') !== 'true') return false; const r = s.getBoundingClientRect(); let b = 0; try { b = u.getBBox().width } catch (e) {} return r.width === 16 && r.height === 16 && b >= 7; });
+  const rs = links.map(a => a.getBoundingClientRect());
+  const targets = rs.every(r => r.width >= 24 && r.height >= 24) && rs.every((r, i) => i === 0 || r.left >= rs[i - 1].right + 2);
+  const oneLine = new Set(rs.map(r => Math.round(r.top))).size === 1;
+  const supportPx = parseFloat(getComputedStyle(nav.querySelector('.support span')).fontSize);
+  return { visible: vis(nav), inside, over: over.join(' '), hrefs, newTab, labels, titles, words, marks, targets, oneLine, supportPx, width: Math.round(R.width), ok: vis(nav) && inside && over.length === 0 && newTab && marks && targets && oneLine && supportPx >= 11 };
+})()`
+// the reader panel at the hold: inside the viewport, under nothing, four lines or more at 15 to 17px
+const PANEL = `(() => {
+  const r = document.querySelector('.ss #newsletter .reader'), R = r.getBoundingClientRect();
+  const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.5) return false; } return true; };
+  const hit = (b) => b.width > 0 && b.left < R.right && R.left < b.right && b.top < R.bottom && R.top < b.bottom;
+  const over = [...document.querySelectorAll('.ss .hud-social, .ss .hud-nav, .ss .hud-top, .ss .orbit-nav, .ss .moon-tag, .ss .pin h2')].filter(vis).filter(el => hit(el.getBoundingClientRect())).map(el => el.classList[1] || el.classList[0] || el.tagName.toLowerCase());
+  const box = __ss.dustBox && __ss.dustBox();
+  if (box && box.n > 0 && hit({ width: 1, left: box.left, right: box.right, top: box.top, bottom: box.bottom })) over.push('dust');
+  const a = document.querySelector('.ss #newsletter .reader .issue:not([hidden])'), op = a.querySelector('.issue-body'), ob = op.getBoundingClientRect(), cs = getComputedStyle(op);
+  const inside = R.left >= 0 && R.right <= innerWidth && R.top >= 0 && R.bottom <= innerHeight && ob.top >= R.top && ob.bottom <= R.bottom + 1 && ob.width > 0;
+  const lines = Math.floor(ob.height / parseFloat(cs.lineHeight)), size = parseFloat(cs.fontSize);
+  return { ok: over.length === 0 && inside && parseFloat(getComputedStyle(r).opacity) > 0.95 && lines >= 4 && size >= 15 && size <= 17, over: over.join(' '), inside, size: Math.round(R.width) + 'x' + Math.round(R.height), lines, px: size, scrollable: op.scrollHeight > op.clientHeight + 1, renderer: __ss.renderer };
+})()`
+// every card fits: inside the viewport above the legend, no two overlapping
+const FIT = sel => `(() => {
+  const els = [...document.querySelectorAll('.ss ${sel} li')].filter(l => getComputedStyle(l).display !== 'none');
+  const rs = els.map(l => l.getBoundingClientRect());
+  const hb = document.querySelector('.ss .hud-nav').getBoundingClientRect();
+  const inside = rs.every(r => r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= hb.top);
+  let overlaps = 0;
+  for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const a = rs[i], b = rs[j]; if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) overlaps++; }
+  return { shown: els.length, inside, overlaps, span: Math.round(Math.min(...rs.map(r => r.top))) + '..' + Math.round(Math.max(...rs.map(r => r.bottom))) + ' of ' + Math.round(hb.top), overflowX: document.documentElement.scrollWidth > innerWidth };
+})()`
+// where the keyboard focus is: inert, unseen, and which station's pin holds it
+const FOCUS = `(() => {
+  const el = document.activeElement;
+  if (!el || el === document.body) return { none: true };
+  const seen = (x) => { for (let e = x; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) return false; } return true; };
+  const pins = [...document.querySelectorAll('.ss .pin')], pin = pins.findIndex(p => p.contains(el));
+  return { none: false, what: el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : ''), inert: !!el.closest('[inert]'), seen: seen(el), pin, hud: !!el.closest('.ss .hud'), detail: !!el.closest('#detail') };
+})()`
+
+// ------------------------------------------------------------------ the run
 const rows = []
 const row = (name, pass, detail = '') => { rows.push({ name, pass, detail }); console.log(`${pass ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`) }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 const until = async (check, ms = 10000, step = 100) => { for (let t = 0; t < ms; t += step) { if (await check()) return true; await sleep(step) } return false }
+// a group that throws fails as one row, and the run goes on
+const group = async (name, fn) => { if (!want(name)) return; try { await fn() } catch (error) { row(`${name} (group)`, false, error.message.split('\n')[0]) } }
 let chrome, session, profile
 try {
   try { accessSync(chromeBin, constants.X_OK); row('chrome-absent', true, 'Chrome available') }
@@ -39,25 +232,34 @@ try {
       await sleep(100)
     }
     if (!ready) throw new Error('Chrome did not start')
-    // Console errors and warnings for the whole run, for the last row. Home's own
+    // Console errors and warnings for the whole run, for the last row. Other pages'
     // messages are the site's, not this route's, and are noted apart (both are on
-    // production too, 2026-10-22): React hydration errors (#418, #423, #425) on its
-    // fresh load (the teardown's baseline), and react-three-fiber's THREE.Clock
-    // deprecation each time home's particle canvas mounts. This route uses neither.
+    // production too, 2026-10-22): React hydration errors (#418, #423, #425) on a
+    // fresh load of home, and react-three-fiber's THREE.Clock deprecation each time
+    // home's particle canvas mounts. This route uses neither. A row that causes an
+    // expected message (a forced context loss) names it in `expected` for its run.
     const SITE_NOISE = [/THREE\.Clock: This module has been deprecated/]
     const consoleLog = [], siteLog = []
     let consoleScope = 'scroll'
+    let expected = [], expectedSeen = []
     async function tab() {
       const info = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json()
       const ws = new WebSocket(info.webSocketDebuggerUrl)
       await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject })
       let nextId = 0
       const waiting = new Map()
+      const handlers = new Map()
       const errors = []
       const disposals = []
-      const note = text => { errors.push(text); (consoleScope === 'scroll' && !SITE_NOISE.some(noise => noise.test(text)) ? consoleLog : siteLog).push(text) }
+      const note = text => {
+        if (expected.some(pattern => pattern.test(text))) { expectedSeen.push(text.split('\n')[0]); return }
+        errors.push(text)
+        if (consoleScope === 'scroll' && !SITE_NOISE.some(noise => noise.test(text))) consoleLog.push(text)
+        else siteLog.push(`${consoleScope}: ${text}`)
+      }
       ws.onmessage = event => {
         const message = JSON.parse(event.data)
+        if (message.method && handlers.has(message.method)) handlers.get(message.method)(message.params)
         if (message.id && waiting.has(message.id)) {
           const { resolve, reject } = waiting.get(message.id); waiting.delete(message.id)
           message.error ? reject(new Error(message.error.message)) : resolve(message.result)
@@ -95,11 +297,20 @@ try {
       }
       // n frames after a snap, so poses, chips and the panel have followed
       const frames = async (n = 3) => { const f0 = await evaluate('__ss.frames'); await until(async () => await evaluate('__ss.frames') - f0 >= n, 1500, 25) }
+      const goto = async (p, n = 3) => { await evaluate(`__ss.goto(${p})`); await frames(n) }
+      // real input through Chrome's pipeline
+      const mouse = async (x, y) => { for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: type === 'mouseMoved' ? 0 : 1 }) }
       const click = async selector => {
         const box = await evaluate(`(r => r && { x: r.left + r.width / 2, y: r.top + r.height / 2 })(document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect())`)
         if (!box) throw new Error(`nothing to click: ${selector}`)
-        for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: box.x, y: box.y, button: 'left', clickCount: type === 'mouseMoved' ? 0 : 1 })
+        await mouse(box.x, box.y)
       }
+      const key = async (k, code, wait = 900, modifiers = 0) => {
+        await send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code: k, windowsVirtualKeyCode: code, modifiers })
+        await send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code: k, windowsVirtualKeyCode: code, modifiers })
+        await sleep(wait)
+      }
+      const shot = async file => writeFileSync(file, Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).data, 'base64'))
       // listeners on a global (window or document), counted by CDP, not by the page
       const listeners = async expression => {
         const { result } = await send('Runtime.evaluate', { expression })
@@ -109,183 +320,625 @@ try {
       }
       const heap = async () => { await send('HeapProfiler.collectGarbage'); await send('HeapProfiler.collectGarbage'); return (await send('Runtime.getHeapUsage')).usedSize }
       const close = async () => { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${info.id}`) }
-      return { evaluate, send, viewport, open, openEngine, running, frames, click, listeners, heap, close, errors, disposals }
+      return { evaluate, send, viewport, open, openEngine, running, frames, goto, mouse, click, key, shot, listeners, heap, close, errors, disposals, on: (method, fn) => handlers.set(method, fn), off: method => handlers.delete(method) }
     }
 
     // ---------------------------------------------------------------- shell rows
+    await group('shell', async () => {
+      session = await tab()
+      await session.viewport(1440, 900)
+      await session.open(page)
+      const head = await session.evaluate(`({title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,robots:document.querySelector('meta[name="robots"]')?.content})`)
+      row('SEO head', head.title === 'scroll | Nichalas Barnes' && head.canonical === 'https://nichalasbarnes.com/scroll/' && /noindex/.test(head.robots ?? ''), JSON.stringify(head))
+      const shell = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,links:document.querySelectorAll('.ss .hud-nav a').length,projects:document.querySelectorAll('.ss #projects .ring li').length,tools:document.querySelectorAll('.ss #tools .ring li').length,letters:document.querySelectorAll('.ss .issue').length})`)
+      row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
+      await session.close(); session = await tab()
+      await session.open(page, true)
+      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p')})`)
+      row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter, JSON.stringify(fallback))
+      await session.close(); session = null
+    })
     session = await tab()
-    await session.viewport(1440, 900)
-    await session.open(page)
-    const head = await session.evaluate(`({title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,robots:document.querySelector('meta[name="robots"]')?.content})`)
-    row('SEO head', head.title === 'scroll | Nichalas Barnes' && head.canonical === 'https://nichalasbarnes.com/scroll/' && /noindex/.test(head.robots ?? ''), JSON.stringify(head))
-    const shell = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,links:document.querySelectorAll('.ss .hud-nav a').length,projects:document.querySelectorAll('.ss #projects .ring li').length,tools:document.querySelectorAll('.ss #tools .ring li').length,letters:document.querySelectorAll('.ss .issue').length})`)
-    row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
-    await session.close(); session = await tab()
-    await session.open(page, true)
-    const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p')})`)
-    row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter, JSON.stringify(fallback))
-    await session.close(); session = await tab()
     const s = session
+    const join = query => page + (page.includes('?') ? '&' : '?') + query
+    const at = i => `scrollTo(0, ${i} * 3 * innerHeight + innerHeight * 0.9)`
 
     // ---------------------------------------------------------------- engine rows
-    const join = query => page + (page.includes('?') ? '&' : '?') + query
-    await s.openEngine(page)
-    const version = await s.evaluate(`({ root: document.querySelector('.ss').dataset.ssVersion, script: __ss.version })`)
-    row('version', !!version.root && version.root === version.script, JSON.stringify(version))
+    await group('engine', async () => {
+      await s.openEngine(page)
+      const version = await s.evaluate(`({ root: document.querySelector('.ss').dataset.ssVersion, script: __ss.version })`)
+      row('version', !!version.root && version.root === version.script, JSON.stringify(version))
 
-    const boot = await s.evaluate(`({ renderer: __ss.renderer, tier: __ss.tier, rm: __ss.rm, on: document.documentElement.classList.contains('ss-on') })`)
-    row('boot', boot.renderer === 'webgl2' && boot.tier === 'high' && boot.rm === false && boot.on, JSON.stringify(boot))
+      const boot = await s.evaluate(`({ renderer: __ss.renderer, tier: __ss.tier, rm: __ss.rm, on: document.documentElement.classList.contains('ss-on') })`)
+      row('boot', boot.renderer === 'webgl2' && boot.tier === 'high' && boot.rm === false && boot.on, JSON.stringify(boot))
 
-    const fps = await s.evaluate(`new Promise(done => { const f0 = __ss.frames; setTimeout(() => done(__ss.frames - f0), 1000) })`)
-    row('fps', fps >= 55, `${fps} frames in 1 s at 1440x900 (60 wanted)`)
+      const fps = await s.evaluate(`new Promise(done => { const f0 = __ss.frames; setTimeout(() => done(__ss.frames - f0), 1000) })`)
+      row('fps', fps >= 55, `${fps} frames in 1 s at 1440x900 (60 wanted)`)
 
-    // the smoothed position at 0, 25, 50, 75 and 100% of the document: 11 scenes, sp 0 to 10
-    const spAt = []
-    const maxY = await s.evaluate('document.documentElement.scrollHeight - innerHeight')
-    for (const f of [0, 0.25, 0.5, 0.75, 1]) { await s.evaluate(`scrollTo(0, ${f} * ${maxY})`); await sleep(900); spAt.push(Number((await s.evaluate('__ss.sp')).toFixed(2))) }
-    const spWant = [0, 2.5, 5, 7.5, 10]
-    row('position', spAt.every((sp, i) => Math.abs(sp - spWant[i]) <= 0.06), `sp ${spAt.join(' ')} (prototype: 0 2.46 4.96 7.46 9.96)`)
+      // the smoothed position at 0, 25, 50, 75 and 100% of the document: 11 scenes, sp 0 to 10
+      const spAt = []
+      const maxY = await s.evaluate('document.documentElement.scrollHeight - innerHeight')
+      for (const f of [0, 0.25, 0.5, 0.75, 1]) { await s.evaluate(`scrollTo(0, ${f} * ${maxY})`); await sleep(900); spAt.push(Number((await s.evaluate('__ss.sp')).toFixed(2))) }
+      const spWant = [0, 2.5, 5, 7.5, 10]
+      row('position', spAt.every((sp, i) => Math.abs(sp - spWant[i]) <= 0.06), `sp ${spAt.join(' ')} (prototype: 0 2.46 4.96 7.46 9.96)`)
 
-    // the legend: one chip per scene, in scroll order, labelled as the section is; a click travels there
-    const legend = await s.evaluate(`({ chips: [...document.querySelectorAll('.ss .hud-nav a')].map(a => a.textContent + ' ' + a.getAttribute('href')), scenes: __ss.scenes.map(x => x.label + ' #' + x.id), sections: [...document.querySelectorAll('.ss .scene')].map(x => x.getAttribute('aria-label') + ' #' + x.id) })`)
-    const names = legend.chips.map(c => c.split(' #')[0])
-    row('legend = scene list', legend.chips.join('|') === legend.scenes.join('|') && legend.scenes.join('|') === legend.sections.join('|') && names.join('|') === LEGEND.join('|'), names.join(', '))
-    await s.evaluate('scrollTo(0, 0)'); await until(async () => await s.evaluate('__ss.sp') < 0.01, 3000)
-    const target = LEGEND.indexOf('Newsletter')
-    await s.click(`.ss .hud-nav a[href="#newsletter"]`)
-    const arrived = await until(async () => Math.abs(await s.evaluate('__ss.sp') - target) < 0.02, 6000)
-    const after = await s.evaluate(`({ sp: Number(__ss.sp.toFixed(2)), hash: location.hash })`)
-    row('legend click navigates', arrived && after.hash === '', `Newsletter chip: sp ${after.sp} (want ${target}), hash "${after.hash}"`)
+      // the legend: one chip per scene, in scroll order, labelled as the section is; a click travels there
+      const legend = await s.evaluate(`({ chips: [...document.querySelectorAll('.ss .hud-nav a')].map(a => a.textContent + ' ' + a.getAttribute('href')), scenes: __ss.scenes.map(x => x.label + ' #' + x.id), sections: [...document.querySelectorAll('.ss .scene')].map(x => x.getAttribute('aria-label') + ' #' + x.id) })`)
+      const names = legend.chips.map(c => c.split(' #')[0])
+      row('legend = scene list', legend.chips.join('|') === legend.scenes.join('|') && legend.scenes.join('|') === legend.sections.join('|') && names.join('|') === LEGEND.join('|'), names.join(', '))
+      await s.evaluate('scrollTo(0, 0)'); await until(async () => await s.evaluate('__ss.sp') < 0.01, 3000)
+      await s.click(`.ss .hud-nav a[href="#newsletter"]`)
+      const arrived = await until(async () => Math.abs(await s.evaluate('__ss.sp') - NEWS) < 0.02, 6000)
+      const after = await s.evaluate(`({ sp: Number(__ss.sp.toFixed(2)), hash: location.hash })`)
+      row('legend click navigates', arrived && after.hash === '', `Newsletter chip: sp ${after.sp} (want ${NEWS}), hash "${after.hash}"`)
 
-    // the DOM contract: each scene's stagger group, its step and its item count
-    const groups = await s.evaluate(`({ found: [...document.querySelectorAll('.ss .stagger')].map(g => [g.closest('.scene').id, [...g.classList].filter(c => c !== 'stagger').join(' '), g.dataset.step, g.children.length]), sizes: __ss.setSizes })`)
-    const groupsWant = STAGGER.map(([id, cls, step, n]) => [id, cls, step, n ?? groups.sizes[id]])
-    const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && ['projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog'].every(id => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[id])
-    row('stagger groups', groupsOk, groups.found.map(g => `${g[0]} ${g[2]} x${g[3]}`).join(', '))
+      // the DOM contract: each scene's stagger group, its step and its item count
+      const groups = await s.evaluate(`({ found: [...document.querySelectorAll('.ss .stagger')].map(g => [g.closest('.scene').id, [...g.classList].filter(c => c !== 'stagger').join(' '), g.dataset.step, g.children.length]), sizes: __ss.setSizes })`)
+      const groupsWant = STAGGER.map(([id, cls, step, n]) => [id, cls, step, n ?? groups.sizes[id]])
+      const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && ['projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog'].every(id => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[id])
+      row('stagger groups', groupsOk, groups.found.map(g => `${g[0]} ${g[2]} x${g[3]}`).join(', '))
 
-    // ghosts: at a hold only that station is on screen, between two holds only those two
-    const GHOSTS = `(() => {
-      const p = __ss.sp, a = Math.floor(p + 1e-6), b = Math.ceil(p - 1e-6), allowed = new Set([a, b]);
-      const pins = [...document.querySelectorAll('.ss .pin')], heads = [...document.querySelectorAll('.ss .scene')].map(x => x.querySelector('h1, h2').textContent.trim());
-      const vis = (el) => { if (getComputedStyle(el).visibility === 'hidden') return 0; let o = 1; for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === 'none') return 0; o *= parseFloat(cs.opacity); } return o; };
-      const on = (r) => r.width > 0 && r.height > 0 && r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight;
-      const out = [];
-      pins.forEach((pin, i) => {
-        if (allowed.has(i)) return;
-        for (const el of pin.querySelectorAll('h1, h2, .lead, .bio, .facts li, .ring li, .pieces li, .index li, .reader, .pill, .links li, .orbit-nav, .hint, .atlas-wrap')) {
-          const o = vis(el), r = el.getBoundingClientRect();
-          if (o > 0.02 && on(r)) out.push(i + ':' + el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + '@' + o.toFixed(2));
+      await s.openEngine(page)
+      const ghosts = []; let ghostSamples = 0
+      for (let i = 0; i < LEGEND.length; i++) for (const d of [0, -0.4, -0.2, 0.2, 0.4]) {
+        const p = i + d; if (p < 0 || p > LEGEND.length - 1) continue
+        await s.goto(p); ghostSamples++
+        const r = await s.evaluate(GHOSTS)
+        if (r.out.length) ghosts.push(`p=${r.p}: ${r.out.join(' ')}`)
+      }
+      row('ghosts (snap sweep)', ghosts.length === 0, `${ghostSamples} samples; ${ghosts.join('; ').slice(0, 400) || 'none'}`)
+
+      const wrong = []
+      for (let i = 0; i < LEGEND.length; i++) {
+        // a snap, three frames, then up to 1 s: a loaded machine can stall a frame past the prototype's fixed 160 ms
+        await s.goto(i)
+        let r = await s.evaluate(STATION(i))
+        for (let t = 0; !r.ok && t < 1000; t += 100) { await sleep(100); r = await s.evaluate(STATION(i)) }
+        if (!r.ok) wrong.push(`${i}: wants "${r.want}", dust "${r.dust}", box ${r.boxOk}, shown "${r.shown}"`)
+      }
+      row('stations show their own headline', wrong.length === 0, wrong.join('; ') || `${LEGEND.length} stations`)
+
+      // no line of copy shows twice, and the dust draws only the window's headlines
+      const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill')].map(el => ${NORM}(el.textContent))`)
+      const dupStatic = lines.filter((l, i) => lines.indexOf(l) !== i)
+      const dupLive = [], stray = []
+      for (let p = 0; p <= LEGEND.length - 1 + 0.001; p += 0.1) {
+        await s.goto(p.toFixed(2))
+        const seen = await s.evaluate(SEEN)
+        const d = seen.out.filter((l, i) => seen.out.indexOf(l) !== i)
+        if (d.length) dupLive.push(`${p.toFixed(1)}: ${d.join(' | ')}`)
+        if (!seen.owned) stray.push(`${p.toFixed(1)}: "${seen.dust}"`)
+      }
+      row('no line shown twice', !dupStatic.length && !dupLive.length && !stray.length, [...dupStatic, ...dupLive, ...stray].join('; ').slice(0, 400) || `${lines.length} lines, sweep p=0..${LEGEND.length - 1}`)
+
+      // Canvas2D fallback
+      await s.openEngine(join('nogl=1'))
+      const nogl = await s.evaluate(`({ renderer: __ss.renderer, frames: __ss.frames })`)
+      row('Canvas2D fallback (?nogl=1)', nogl.renderer === 'canvas2d', JSON.stringify(nogl))
+
+      // calm motion: the media query, and the ?rm=1 debug hold
+      const CALM = `({ rm: __ss.rm, calm: document.documentElement.classList.contains('calm'), h1: getComputedStyle(document.querySelector('.ss h1')).opacity, dust: __ss.dust })`
+      const calmOk = c => c.rm === true && c.calm && c.h1 === '1' && c.dust === null
+      await s.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] })
+      await s.openEngine(page)
+      const calmMedia = await s.evaluate(CALM)
+      await s.send('Emulation.setEmulatedMedia', { features: [] })
+      row('calm motion (prefers-reduced-motion)', calmOk(calmMedia), JSON.stringify(calmMedia))
+      await s.openEngine(join('rm=1'))
+      const calmQuery = await s.evaluate(CALM)
+      row('calm motion (?rm=1)', calmOk(calmQuery), JSON.stringify(calmQuery))
+
+      // 390px: the balanced tier, and nothing wider than the screen
+      await s.openEngine(page, 390, 844)
+      const phone = await s.evaluate(`({ tier: __ss.tier, renderer: __ss.renderer, scrollWidth: document.documentElement.scrollWidth, innerWidth })`)
+      row('390px layout', phone.tier === 'balanced' && phone.scrollWidth <= phone.innerWidth, JSON.stringify(phone))
+    })
+
+    // ---------------------------------------------------------------- ghosts: live, and the pixel safeguard
+    await group('ghosts', async () => {
+      // a slow scroll with holds, sampled in flight and at rest, then jumps straight across stations
+      await s.openEngine(page)
+      const found = []; let samples = 0
+      for (let i = 0; i < LEGEND.length; i++) {
+        await s.evaluate(at(i))
+        await sleep(350); const mid = await s.evaluate(GHOSTS); samples++
+        if (mid.out.length) found.push(`flight to ${i} p=${mid.p}: ${mid.out.join(' ')}`)
+        await sleep(1200); const hold = await s.evaluate(GHOSTS); samples++
+        if (hold.out.length) found.push(`hold ${i} p=${hold.p}: ${hold.out.join(' ')}`)
+      }
+      for (const [from, to] of [[0, 7], [7, 2], [2, 10], [10, 5]]) {
+        await s.evaluate(at(from)); await sleep(1600)
+        await s.evaluate(at(to))
+        let waited = 0
+        for (const wait of [250, 500, 900, 1600]) { await sleep(wait - waited); waited = wait; const r = await s.evaluate(GHOSTS); samples++; if (r.out.length) found.push(`jump ${from} to ${to} at ${wait}ms p=${r.p}: ${r.out.join(' ')}`) }
+      }
+      row('ghosts (live scroll and jumps)', !found.length, `${samples} samples; ${found.join('; ').slice(0, 400) || 'none'}`)
+
+      // Through the stations in order on one page, each hold's frame against the same
+      // frame with every other station taken out (__ss.solo): they may differ by no
+      // more than 200 px (6% fuzz) over the noise floor of a third capture. Both renderers.
+      let magick = true
+      try { execFileSync('magick', ['-version'], { stdio: 'ignore' }) } catch { magick = false }
+      if (!magick) { row('ghosts (pixel safeguard)', false, 'ImageMagick magick not found; the row needs it'); return }
+      const pxDir = mkdtempSync(path.join(os.tmpdir(), 'scroll-capture-px-'))
+      const ae = (x, y) => { try { execFileSync('magick', ['compare', '-metric', 'AE', '-fuzz', '6%', x, y, 'null:'], { stdio: ['ignore', 'ignore', 'pipe'] }); return 0 } catch (e) { const n = Number(String(e.stderr || '').trim().split(' ')[0]); return Number.isFinite(n) && e.status === 1 ? n : NaN } }
+      try {
+        for (const extra of ['', 'nogl=1']) {
+          await s.openEngine(join(['p=0', extra].filter(Boolean).join('&'))); await s.evaluate(PX_FREEZE); await s.frames(3)
+          const bad = []; let worst = 0, floor = 0
+          for (let i = 0; i < LEGEND.length; i++) {
+            for (const p of [i - 0.6, i - 0.3, i]) if (p >= 0) await s.goto(p)
+            const A = path.join(pxDir, `a${i}.png`), B = path.join(pxDir, `b${i}.png`), C = path.join(pxDir, `c${i}.png`)
+            await s.shot(A); await s.evaluate(`__ss.solo(${i})`); await s.frames(3); await s.shot(B); await s.evaluate('__ss.solo(-1)'); await s.frames(3); await s.shot(C)
+            const ab = ae(A, B), ac = ae(A, C)
+            worst = Math.max(worst, ab); floor = Math.max(floor, ac)
+            if (!(ab - ac <= 200)) bad.push(`${i}: ${ab} px differ in solo (floor ${ac})`)
+          }
+          // the captures must hold the scene: two stations' frames differ widely, or a blank capture would pass
+          const apart = ae(path.join(pxDir, 'a1.png'), path.join(pxDir, 'a2.png'))
+          if (!(apart > 20000)) bad.push(`captures too alike to judge: stations 1 and 2 differ by ${apart} px`)
+          row(`ghosts (pixel safeguard, ${extra ? 'Canvas2D' : 'WebGL'})`, !bad.length, `${LEGEND.length} stations, worst ${worst} px, floor ${floor} px, stations 1 and 2 apart ${apart} px; ${bad.join('; ') || 'none over 200'}`)
         }
-      });
-      const news = __ss.scenes.findIndex(x => x.id === 'newsletter');
-      if (!allowed.has(news)) for (const tag of document.querySelectorAll('.ss .moon-tag')) { const o = vis(tag); if (o > 0.02 && on(tag.getBoundingClientRect())) out.push(news + ':moon-tag@' + o.toFixed(2)); }
-      if (__ss.dust !== null && __ss.dust !== heads[a] && __ss.dust !== heads[b]) out.push('dust:"' + __ss.dust + '"');
-      for (const B of __ss.bodies) if (B.scene < a && B.alpha > 0.02) out.push('body:' + B.set + '@' + B.alpha);
-      return { p: Number(p.toFixed(2)), out };
-    })()`
-    await s.openEngine(page)
-    const ghosts = []; let ghostSamples = 0
-    for (let i = 0; i < LEGEND.length; i++) for (const d of [0, -0.4, -0.2, 0.2, 0.4]) {
-      const p = i + d; if (p < 0 || p > LEGEND.length - 1) continue
-      await s.evaluate(`__ss.goto(${p})`); await s.frames(3); ghostSamples++
-      const r = await s.evaluate(GHOSTS)
-      if (r.out.length) ghosts.push(`p=${r.p}: ${r.out.join(' ')}`)
-    }
-    row('ghosts (snap sweep)', ghosts.length === 0, `${ghostSamples} samples; ${ghosts.join('; ').slice(0, 400) || 'none'}`)
+      } finally { rmSync(pxDir, { recursive: true, force: true }) }
+    })
 
-    // every station shows its own headline: the dust was rasterised from that heading and sits in its box
-    const STATION = i => `(() => {
-      const own = document.querySelectorAll('.ss .scene')[${i}].querySelector('h1, h2'), want = own.textContent.trim();
-      const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.5) return false; } return true; };
-      const shown = [...document.querySelectorAll('.ss .pin h1, .ss .pin h2')].filter(vis).map(el => el.textContent.trim());
-      const dust = __ss.dust, box = __ss.dustBox && __ss.dustBox(), r = own.getBoundingClientRect(), pad = 16;
-      const boxOk = dust === null ? null : !!(box && box.n > 0 && box.left >= r.left - pad && box.right <= r.right + pad && box.top >= r.top - pad && box.bottom <= r.bottom + pad);
-      const ok = dust === null ? (shown.length === 1 && shown[0] === want) : (dust === want && boxOk && shown.length === 0);
-      return { want, dust, boxOk, shown: shown.join(' | '), ok };
-    })()`
-    const wrong = []
-    for (let i = 0; i < LEGEND.length; i++) {
-      // a snap, three frames, then up to 1 s: a loaded machine can stall a frame past the prototype's fixed 160 ms
-      await s.evaluate(`__ss.goto(${i})`); await s.frames(3)
-      let r = await s.evaluate(STATION(i))
-      for (let t = 0; !r.ok && t < 1000; t += 100) { await sleep(100); r = await s.evaluate(STATION(i)) }
-      if (!r.ok) wrong.push(`${i}: wants "${r.want}", dust "${r.dust}", box ${r.boxOk}, shown "${r.shown}"`)
-    }
-    row('stations show their own headline', wrong.length === 0, wrong.join('; ') || `${LEGEND.length} stations`)
+    // ---------------------------------------------------------------- copy
+    await group('copy', async () => {
+      await s.openEngine(page)
+      const words = await s.evaluate(WORDS)
+      const goneHits = [...words.gone], detailHits = []
+      let cards = 0
+      const detailSets = await s.evaluate('__ss.detailSets')
+      for (const [set, n] of await s.evaluate('Object.entries(__ss.setSizes)')) for (let k = 0; k < n; k++) {
+        if (!detailSets.includes(set)) continue
+        const text = await s.evaluate(`__ss.detailText('${set}', ${k})`); cards++
+        const m = text && text.match(BANNED), g = text && text.match(GONE)
+        if (m) detailHits.push(`${set} ${k}: ...${text.slice(Math.max(0, m.index - 30), m.index + 40)}...`)
+        if (g) goneHits.push(`${set} ${k}: ...${text.slice(Math.max(0, g.index - 30), g.index + 40)}...`)
+      }
+      const bio = await s.evaluate("[...document.querySelectorAll('.ss #about .bio p')].map(p => p.textContent.trim())")
+      const bioOk = bio.length === 2 && bio[0] === BIO[0] && bio[1] === BIO[1] && !BANNED.test(bio.join(' ')) && !/[\u2013\u2014]/.test(bio.join(' '))
+      row('copy: React, TypeScript and Node named nowhere', !words.hits.length && !detailHits.length && bioOk, `page ${words.hits.join(' | ') || 'none'}; ${cards} detail cards (${detailSets.join(' ')}): ${detailHits.join(' | ') || 'none'}; bio from aboutFaq.ts ${bioOk}`)
+      await s.goto(LEGEND.indexOf('Essays')); await sleep(160)
+      const essaysDust = await s.evaluate('__ss.dust')
+      const goneOk = !goneHits.length && words.strip === 0 && words.essays === 'Essays.' && essaysDust === 'Essays.'
+      row('copy: rounds 12 and 13 words and markup gone', goneOk, `still there ${goneHits.join(' | ') || 'none'}; strip or link elements ${words.strip}; Essays h2 "${words.essays}", dust "${essaysDust}"`)
+    })
 
-    // no line of copy shows twice, and the dust draws only the window's headlines
-    const NORM = "(s => s.replace(/[^a-z0-9 ]/gi, '').replace(/\\s+/g, ' ').trim().toLowerCase())"
-    const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill')].map(el => ${NORM}(el.textContent))`)
-    const dupStatic = lines.filter((l, i) => lines.indexOf(l) !== i)
-    const SEEN = `(() => {
-      const norm = ${NORM}, vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) return false; } return true; };
-      const out = [...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill')].filter(vis).map((el) => norm(el.textContent));
-      if (__ss.dust) out.push(norm(__ss.dust));
-      const heads = [...document.querySelectorAll('.ss .scene')].map(x => x.querySelector('h1, h2').textContent.trim());
-      const a = Math.floor(__ss.sp), b = Math.min(a + 1, heads.length - 1);
-      return { out, owned: __ss.dust === null || __ss.dust === heads[a] || __ss.dust === heads[b], dust: __ss.dust };
-    })()`
-    const dupLive = [], stray = []
-    for (let p = 0; p <= LEGEND.length - 1 + 0.001; p += 0.1) {
-      await s.evaluate(`__ss.goto(${p.toFixed(2)})`); await s.frames(3)
-      const seen = await s.evaluate(SEEN)
-      const d = seen.out.filter((l, i) => seen.out.indexOf(l) !== i)
-      if (d.length) dupLive.push(`${p.toFixed(1)}: ${d.join(' | ')}`)
-      if (!seen.owned) stray.push(`${p.toFixed(1)}: "${seen.dust}"`)
-    }
-    row('no line shown twice', !dupStatic.length && !dupLive.length && !stray.length, [...dupStatic, ...dupLive, ...stray].join('; ').slice(0, 400) || `${lines.length} lines, sweep p=0..${LEGEND.length - 1}`)
+    // ---------------------------------------------------------------- technology marks
+    await group('marks', async () => {
+      await s.openEngine(page)
+      const sprite = await s.evaluate(SPRITE)
+      const spriteBad = []
+      for (const [name, f] of Object.entries(TECH_FILES)) { const sym = sprite.find(x => x.id === `i-${name}`); if (!sym) spriteBad.push(`${name}: not in the sprite`); else if (sym.ds.join('|') !== f.ds.join('|') || !sym.kids) spriteBad.push(`${name}: the sprite's paths differ from the file`); if (!f.clean) spriteBad.push(`${name}: not a plain icon file`); if (f.bytes > 6000) spriteBad.push(`${name}: ${f.bytes} bytes`) }
+      for (const sym of sprite) if (!TECH_FILES[sym.id.slice(2)]) spriteBad.push(`${sym.id}: no file`)
+      const cardBad = [], detailBad = []
+      let marks = 0
+      for (const set of ['projects', 'tools']) {
+        const scene = LEGEND.indexOf(set === 'projects' ? 'Projects' : 'Tools and games')
+        for (const [w, h] of [[1440, 900], [390, 844]]) {
+          await s.openEngine(join(`p=${scene}`), w, h); await sleep(200)
+          const cards = await s.evaluate(CARDS(set))
+          for (const c of cards) {
+            const want = techOf(c.name)
+            if (!want) { cardBad.push(`${c.name}: not in gatsby-node.js (or the Chimera list)`); continue }
+            const names = c.icons.map(i => i.name)
+            if (names.join('|') !== want.join('|')) cardBad.push(`${c.name} ${w}: marks ${names.join(', ')} vs gatsby-node.js ${want.join(', ')}`)
+            for (const i of c.icons) { marks++; if (!(i.symbol && i.role === 'img' && i.title === i.name && i.w >= 14 && i.w <= 16 && i.h === i.w && i.box >= 7)) cardBad.push(`${c.name} ${w} ${i.name}: ${JSON.stringify(i)}`) }
+            if (!(c.dim > 0.5 && c.dim < 1) || c.pxText < 11) cardBad.push(`${c.name} ${w}: dim ${c.dim}, text ${c.pxText}px`)
+          }
+          if (cards.length !== (set === 'projects' ? 7 : 5)) cardBad.push(`${set} ${w}: ${cards.length} cards`)
+        }
+        await s.viewport(1440, 900)
+        const n = (await s.evaluate('__ss.setSizes'))[set]
+        for (let k = 0; k < n; k++) {
+          const items = await s.evaluate(`__ss.detailTech('${set}', ${k})`), name = await s.evaluate("document.getElementById('detail-title').textContent")
+          const want = techOf(name) || []
+          if (items.map(i => i.name).join('|') !== want.join('|')) detailBad.push(`${name}: detail marks ${items.map(i => i.name).join(', ')} vs gatsby-node.js ${want.join(', ')}`)
+          for (const i of items) if (i.shown !== (BANNED.test(i.name) ? '' : i.name)) detailBad.push(`${name} ${i.name}: shows "${i.shown}"`)
+        }
+      }
+      // the detail row drawn, with a dive open: one project, one tool, desktop and phone
+      for (const [w, h, q] of [[1440, 900, `p=${LEGEND.indexOf('Projects')}&dive=3&dt=1`], [390, 844, `p=${LEGEND.indexOf('Projects')}&dive=1&dt=1`], [1440, 900, `p=${LEGEND.indexOf('Tools and games')}&dive=t1&dt=1`]]) {
+        await s.openEngine(join(q), w, h); await sleep(250)
+        const d = await s.evaluate(DETAIL)
+        if (d.hidden || !d.inside || !d.items.length || d.items.some(i => !(i.w === 16 && i.box >= 7 && i.px >= 11 && i.named))) detailBad.push(`${q} at ${w}: ${JSON.stringify(d)}`)
+      }
+      row('technology marks', !spriteBad.length && !cardBad.length && !detailBad.length, `${Object.keys(TECH_FILES).length} files, ${sprite.length} symbols, ${marks} marks on cards at 1440 and 390; sprite ${spriteBad.join('; ') || 'same as the files'}; cards ${cardBad.join('; ').slice(0, 300) || 'right'}; details ${detailBad.join('; ').slice(0, 300) || 'right'}`)
+    })
 
-    // Canvas2D fallback
-    await s.openEngine(join('nogl=1'))
-    const nogl = await s.evaluate(`({ renderer: __ss.renderer, frames: __ss.frames })`)
-    row('Canvas2D fallback (?nogl=1)', nogl.renderer === 'canvas2d', JSON.stringify(nogl))
+    // ---------------------------------------------------------------- stories
+    await group('stories', async () => {
+      // every story in gatsby-node.js is on the Writing scene, in its order, and in the sky as a star
+      await s.openEngine(join(`p=${LEGEND.indexOf('Writing')}`)); await sleep(200)
+      const r = await s.evaluate("({ titles: [...document.querySelectorAll('.ss #writing .pieces li strong')].map(x => x.textContent.trim()), nums: [...document.querySelectorAll('.ss #writing .pieces li .cover b')].map(x => x.textContent.trim()), cards: [...document.querySelectorAll('.ss #writing .pieces li')].filter(l => getComputedStyle(l).visibility === 'visible').length, stars: __ss.setSizes.writing, links: [...document.querySelectorAll('.ss #writing .pieces li a')].map(a => a.getAttribute('href')) })")
+      const linksWant = STORIES.map(t => `/writing/#${slug(t)}`)
+      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.cards === STORIES.length && r.stars === STORIES.length && r.links.join('|') === linksWant.join('|'), `${STORIES.length} in gatsby-node.js, ${r.titles.length} on the scene, ${r.cards} shown at the hold, ${r.stars} stars, links ${r.links.join('|') === linksWant.join('|') ? '/writing/#<slug>' : r.links.join(' ')}`)
 
-    // calm motion: the media query, and the ?rm=1 debug hold
-    const CALM = `({ rm: __ss.rm, calm: document.documentElement.classList.contains('calm'), h1: getComputedStyle(document.querySelector('.ss h1')).opacity, dust: __ss.dust })`
-    const calmOk = c => c.rm === true && c.calm && c.h1 === '1' && c.dust === null
-    await s.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] })
-    await s.openEngine(page)
-    const calmMedia = await s.evaluate(CALM)
-    await s.send('Emulation.setEmulatedMedia', { features: [] })
-    row('calm motion (prefers-reduced-motion)', calmOk(calmMedia), JSON.stringify(calmMedia))
-    await s.openEngine(join('rm=1'))
-    const calmQuery = await s.evaluate(CALM)
-    row('calm motion (?rm=1)', calmOk(calmQuery), JSON.stringify(calmQuery))
+      // A story opens where it lives: its card, its star (a real click on the sky) and
+      // Enter on its card each ask for /writing/#<slug> and open no detail. The
+      // navigation is intercepted (document requests fail as aborted; the page stays).
+      const nav = []
+      s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId: p.requestId, errorReason: 'Aborted' }).catch(() => {}) })
+      await s.goto(LEGEND.indexOf('Writing')); await sleep(250)
+      await s.send('Fetch.enable', { patterns: [{ urlPattern: '*', resourceType: 'Document', requestStage: 'Request' }] })
+      const storyBad = []
+      let probes = 0
+      const probe = async (label, k, act) => {
+        const n0 = nav.length; probes++
+        await act()
+        await until(async () => nav.length > n0, 1500, 50)
+        await sleep(120)
+        const st = await s.evaluate("({ active: __ss.diveState.active, hidden: document.getElementById('detail').hidden, locked: document.documentElement.classList.contains('locked') })").catch(() => null)
+        if (!st || nav.length !== n0 + 1 || nav[n0] !== new URL(linksWant[k], origin).href || st.active || !st.hidden || st.locked) storyBad.push(`${label} ${k}: ${JSON.stringify({ url: nav[n0], asked: nav.length - n0, st })}`)
+      }
+      try {
+        for (let k = 0; k < r.links.length; k++) await probe('card', k, () => s.evaluate(`document.querySelectorAll('.ss #writing .pieces li a')[${k}].click()`))
+        for (let k = 0; k < r.links.length; k++) { const pos = await s.evaluate(`__ss.bodyPos('writing', ${k})`); await probe('star', k, () => s.mouse(Math.round(pos.x), Math.round(pos.y))) }
+        for (const k of [0, 7, 15]) await probe('enter', k, async () => { await s.evaluate(`document.querySelectorAll('.ss #writing .pieces li a')[${k}].focus()`); await s.key('Enter', 13, 0) })
+      } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
+      row('stories open where they live', !storyBad.length && probes === 35, `${probes} probes (card, star, Enter), ${nav.length} navigations asked; ${storyBad.join('; ').slice(0, 400) || 'each to its own /writing/#<slug>, no detail'}`)
 
-    // 390px: the balanced tier, and nothing wider than the screen
-    await s.openEngine(page, 390, 844)
-    const phone = await s.evaluate(`({ tier: __ss.tier, renderer: __ss.renderer, scrollWidth: document.documentElement.scrollWidth, innerWidth })`)
-    row('390px layout', phone.tier === 'balanced' && phone.scrollWidth <= phone.innerWidth, JSON.stringify(phone))
-    await s.viewport(1440, 900)
+      // and /writing/#<slug> opens that story as a click on its title does: the reader
+      // fades in and the title's words are revealed. The page is the site's; its
+      // known noise (SITE_NOISE) is noted apart, any other message fails the row.
+      const hashBad = []
+      const site0 = siteLog.length
+      consoleScope = '/writing/'
+      try {
+        for (const title of STORIES) {
+          await s.viewport(1440, 900)
+          await s.open(`${origin}/writing/#${slug(title)}`)
+          const shown = await until(() => s.evaluate(`(document.querySelector('.reader-title') || {}).textContent === ${JSON.stringify(title)}`), 8000)
+          const revealed = shown && await until(() => s.evaluate("document.querySelectorAll('.reader-title .visible').length > 0"), 3000)
+          if (!shown || !revealed) hashBad.push(`${slug(title)}: shows "${await s.evaluate("(document.querySelector('.reader-title') || {}).textContent || ''")}"${shown ? ', title words never revealed' : ''}`)
+        }
+      } finally { consoleScope = 'scroll' }
+      const hashNoise = [...new Set(siteLog.slice(site0).filter(t => !SITE_NOISE.some(noise => noise.test(t))).map(t => t.split('\n')[0]))]
+      row('writing hash opens the story', !hashBad.length && !hashNoise.length, `${STORIES.length - hashBad.length} of ${STORIES.length} opened and revealed; ${hashBad.slice(0, 3).join('; ')}${hashNoise.length ? ` messages: ${hashNoise.join(' | ')}` : 'no messages beyond the site noise'}`)
+    })
 
-    // teardown: leave for home and come back three times. Listeners on window and
-    // document return to home's count, the debug hook and the html classes go,
-    // dispose reports loseContext, and the heap after GC holds within 10%.
-    consoleScope = 'site'
-    await s.open(`${origin}/`)
-    await sleep(1500)
-    consoleScope = 'scroll'
-    const baseline = { window: await s.listeners('window'), document: await s.listeners('document') }
-    const cycles = []
-    for (let cycle = 1; cycle <= 3; cycle++) {
-      await s.evaluate(`window.___navigate(${JSON.stringify(new URL(page).pathname + new URL(page).search)})`)
-      const mounted = await s.running()
-      // on the route the counter must see the engine's own listeners, or the comparison proves nothing
-      const mountedWindow = await s.listeners('window')
-      await s.evaluate(`window.___navigate('/')`)
-      const left = await until(() => s.evaluate(`location.pathname === '/' && !document.documentElement.classList.contains('ss-on') && window.__ss === undefined`))
+    // ---------------------------------------------------------------- the newsletter orbit and reader
+    await group('orbit', async () => {
+      await s.openEngine(page)
+      // the planet is absent a station away, there on the approach and the leave, full at the hold with the newest at the front
+      const orb = []
+      for (const d of [-0.9, -0.3, 0, 0.3, 0.9]) { await s.goto(NEWS + d); await sleep(160); orb.push({ d, ...(await s.evaluate(ORBIT)) }) }
+      const orbOk = orb[0].planetA < 0.05 && orb[4].planetA < 0.05 && orb[1].planetA > 0.3 && orb[3].planetA > 0.3 && orb[2].planetA > 0.9 && orb[2].front === 0 && orb[2].moons >= 5 && orb[2].tags >= 5 && orb[2].tagsIn
+      row('newsletter orbit blend', orbOk, orb.map(o => `${o.d >= 0 ? '+' : ''}${o.d}: planet ${o.planetA}, sun ${o.theta}deg, ${o.moons} of ${o.n} moons, ${o.tags} tags${o.tags && !o.tagsIn ? ' (off screen)' : ''}`).join('; '))
+
+      // every letter is reachable by the orbit: at the front its moon is in view, tagged, its row lit, the counter naming it
+      await s.goto(NEWS); await sleep(160)
+      const nLetters = await s.evaluate('__ss.orbit.n')
+      const reach = []
+      for (let k = 0; k < nLetters; k++) {
+        await s.evaluate(`__ss.orbitTo(${k})`); await sleep(60); await s.frames(2)
+        const o = await s.evaluate(REACH)
+        if (!(o.front === k && o.vis > 0.5 && o.tag && o.row === k && o.pos === `No. ${o.num} of ${o.n}`)) reach.push(`${k}: ${JSON.stringify(o)}`)
+      }
+      row('newsletter: every letter reachable', !reach.length && nLetters === ISSUES.length, `${nLetters} letters on the station, ${ISSUES.length} in content/newsletter; ${reach.join('; ') || 'all reachable'}`)
+
+      // the reader shows the front letter's whole text, block by block against the markdown, and starts at the top on each change
+      const text = []
+      for (let k = 0; k < nLetters; k++) {
+        await s.evaluate(`__ss.orbitTo(${k})`); await sleep(60); await s.frames(2)
+        const r = await s.evaluate(READ), x = ISSUES[k]
+        await s.evaluate(`(b => { b.scrollTop = 300; })(${FRONT_BODY})`)
+        const sameBlocks = x && r.blocks.length === x.blocks.length && r.blocks.every((b, i) => b.kind === x.blocks[i].kind && b.text === x.blocks[i].text && (b.kind !== 'img' || b.file === x.blocks[i].file))
+        const same = sameBlocks && r.k === k && r.shown === 1 && r.alpha === '1' && r.labelled && r.region && r.scrollable && r.top === 0 && !r.emdash && r.links && r.meta === x.meta && r.title === x.title && r.deck === x.deck && r.week === x.week
+        if (!same) {
+          const at = r.blocks.findIndex((b, i) => !x?.blocks[i] || b.kind !== x.blocks[i].kind || b.text !== x.blocks[i].text || (b.kind === 'img' && b.file !== x.blocks[i].file))
+          text.push(`${k}: ${JSON.stringify({ ...r, blocks: r.blocks.length }).slice(0, 260)} wants ${JSON.stringify({ meta: x?.meta, title: x?.title, week: x?.week, blocks: x?.blocks.length })}${sameBlocks ? '' : `; first different block ${at}: ${JSON.stringify(r.blocks[at]).slice(0, 120)} vs ${JSON.stringify(x?.blocks[at]).slice(0, 120)}`}`)
+        }
+      }
+      row('reader shows the whole letter', !text.length, text.join('; ').slice(0, 600) || `${nLetters} letters, blocks ${ISSUES.map(x => x.blocks.length).join(' ')}`)
+
+      // no dive from the Newsletter: the front tag, chip and moon and Enter open nothing; another chip turns the ring
+      await s.openEngine(page)
+      await s.goto(NEWS); await sleep(300)
+      const front = await s.evaluate('__ss.orbit.front')
+      const NOD = "({ active: __ss.diveState.active, hidden: document.getElementById('detail').hidden, locked: document.documentElement.classList.contains('locked'), dialogs: [...document.querySelectorAll('[role=dialog]')].filter(d => !d.hidden).length, front: __ss.orbit.front, sp: Number(__ss.sp.toFixed(2)) })"
+      const pos = await s.evaluate(`__ss.bodyPos('newsletter', ${front})`)
+      const opened = []
+      const acts = [
+        ['the front tag', () => s.evaluate(`document.querySelectorAll('.ss .moon-tag')[${front}].click()`)],
+        ['the front chip', () => s.evaluate(`document.querySelector('.ss #newsletter .pieces li a[data-k="${front}"]').click()`)],
+        ['the front moon', () => s.mouse(Math.round(pos.x), Math.round(pos.y))],
+        ['Enter', async () => { await s.evaluate('document.activeElement && document.activeElement.blur && document.activeElement.blur()'); await s.key('Enter', 13, 0) }],
+      ]
+      for (const [label, act] of acts) { await act(); await sleep(600); const r = await s.evaluate(NOD); if (r.active || !r.hidden || r.locked || r.dialogs || r.front !== front || r.sp !== NEWS) opened.push(`${label}: ${JSON.stringify(r)}`) }
+      await s.evaluate(`document.querySelector('.ss #newsletter .pieces li a[data-k="${front + 3}"]').click()`); await sleep(1200)
+      const r = await s.evaluate(NOD)
+      const turned = r.front === front + 3 && !r.active && r.hidden && !r.dialogs
+      row('newsletter: no dive', !opened.length && turned, `${opened.join('; ') || 'tag, chip, moon and Enter open nothing'}; a chip three older turns the ring: ${turned}`)
+    })
+
+    // ---------------------------------------------------------------- wheel, keys and touch at the Newsletter
+    await group('gestures', async () => {
+      const wheel = async (dx, dy, n, x = 900, y = 450, gap = 40) => { for (let i = 0; i < n; i++) { await s.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x, y, deltaX: dx, deltaY: dy }); await sleep(gap) } }
+      // sideways input turns the ring and leaves the page; vertical input scrolls the page and leaves the ring
+      await s.openEngine(page)
+      await s.evaluate(at(NEWS)); await sleep(1400)
+      const g0 = await s.evaluate(STATE)
+      await wheel(-120, 0, 6); await sleep(900); const g1 = await s.evaluate(STATE)
+      await wheel(0, 120, 3); await sleep(900); const g2 = await s.evaluate(STATE)
+      await s.key('ArrowLeft', 37); const g3 = await s.evaluate(STATE)
+      await s.key('ArrowRight', 39); const g4 = await s.evaluate(STATE)
+      await s.evaluate(at(NEWS - 2)); await sleep(1400)
+      const g5 = await s.evaluate(STATE)
+      await wheel(-120, 0, 3); await sleep(900); const g6 = await s.evaluate(STATE)
+      const gestureOk = g1.y === g0.y && Math.abs(g1.sp - g0.sp) < 0.05 && g1.front > g0.front && g1.consumed === 6 && g1.settled
+        && g2.y > g1.y && g2.front === g1.front && g2.ignored === g1.ignored + 3
+        && g3.front === g2.front + 1 && g3.y === g2.y && g4.front === g3.front - 1
+        && g6.front === g5.front && g6.consumed === g5.consumed && g6.y === g5.y
+      row('sideways input orbits, vertical scroll untouched', gestureOk, `hold y ${g0.y} front ${g0.front}; 6 sideways: y ${g1.y}, front ${g1.front}, consumed ${g1.consumed}, settled ${g1.settled}; 3 vertical: y ${g2.y}, front ${g2.front}, ignored ${g2.ignored}; Left then Right: ${g3.front} then ${g4.front}; away: front ${g5.front} to ${g6.front}`)
+
+      // the wheel over the letter's text: the text first, the page after a 350 ms pause at its end
+      await s.evaluate(at(NEWS)); await sleep(1400)
+      const bodyAt = await s.evaluate(`(r => ({ x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }))(${FRONT_BODY}.getBoundingClientRect())`)
+      const r0 = await s.evaluate(RSTATE)
+      await wheel(0, 120, 3, bodyAt.x, bodyAt.y); await sleep(200); const r1 = await s.evaluate(RSTATE)
+      await wheel(0, 400, 40, bodyAt.x, bodyAt.y, 30); await sleep(100); const r2 = await s.evaluate(RSTATE)
+      await sleep(450); await wheel(0, 120, 3, bodyAt.x, bodyAt.y); await sleep(900); const r3 = await s.evaluate(RSTATE)
+      await s.evaluate(at(NEWS)); await sleep(1400)
+      const r4 = await s.evaluate(RSTATE)
+      await wheel(-120, 0, 6, bodyAt.x, bodyAt.y); await sleep(900); const r5 = await s.evaluate(RSTATE)
+      await s.evaluate(`${FRONT_BODY}.focus()`)
+      await s.key('ArrowLeft', 37); const r6 = await s.evaluate(RSTATE)
+      await s.key('ArrowDown', 40); const r7 = await s.evaluate(RSTATE)
+      const handoffOk = r1.y === r0.y && r1.scroll > r0.scroll && r1.wheeled === r0.wheeled + 3
+        && r2.y === r0.y && r2.held > 0 && r2.passed === r0.passed
+        && r3.y > r0.y && r3.passed >= 1
+        && r5.y === r4.y && r5.front > r4.front
+        && r6.focused && r6.front === r5.front + 1 && r6.y === r4.y
+        && r7.scroll > 0 && r7.y === r4.y
+      row('wheel over the letter: text first, page after 350 ms', handoffOk, `3 wheels: text ${r0.scroll} to ${r1.scroll}, page ${r0.y} to ${r1.y}; 40 to the end: text ${r2.scroll}, page ${r2.y}, held ${r2.held}; after 450 ms: page ${r3.y}, passed ${r3.passed}; sideways: front ${r4.front} to ${r5.front}; focused Left then Down: front ${r6.front}, text ${r7.scroll}, page ${r7.y}`)
+
+      // the reader follows the ring, and the live region names the letter once per settle
+      await s.openEngine(page)
+      await s.evaluate(at(NEWS)); await sleep(1400)
+      const n0 = await s.evaluate(ANNOUNCE)
+      await s.evaluate('__ss.orbitTo(5)'); await sleep(1800); const n1 = await s.evaluate(ANNOUNCE)
+      await wheel(-120, 0, 6); await sleep(1900); const n2 = await s.evaluate(ANNOUNCE)   // the prototype's wheel() ends with 900 ms, then 1000
+      const announceOk = n1.announced === n0.announced + 1 && n1.active === 5 && n1.front === 5 && n1.text.startsWith(`No. ${ISSUES[5].num},`) && n1.alpha > 0.95
+        && n2.announced === n0.announced + 2 && n2.active === n2.front && n2.front === 9 && n2.text.startsWith(`No. ${ISSUES[9].num},`) && n2.alpha > 0.95
+      row('reader follows the ring, announced once per settle', announceOk, `hold: announced ${n0.announced}, letter ${n0.active}; turned to 5: announced ${n1.announced}, reader on ${n1.active} at ${n1.alpha}, said "${n1.text}"; four by wheel: announced ${n2.announced}, reader on ${n2.active} at ${n2.alpha}, said "${n2.text}"`)
+
+      // touch on a phone: a sideways swipe on the text turns the ring, a vertical one scrolls the text, below the panel the page
+      await s.openEngine(page, 390, 844)
+      await s.evaluate(at(NEWS)); await sleep(1400)
+      const swipe = async (x0, y0, x1, y1) => {
+        await s.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0 }] })
+        for (let i = 1; i <= 8; i++) { await s.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + (x1 - x0) * i / 8, y: y0 + (y1 - y0) * i / 8 }] }); await sleep(30) }
+        await s.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await sleep(900)
+      }
+      const body = await s.evaluate(`(r => ({ x: Math.round(r.left + r.width / 2), top: Math.round(r.top), bottom: Math.round(r.bottom) }))(${FRONT_BODY}.getBoundingClientRect())`)
+      const t0 = await s.evaluate(TSTATE)
+      await swipe(body.x - 80, body.top + 40, body.x + 130, body.top + 44); const t1 = await s.evaluate(TSTATE)
+      await swipe(body.x, body.bottom - 20, body.x + 4, body.top + 20); const t2 = await s.evaluate(TSTATE)
+      const below = await s.evaluate("(r => Math.round(r.bottom))(document.querySelector('.ss #newsletter .reader').getBoundingClientRect())")
+      await swipe(200, below + 30, 204, below - 170); const t3 = await s.evaluate(TSTATE)
+      const touchOk = t1.y === t0.y && t1.front > t0.front && t1.consumed > t0.consumed && t2.y === t1.y && t2.scroll > t1.scroll && t2.front === t1.front && t3.y > t2.y && t3.front === t2.front
+      row('touch: sideways swipe orbits, vertical scrolls text then page (390)', touchOk, `hold y ${t0.y} front ${t0.front}; sideways on the text: y ${t1.y}, front ${t1.front}; vertical on the text: y ${t2.y}, text ${t1.scroll} to ${t2.scroll}; below the panel: y ${t3.y}, front ${t3.front}`)
+      await s.viewport(1440, 900)
+    })
+
+    // ---------------------------------------------------------------- links row
+    await group('links', async () => {
+      for (const [w, h] of SIZES) {
+        await s.openEngine(page, w, h)
+        const bad = []
+        let hrefsOk = true, namesOk = true, width = 0
+        for (let i = 0; i < LEGEND.length; i++) {
+          await s.goto(i); await sleep(100)
+          const r = await s.evaluate(SOCIAL)
+          if (r.hrefs.join('|') !== SOCIAL_LINKS.join('|')) hrefsOk = false
+          if (r.labels.join('|') !== SOCIAL_LABELS.join('|') || r.titles.join('|') !== SOCIAL_LABELS.join('|') || r.words.join('|') !== SOCIAL_WORDS.join('|')) namesOk = false
+          width = r.width
+          if (!r.ok) bad.push(`${i}: ${r.visible ? '' : 'hidden '}${r.inside ? '' : 'outside '}${r.over ? 'under ' + r.over : ''}${r.newTab ? '' : ' not a new tab'}${r.marks ? '' : ' marks not drawn'}${r.targets ? '' : ' targets under 24px or touching'}${r.oneLine ? '' : ' wraps'}${r.supportPx >= 11 ? '' : ' Support under 11px'}`)
+        }
+        row(`links on every scene (${w}x${h})`, !bad.length && hrefsOk && namesOk, `${hrefsOk ? 'the five links' : 'hrefs differ'}, ${namesOk ? 'named' : 'names differ'}, row ${width}px; ${bad.join('; ') || 'clear at all 11'}`)
+      }
+      for (const [w, h] of [[1440, 900], [1024, 768], [390, 844]]) {
+        await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}&dive=3&dt=1`), w, h); await sleep(200)
+        const r = await s.evaluate(SOCIAL)
+        row(`links while a detail is open (${w}x${h})`, r.ok, `visible ${r.visible}, inside ${r.inside}, under ${r.over || 'nothing'}`)
+      }
+    })
+
+    // ---------------------------------------------------------------- the reader panel at the hold
+    await group('panel', async () => {
+      for (const [w, h, extra] of [...SIZES.map(([w, h]) => [w, h, '']), [1440, 900, 'nogl=1']]) {
+        await s.openEngine(join([`p=${NEWS}`, extra].filter(Boolean).join('&')), w, h); await sleep(250)
+        const r = await s.evaluate(PANEL)
+        row(`reader at the hold (${w}x${h}${extra ? ', Canvas2D' : ''})`, r.ok, `${r.renderer}, panel ${r.size}, ${r.lines} lines at ${r.px}px, scrolls ${r.scrollable}, inside ${r.inside}, under ${r.over || 'nothing'}`)
+      }
+    })
+
+    // ---------------------------------------------------------------- dives, and Chimera
+    await group('dives', async () => {
+      // in, landed, out, with the scroll position intact
+      const DIVES = [
+        ['projects, GalAtlas', 1440, 900, 'projects', '__ss.dive(3)', ''], ['projects, GalAtlas (390)', 390, 844, 'projects', '__ss.dive(3)', ''],
+        ['projects, Job Toast (typographic)', 1440, 900, 'projects', '__ss.dive(5)', ''], ['projects, Chimera (the apex)', 1440, 900, 'projects', '__ss.dive(0)', ''],
+        ['projects, GalAtlas (?rm=1)', 1440, 900, 'projects', '__ss.dive(3)', 'rm=1'],
+        ['tools', 1440, 900, 'tools', "__ss.dive(0, 'tools')", ''], ['tools (390)', 390, 844, 'tools', "__ss.dive(4, 'tools')", ''],
+        ['essays', 1440, 900, 'essays', "__ss.dive(0, 'essays')", ''], ['essays (390)', 390, 844, 'essays', "__ss.dive(0, 'essays')", ''],
+        ['essays, the second', 1440, 900, 'essays', "__ss.dive(1, 'essays')", ''],
+        ['changelog', 1440, 900, 'changelog', "__ss.dive(1, 'changelog')", ''], ['changelog (390)', 390, 844, 'changelog', "__ss.dive(5, 'changelog')", ''],
+      ]
+      for (const [label, w, h, sceneId, call, extra] of DIVES) {
+        await s.openEngine(extra ? join(extra) : page, w, h)
+        const scene = await s.evaluate(`__ss.scenes.findIndex(x => x.id === '${sceneId}')`)
+        await s.evaluate(at(scene)); await sleep(1400)
+        const sp0 = Number((await s.evaluate('__ss.sp')).toFixed(2))
+        await s.evaluate(call)
+        await until(() => s.evaluate('__ss.diveState.active'), 2500, 50)
+        await sleep(300)
+        const mid = await s.evaluate("({ t: Number(__ss.diveState.t.toFixed(2)), locked: document.documentElement.classList.contains('locked'), k: __ss.diveState.k, set: __ss.diveState.set })")
+        await sleep(1100)
+        const landed = await s.evaluate("({ open: __ss.diveState.open, opacity: getComputedStyle(document.getElementById('detail')).opacity, title: document.getElementById('detail-title').textContent, focus: document.activeElement.id, cardIn: (r => r.left >= 0 && r.right <= innerWidth)(document.querySelector('.ss .detail-card').getBoundingClientRect()) })")
+        await s.evaluate("document.getElementById('detail-back').click()")
+        await sleep(1400)
+        const after = await s.evaluate("({ active: __ss.diveState.active, hidden: document.getElementById('detail').hidden, locked: document.documentElement.classList.contains('locked'), sp: Number(__ss.sp.toFixed(2)) })")
+        const ok = mid.locked && landed.open && landed.opacity === '1' && landed.focus === 'detail-back' && landed.cardIn && !after.active && after.hidden && !after.locked && after.sp === scene
+        row(`dive: ${label}`, ok, `sp ${sp0}, t at 0.3 s ${mid.t}, locked ${mid.locked}; landed open ${landed.open} at opacity ${landed.opacity}, "${landed.title}", focus ${landed.focus}, card in view ${landed.cardIn}; closed ${!after.active && after.hidden && !after.locked}, sp after ${after.sp}`)
+      }
+      await s.viewport(1440, 900)
+
+      // Chimera (round 14): first card, its picture and marks; the apex body highest and clear of the headline; its detail
+      await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}`)); await sleep(250)
+      const card = await s.evaluate(`(() => { const li = document.querySelector('.ss #projects .ring li'), a = li.querySelector('a'), img = a.querySelector('img'), r = li.getBoundingClientRect(), cs = getComputedStyle(li); return { name: a.querySelector('strong').textContent.trim(), k: a.dataset.k, href: a.getAttribute('href'), src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth === 960 && img.naturalHeight === 600, marks: [...a.querySelectorAll('.tech svg.ti')].map(s => s.getAttribute('aria-label')), shown: cs.visibility === 'visible' && parseFloat(cs.opacity) > 0.9 && r.top >= 0 && r.bottom <= innerHeight, text: a.textContent } })()`)
+      const bodies = []; for (let k = 0; k < 7; k++) bodies.push(await s.evaluate(`__ss.bodyPos('projects', ${k})`))
+      const box = await s.evaluate('__ss.dustBox()')
+      const apex = bodies[0], highest = bodies.slice(1).every(b => apex.y < b.y), clear = box && box.n > 0 && apex.y + apex.radius <= box.top
+      const text = await s.evaluate("__ss.detailText('projects', 0)")
+      const tech = (await s.evaluate("__ss.detailTech('projects', 0)")).map(i => i.name)
+      const detail = await s.evaluate(`(() => { const a = document.getElementById('detail-link'), g = document.getElementById('detail-github'); return { title: document.getElementById('detail-title').textContent, blurb: document.getElementById('detail-blurb').textContent, href: a.href, label: document.getElementById('detail-link-label').textContent, newTab: a.target === '_blank' && /noopener/.test(a.rel), source: g.hidden ? '' : g.href } })()`)
+      const wrong = []
+      if (card.name !== 'Chimera' || card.k !== '0') wrong.push(`first card ${card.name} (k ${card.k})`)
+      if (card.href !== CHIMERA.site) wrong.push(`card href ${card.href}`)
+      if (!/chimera/.test(card.src) || !card.loaded) wrong.push(`picture ${card.src} ${card.loaded ? '' : 'not loaded at 960x600'}`)
+      if (card.marks.join('|') !== EXTRA_TECH.Chimera.join('|')) wrong.push(`card marks ${card.marks.join(', ')}`)
+      if (!card.shown) wrong.push('card not shown at the hold')
+      if (BANNED.test(card.text) || BANNED.test(text || '')) wrong.push('React, TypeScript or Node in the copy')
+      if (!highest) wrong.push(`apex not the highest body: ${bodies.map(b => Math.round(b.y)).join(' ')}`)
+      if (!clear) wrong.push(`apex glow to ${Math.round(apex.y + apex.radius)} against the headline from ${box && Math.round(box.top)}`)
+      if (detail.title !== 'Chimera' || !/Unreal Engine 5/.test(detail.blurb) || !/painted hill town/.test(detail.blurb)) wrong.push(`detail copy: ${detail.title}: ${detail.blurb.slice(0, 60)}`)
+      if (detail.href !== CHIMERA.site || detail.label !== CHIMERA.cta || !detail.newTab) wrong.push(`detail link ${detail.label} ${detail.href} ${detail.newTab ? '' : 'not a new tab'}`)
+      if (detail.source !== CHIMERA.source) wrong.push(`source link ${detail.source}`)
+      if (tech.join('|') !== EXTRA_TECH.Chimera.join('|')) wrong.push(`detail marks ${tech.join(', ')}`)
+      row('chimera: first card, apex body, detail', !wrong.length, wrong.join('; ') || `apex y ${Math.round(apex.y)} above the headline at ${box && Math.round(box.top)}, "${detail.label}"`)
+    })
+
+    // ---------------------------------------------------------------- a forced context loss
+    await group('context', async () => {
+      // Canvas2D takes over for the rest of the visit, the note says so, and the stations still travel
+      expected = [/CONTEXT_LOST_WEBGL/i, /WebGL context lost/i]
+      try {
+        await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}`))
+        const before = await s.evaluate('__ss.renderer')
+        const fpsBefore = await s.evaluate(`new Promise(done => { const f0 = __ss.frames; setTimeout(() => done(__ss.frames - f0), 1000) })`)
+        await s.evaluate("document.querySelector('.ss #sky').getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()")
+        const switched = await until(() => s.evaluate("__ss.renderer === 'canvas2d'"), 3000, 50)
+        await sleep(500)
+        const f0 = await s.evaluate('__ss.frames'); await sleep(1000); const fps = await s.evaluate('__ss.frames') - f0
+        await s.goto(NEWS); await sleep(300)
+        const state = await s.evaluate("({ renderer: __ss.renderer, skies: document.querySelectorAll('.ss canvas#sky').length, drawn: !!document.querySelector('.ss #sky').getContext('2d'), note: (f => f.hidden ? '' : f.textContent)(document.getElementById('fallback')), sp: Number(__ss.sp.toFixed(2)), ghosts: 0 })")
+        const ghost = await s.evaluate(GHOSTS)
+        const ok = before === 'webgl2' && switched && fps >= 10 && state.skies === 1 && state.drawn && /context lost/i.test(state.note) && state.sp === NEWS && !ghost.out.length
+        row('context loss', ok, `${before} to ${state.renderer} (${switched ? 'switched' : 'not switched'}), ${fpsBefore} frames in 1 s before, ${fps} after, one sky ${state.skies === 1}, note "${state.note}", travels to sp ${state.sp}, ghosts ${ghost.out.join(' ') || 'none'}; expected messages: ${expectedSeen.join(' | ') || 'none'}`)
+      } finally { await sleep(300); expected = [] }
+    })
+
+    // ---------------------------------------------------------------- accessibility
+    await group('a11y', async () => {
+      await s.openEngine(page)
+      // names: scenes labelled, marks named or hidden, every link and button named, letter regions labelled, the dialog modal
+      const names = await s.evaluate(`(() => {
+        const named = (el) => !!(el.textContent.trim() || el.getAttribute('aria-label') || el.getAttribute('title'));
+        return {
+          scenes: [...document.querySelectorAll('.ss .scene')].filter(x => !x.getAttribute('aria-label')).map(x => x.id),
+          marks: [...document.querySelectorAll('.ss svg.ti')].filter(v => !(v.getAttribute('aria-hidden') === 'true' || (v.getAttribute('role') === 'img' && v.getAttribute('aria-label') && (v.querySelector('title') || {}).textContent === v.getAttribute('aria-label')))).length,
+          links: [...document.querySelectorAll('.ss a')].filter(a => !named(a)).map(a => a.getAttribute('href')),
+          buttons: [...document.querySelectorAll('.ss button')].filter(b => !named(b)).map(b => b.className),
+          regions: [...document.querySelectorAll('.ss .issue-body')].filter(b => !(b.getAttribute('role') === 'region' && b.tabIndex === 0 && document.getElementById(b.getAttribute('aria-labelledby')))).length,
+          dialog: (d => d.getAttribute('role') === 'dialog' && d.getAttribute('aria-modal') === 'true' && d.getAttribute('aria-labelledby') === 'detail-title')(document.getElementById('detail')),
+          live: (l => l && l.getAttribute('aria-live') === 'polite')(document.getElementById('orbit-announce')),
+        };
+      })()`)
+      const namesOk = !names.scenes.length && !names.marks && !names.links.length && !names.buttons.length && !names.regions && names.dialog && names.live
+      row('a11y: names, regions, dialog', namesOk, `unlabelled scenes ${names.scenes.join(' ') || 'none'}, unnamed marks ${names.marks}, links ${names.links.join(' ') || 'none'}, buttons ${names.buttons.join(' ') || 'none'}, unlabelled letter regions ${names.regions}, dialog modal ${names.dialog}, live region ${names.live}`)
+
+      // Tab order at three holds: focus never lands in an inert or unseen element, and reaches the station's own controls
+      const tabBad = [], reached = []
+      for (const hold of [LEGEND.indexOf('Projects'), NEWS, LEGEND.indexOf('Contact')]) {
+        await s.goto(hold); await sleep(300)
+        await s.evaluate('document.activeElement && document.activeElement.blur && document.activeElement.blur()')
+        let inStation = 0
+        for (let i = 0; i < 40; i++) {
+          await s.key('Tab', 9, 40)
+          const f = await s.evaluate(FOCUS)
+          if (f.none) continue
+          if (f.inert || !f.seen || (f.pin >= 0 && f.pin !== hold) || f.detail) tabBad.push(`hold ${hold}, Tab ${i + 1}: ${f.what} (pin ${f.pin}, inert ${f.inert}, seen ${f.seen})`)
+          if (f.pin === hold) inStation++
+        }
+        reached.push(`${LEGEND[hold]} ${inStation}`)
+        if (!inStation) tabBad.push(`hold ${hold}: Tab never reached the station`)
+      }
+      row('a11y: Tab never lands in an inert or unseen element', !tabBad.length, `${tabBad.slice(0, 4).join('; ') || 'clean'}; Tab stops in the station: ${reached.join(', ')}`)
+
+      // a dive from a real click and from Enter: focus to Back, the scenes inert, Tab kept out of them, Escape returns focus to the card
+      const diveBad = []
+      for (const how of ['click', 'Enter']) {
+        await s.openEngine(page)
+        await s.evaluate(at(LEGEND.indexOf('Projects'))); await sleep(1400)
+        const cardSel = '.ss #projects a[data-set="projects"][data-k="3"]'
+        if (how === 'click') await s.click(cardSel)
+        else { await s.evaluate(`document.querySelector('${cardSel}').focus()`); await s.key('Enter', 13, 0) }
+        const opened = await until(() => s.evaluate('__ss.diveState.open'), 4000, 50)
+        await sleep(200)
+        const st = await s.evaluate(`({ focus: document.activeElement.id, inert: document.getElementById('scenes').inert, title: document.getElementById('detail-title').textContent })`)
+        const out = []
+        for (let i = 0; i < 8; i++) { await s.key('Tab', 9, 40); const f = await s.evaluate(FOCUS); if (!f.none && (f.inert || f.pin >= 0)) out.push(f.what) }
+        await s.key('Escape', 27, 0)
+        const closed = await until(() => s.evaluate('!__ss.diveState.active'), 3000, 50)
+        await sleep(200)
+        const back = await s.evaluate(`({ card: document.activeElement === document.querySelector('${cardSel}'), what: document.activeElement.tagName + '.' + document.activeElement.className, inert: document.getElementById('scenes').inert })`)
+        if (!(opened && st.focus === 'detail-back' && st.inert && !out.length && closed && back.card && !back.inert)) diveBad.push(`${how}: ${JSON.stringify({ opened, ...st, tabIntoScenes: out.join(' '), closed, ...back })}`)
+      }
+      row('a11y: dive focus (click and Enter)', !diveBad.length, diveBad.join('; ') || 'focus to Back, scenes inert, Tab stays out, Escape returns focus to the card')
+    })
+
+    // ---------------------------------------------------------------- every card fits
+    await group('fit', async () => {
+      const SETS = [['projects', '#projects .ring'], ['tools', '#tools .ring'], ['writing', '#writing .pieces'], ['essays', '#essays .pieces'], ['newsletter', '#newsletter .pieces'], ['changelog', '#changelog .pieces']]
+      for (const [w, h] of SIZES) {
+        const bad = [], spans = []
+        for (const [id, sel] of SETS) {
+          await s.openEngine(join(`p=${SCENE_IDS.indexOf(id)}`), w, h); await sleep(200)
+          const fit = await s.evaluate(FIT(sel))
+          spans.push(`${id} ${fit.shown}`)
+          if (!fit.inside || fit.overlaps || fit.overflowX) bad.push(`${id}: ${JSON.stringify(fit)}`)
+        }
+        row(`cards fit (${w}x${h})`, !bad.length, bad.join('; ').slice(0, 400) || spans.join(', '))
+      }
+      await s.viewport(1440, 900)
+    })
+
+    // ---------------------------------------------------------------- teardown
+    // leave for home and come back three times. Listeners on window and document
+    // return to home's count, the debug hook and the html classes go, dispose
+    // reports loseContext, and the heap after GC holds within 10%.
+    await group('teardown', async () => {
+      consoleScope = 'home'
+      await s.viewport(1440, 900)
+      await s.open(`${origin}/`)
       await sleep(1500)
-      const state = await s.evaluate(`({ ss: typeof window.__ss, classes: ['ss-on', 'locked', 'calm'].filter(c => document.documentElement.classList.contains(c)), dir: document.documentElement.hasAttribute('data-dir'), vh: document.documentElement.style.getPropertyValue('--vh'), tags: document.querySelectorAll('.moon-tag').length })`)
-      cycles.push({ cycle, mounted, mountedWindow, left, ...state, window: await s.listeners('window'), document: await s.listeners('document'), heap: await s.heap(), disposed: s.disposals.length, loseContext: s.disposals.at(-1) === true })
-    }
-    const heapOk = cycles.every(c => c.heap <= cycles[0].heap * 1.1)
-    const teardownOk = cycles.every(c => c.mounted && c.mountedWindow > baseline.window && c.left && c.ss === 'undefined' && !c.classes.length && !c.dir && !c.vh && !c.tags && c.window === baseline.window && c.document === baseline.document && c.disposed === c.cycle && c.loseContext) && heapOk
-    const mb = n => (n / 1048576).toFixed(1)
-    row('teardown and remount', teardownOk, `home listeners window ${baseline.window}, document ${baseline.document}; ` + cycles.map(c => `cycle ${c.cycle}: mounted ${c.mounted} (window ${c.mountedWindow}), left: window ${c.window}, document ${c.document}, __ss ${c.ss}, html ${c.classes.join(' ') || 'clean'}, disposed ${c.disposed} (loseContext ${c.loseContext}), heap ${mb(c.heap)} MB`).join('; '))
+      consoleScope = 'scroll'
+      const baseline = { window: await s.listeners('window'), document: await s.listeners('document') }
+      const cycles = []
+      const disposed0 = s.disposals.length
+      for (let cycle = 1; cycle <= 3; cycle++) {
+        await s.evaluate(`window.___navigate(${JSON.stringify(new URL(page).pathname + new URL(page).search)})`)
+        const mounted = await s.running()
+        // on the route the counter must see the engine's own listeners, or the comparison proves nothing
+        const mountedWindow = await s.listeners('window')
+        await s.evaluate(`window.___navigate('/')`)
+        const left = await until(() => s.evaluate(`location.pathname === '/' && !document.documentElement.classList.contains('ss-on') && window.__ss === undefined`))
+        await sleep(1500)
+        const state = await s.evaluate(`({ ss: typeof window.__ss, classes: ['ss-on', 'locked', 'calm'].filter(c => document.documentElement.classList.contains(c)), dir: document.documentElement.hasAttribute('data-dir'), vh: document.documentElement.style.getPropertyValue('--vh'), tags: document.querySelectorAll('.moon-tag').length })`)
+        cycles.push({ cycle, mounted, mountedWindow, left, ...state, window: await s.listeners('window'), document: await s.listeners('document'), heap: await s.heap(), disposed: s.disposals.length - disposed0, loseContext: s.disposals.at(-1) === true })
+      }
+      const heapOk = cycles.every(c => c.heap <= cycles[0].heap * 1.1)
+      const teardownOk = cycles.every(c => c.mounted && c.mountedWindow > baseline.window && c.left && c.ss === 'undefined' && !c.classes.length && !c.dir && !c.vh && !c.tags && c.window === baseline.window && c.document === baseline.document && c.disposed === c.cycle && c.loseContext) && heapOk
+      const mb = n => (n / 1048576).toFixed(1)
+      row('teardown and remount', teardownOk, `home listeners window ${baseline.window}, document ${baseline.document}; ` + cycles.map(c => `cycle ${c.cycle}: mounted ${c.mounted} (window ${c.mountedWindow}), left: window ${c.window}, document ${c.document}, __ss ${c.ss}, html ${c.classes.join(' ') || 'clean'}, disposed ${c.disposed} (loseContext ${c.loseContext}), heap ${mb(c.heap)} MB`).join('; '))
+    })
 
     await session.close(); session = null
     row('console clean', consoleLog.length === 0, consoleLog.join(' | ').slice(0, 600) || 'no errors or warnings on /scroll/ or across the teardown cycles')
-    if (siteLog.length) console.log(`NOTE home's messages (site, not this route): ${siteLog.map(t => t.split('\n')[0].replace(/; visit .*/, '')).join(' | ')}`)
+    if (siteLog.length) console.log(`NOTE other pages' messages (the site's, not this route's): ${[...new Set(siteLog.map(t => t.split('\n')[0].replace(/; visit .*/, '')))].join(' | ')}`)
   }
 } catch (error) {
   row('harness', false, error.message)
@@ -293,7 +946,7 @@ try {
   if (session) try { await session.close() } catch { /* teardown */ }
   if (chrome) { chrome.kill('SIGKILL'); await new Promise(resolve => chrome.once('exit', resolve)) }
   if (profile) try { rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }) } catch { /* temporary profile */ }
-  console.log(`PENDING ENGINE: ${pendingEngine.join(', ')}`)
+  console.log(`PENDING: ${pendingEngine.join(', ')}`)
   console.log(`CHECKS: ${rows.filter(r => r.pass).length} passed, ${rows.filter(r => !r.pass).length} failed`)
   if (rows.some(r => !r.pass)) process.exitCode = 1
 }

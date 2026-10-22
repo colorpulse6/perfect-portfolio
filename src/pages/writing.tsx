@@ -69,7 +69,14 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
     setReaderMode(true)
     setScrollProgress(0)
 
-    requestAnimationFrame(() => {
+    // The reader mounts on the next render. A click renders it before the next
+    // frame; an open from the URL hash on load (the page still hydrating) can
+    // take a few frames more, so the reveal waits for it, half a second at most.
+    const reveal = (frames = 0): void => {
+      if (!document.querySelector(".reader-container")) {
+        if (frames < 30) requestAnimationFrame(() => reveal(frames + 1))
+        return
+      }
       gsap.fromTo(
         ".reader-container",
         { autoAlpha: 0 },
@@ -119,7 +126,8 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
         // Start content reveal after title has time to begin
         revealTimer.current = window.setTimeout(revealContent, 1200)
       }
-    })
+    }
+    requestAnimationFrame(() => reveal())
   }, [stopReveal])
 
   const closeReader = useCallback(() => {

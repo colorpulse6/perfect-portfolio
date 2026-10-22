@@ -84,7 +84,7 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
         const path = `${week}/${block.src.replace(/^\.\//, "")}`
         const src = files.get(path)
         if (!src) throw new Error(`Missing newsletter image: ${path}`)
-        return { ...block, src }
+        return { ...block, src, file: path }
       })
       const formatted = formatDate(date)
       return { num: String(issue), title, date: formatted,
