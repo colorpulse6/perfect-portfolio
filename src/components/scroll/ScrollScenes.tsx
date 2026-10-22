@@ -31,7 +31,12 @@ const ScrollScenes = React.memo(function ScrollScenes({ data }: { data: ScrollDa
     import("./engine/createScrollScenes").then(({ createScrollScenes }) => {
       if (cancelled) return
       document.documentElement.classList.add("ss-on")
-      dispose = createScrollScenes(root.current!, { data }).dispose
+      try {
+        dispose = createScrollScenes(root.current!, { data }).dispose
+      } catch (error) {
+        document.documentElement.classList.remove("ss-on")
+        throw error
+      }
     })
     return () => { cancelled = true; dispose?.() }
   }, [data])

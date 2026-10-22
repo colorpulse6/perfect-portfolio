@@ -57,3 +57,11 @@ test('engine import is inert and listeners use the disposable input helper', () 
   assert.match(engine, /loseContext\(\)/)
   assert.match(engine, /delete window\.__ss/)
 })
+test('a failed engine boot leaves no ss-on class behind', () => {
+  const src = read('src/components/scroll/ScrollScenes.tsx')
+  assert.match(src, /catch[\s\S]*classList\.remove\(["']ss-on["']\)/)
+})
+test('the story reveal wait is cancelled when the reveal is stopped', () => {
+  const src = read('src/pages/writing.tsx')
+  assert.match(src, /cancelAnimationFrame\(revealFrame\.current\)/)
+})

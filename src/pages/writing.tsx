@@ -56,7 +56,9 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
 
   usePageTransition(transitionStatus, ".writings", { enter: 1, exit: 0.03, mount: 0.5 })
 
+  const revealFrame = useRef(0)
   const stopReveal = useCallback(() => {
+    cancelAnimationFrame(revealFrame.current)
     if (revealTimer.current) {
       clearTimeout(revealTimer.current)
       revealTimer.current = 0
@@ -74,7 +76,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
     // take a few frames more, so the reveal waits for it, half a second at most.
     const reveal = (frames = 0): void => {
       if (!document.querySelector(".reader-container")) {
-        if (frames < 30) requestAnimationFrame(() => reveal(frames + 1))
+        if (frames < 30) revealFrame.current = requestAnimationFrame(() => reveal(frames + 1))
         return
       }
       gsap.fromTo(
@@ -127,7 +129,7 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
         revealTimer.current = window.setTimeout(revealContent, 1200)
       }
     }
-    requestAnimationFrame(() => reveal())
+    revealFrame.current = requestAnimationFrame(() => reveal())
   }, [stopReveal])
 
   const closeReader = useCallback(() => {
