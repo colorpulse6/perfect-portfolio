@@ -79,3 +79,6 @@ yarn-error.log
 
 # cosmos capture harness output
 cosmos-captures/
+
+# scroll capture harness output
+scroll-captures/

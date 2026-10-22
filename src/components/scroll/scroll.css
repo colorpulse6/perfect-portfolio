@@ -1,0 +1,428 @@
+@font-face { font-family: "SS Montserrat"; src: url("./fonts/montserrat-var.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+/* Scroll scenes prototype. Tokens follow the approved wormhole study and the
+   site: near-black void, cyan accent, Montserrat headings, monospace labels. */
+
+.ss {
+  color-scheme: dark;
+  --void: #111111;
+  --ink: rgba(232, 236, 255, 0.96);
+  --mute: rgba(190, 200, 240, 0.70);
+  --faint: rgba(160, 172, 220, 0.46);
+  --line: rgba(150, 170, 255, 0.18);
+  --cyan: #36e6db;
+  --panel: rgba(8, 9, 18, 0.7);
+  --mono: "Courier New", "Lucida Console", monospace;
+  --head: "SS Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --vh: 100vh;
+  --hud-bottom: 54px;   /* the measured height of the legend's band at the foot, set by scenes.js */
+}
+
+html.ss-on { background: var(--void); scroll-behavior: auto; }
+html.ss-on body {
+  margin: 0;
+  color: var(--ink);
+  font: 300 16px/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+.ss a { color: inherit; }
+.ss :focus-visible { outline: 2px solid #7cc4ff; outline-offset: 3px; border-radius: 3px; }
+.ss :focus:not(:focus-visible) { outline: none; }
+
+.ss #sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+
+/* Scroll length comes from the spacer sections; the content is pinned. */
+.ss .scene { height: calc(var(--vh) * 3); position: relative; }
+.ss .scene:last-child { height: var(--vh); }
+.ss .pin {
+  position: fixed; inset: 0; z-index: 2;
+  display: grid; place-items: center;
+  padding: 0 24px; box-sizing: border-box;
+  opacity: 0; visibility: hidden;
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+.ss .inner { width: min(100%, 980px); pointer-events: auto; }
+.ss .stagger > * { will-change: transform, opacity; }
+
+/* Type */
+.ss h1, .ss h2 { font-family: var(--head); font-weight: 300; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
+.ss h1 { font-size: clamp(42px, 7.6vw, 108px); line-height: 1.02; }
+.ss h2 { font-size: clamp(30px, 4.6vw, 60px); line-height: 1.1; max-width: 17ch; }
+.ss .tag { font-family: var(--head); font-weight: 300; font-size: clamp(16px, 1.6vw, 21px); color: var(--mute); margin: 18px 0 0; letter-spacing: 0.01em; }
+.ss .lead { max-width: 36em; color: var(--mute); font-size: clamp(15px, 1.2vw, 17px); margin: 22px 0 0; }
+.ss .lead a { color: var(--ink); text-decoration-color: rgba(54, 230, 219, 0.5); text-underline-offset: 3px; }
+.ss .lab {
+  display: block;
+  font: 600 11px/1.5 var(--mono);
+  letter-spacing: 2.4px; text-transform: uppercase;
+  color: var(--faint);
+}
+.ss .lab.small { font-size: 11px; letter-spacing: 1.6px; }
+
+.ss .hero { text-align: center; }
+.ss .hero .lead { margin-inline: auto; }
+.ss .hint {
+  margin: 56px auto 0; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font: 600 11px/1.5 var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--faint);
+}
+.ss .hint-line { width: 1px; height: 46px; background: linear-gradient(180deg, rgba(54, 230, 219, 0), var(--cyan) 50%, rgba(54, 230, 219, 0)); background-size: 100% 200%; animation: hint 2.6s ease-in-out infinite; }
+@keyframes hint { 0% { background-position: 0 100%; } 100% { background-position: 0 -100%; } }
+
+/* About: the bio (round 11) is a readable block under the headline, in the site's
+   own words; the facts sit under it */
+.ss .bio { max-width: 62ch; margin: 22px 0 0; color: var(--mute); font-size: clamp(14px, 1.1vw, 16px); line-height: 1.6; text-align: left; }
+.ss .bio p { margin: 0 0 0.8em; }
+.ss .bio p:last-child { margin-bottom: 0; }
+.ss .bio { margin-inline: auto; }
+.ss .facts { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 32px; }
+.ss .facts li { padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink); font-size: 15px; line-height: 1.5; }
+.ss .facts .lab { margin-bottom: 6px; }
+
+/* Projects. Screenshots use the Atlas preview-card treatment: a 16:10 window on
+   the void, quiet until hovered, no loud border. */
+.ss .ring { list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 28px; }
+.ss .ring a { display: grid; grid-template-columns: 72px 1fr; grid-template-rows: auto auto auto auto; column-gap: 14px; text-decoration: none; padding: 16px 0 0; border-top: 1px solid var(--line); min-height: 100%; }
+.ss .ring .thumb { grid-row: 1 / 5; align-self: start; display: block; aspect-ratio: 16 / 10; border-radius: 6px; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset, 0 6px 20px rgba(0, 0, 0, 0.35); }
+/* an app's technologies as marks (round 12): a 14px row under the kind, dim until
+   the card is hovered or focused; each mark carries its name as tooltip */
+.ss .ring .tech { display: flex; flex-wrap: wrap; gap: 7px; margin: 7px 0 0; color: var(--faint); opacity: 0.75; transition: opacity .25s, color .25s; }
+.ss .ring .tech .ti { width: 14px; height: 14px; }
+.ss .ring a:hover .tech, .ss .ring a:focus-visible .tech { opacity: 1; color: var(--mute); }
+.ss .ring .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0.82; filter: saturate(0.85); transition: opacity .25s, filter .25s; }
+.ss .ring strong { display: block; font-family: var(--head); font-weight: 500; font-size: 19px; letter-spacing: -0.01em; margin-bottom: 4px; }
+.ss .ring p { margin: 8px 0 0; color: var(--mute); font-size: 14px; line-height: 1.5; }
+.ss .ring a:hover strong, .ss .ring a:focus-visible strong { color: var(--cyan); }
+.ss .ring a:hover .thumb img, .ss .ring a:focus-visible .thumb img { opacity: 1; filter: none; }
+/* an app with no screenshot in the repo wears a typographic cover: its mark, in the thumb's window */
+.ss .ring .cover { grid-row: 1 / 5; align-self: start; }
+.ss .ring .cover b { font-size: 18px; }
+.ss .ring a:hover .cover, .ss .ring a:focus-visible .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+
+/* Writing and the newsletter. The pieces have no cover art, so each wears a
+   typographic cover: its number set light on the void, fiction in the Atlas's
+   lilac, letters in blue. Two columns, filled down then across. */
+.ss .pieces { list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 14px 48px; }
+.ss .pieces a { display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto; column-gap: 14px; align-items: center; text-decoration: none; }
+.ss .pieces .cover { grid-row: 1 / 3; }
+/* a piece with real art (the essays' hero images) wears the same window as the
+   project screenshots: 16:10, hairline, dim until hover */
+.ss .pieces .thumb { grid-row: 1 / 3; display: block; aspect-ratio: 16 / 10; border-radius: 5px; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset; transition: box-shadow .25s; }
+.ss .pieces .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0.82; filter: saturate(0.85); transition: opacity .25s, filter .25s; }
+.ss .pieces a:hover .thumb img, .ss .pieces a:focus-visible .thumb img { opacity: 1; filter: none; }
+.ss .pieces strong { display: block; align-self: end; font-family: var(--head); font-weight: 400; font-size: 17px; line-height: 1.3; }
+.ss .pieces .kind { display: block; align-self: start; margin-top: 3px; }
+.ss .cover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; aspect-ratio: 16 / 10; border-radius: 5px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset; font-family: var(--head); line-height: 1; transition: box-shadow .25s; }
+.ss .cover b { font-weight: 300; font-size: 15px; letter-spacing: 0.04em; color: var(--ink); }
+.ss .cover .lab { display: none; }
+.ss .cover.fiction b { color: rgba(232, 206, 246, 0.95); }
+.ss .cover.letter b { color: rgba(186, 206, 255, 0.95); }
+.ss .cover.app b { color: rgba(186, 240, 232, 0.95); letter-spacing: 0.08em; }
+.ss .cover.essay b { color: rgba(250, 200, 222, 0.95); }
+.ss .cover.log b { color: rgba(170, 215, 245, 0.95); }
+.ss .cover.more { background: rgba(8, 9, 18, 0.5); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset, 0 0 0 1px rgba(150, 170, 255, 0.06); }
+.ss .pieces a:hover strong, .ss .pieces a:focus-visible strong { color: var(--cyan); }
+.ss .pieces a:hover .cover, .ss .pieces a:focus-visible .cover, .ss .pieces a:hover .thumb, .ss .pieces a:focus-visible .thumb { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+/* Writing holds every story (sixteen since round 11): two columns of eight, compact rows */
+.ss #writing .pieces { grid-template-rows: repeat(8, auto); gap: 8px 32px; }
+.ss #writing .pieces a { grid-template-columns: 48px 1fr; column-gap: 12px; }
+.ss #writing .pieces strong { font-size: 15px; }
+
+/* Work, contact */
+.ss .pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 30px; padding: 14px 28px;
+  border: 1px solid rgba(54, 230, 219, 0.35); border-radius: 999px;
+  color: var(--ink); text-decoration: none; white-space: nowrap;
+  font: 400 12px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase;
+  background: rgba(54, 230, 219, 0.04); box-shadow: 0 0 30px rgba(54, 230, 219, 0.08);
+  transition: background .25s, box-shadow .25s, transform .25s;
+}
+.ss .pill span { color: var(--cyan); transition: transform .25s; }
+.ss .pill:hover { background: rgba(54, 230, 219, 0.12); box-shadow: 0 0 50px rgba(54, 230, 219, 0.22); transform: translateY(-2px); }
+.ss .pill:hover span { transform: translate(3px, -3px); }
+.ss .links { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.ss .links a { font: 600 11px/1.5 var(--mono); letter-spacing: 2.4px; text-transform: uppercase; color: var(--mute); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.ss .links a:hover { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .atlas-wrap { margin: 40px 0 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.ss .atlas-wrap .lab { margin-left: 2px; }
+
+/* HUD: the study's top-left mark and bottom-left list. */
+.ss .hud { position: fixed; z-index: 5; font: 600 12px/1.5 var(--mono); letter-spacing: 2px; text-transform: uppercase; }
+.ss .hud-top { top: calc(20px + env(safe-area-inset-top, 0px)); left: 22px; color: var(--ink); pointer-events: none; }
+.ss .hud-top .dot { display: inline-block; width: 7px; height: 7px; border-radius: 99px; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); margin-right: 9px; vertical-align: 1px; }
+.ss .hud-top .sub { color: var(--faint); }
+.ss .hud-nav { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 22px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 11px; }
+.ss .hud-nav a { color: var(--faint); text-decoration: none; transition: color .3s; padding: 4px 0; }
+.ss .hud-nav a:hover { color: var(--mute); }
+.ss .hud-nav a[aria-current="true"] { color: var(--ink); }
+/* A mark from the sprite (round 12): one colour, the text's, so it dims and tints
+   with whatever holds it. Sized where it is used. */
+.ss .ti { display: inline-block; width: 16px; height: 16px; flex: none; fill: currentColor; vertical-align: middle; }
+/* Nic's links, top right on every scene (round 12: the site's marks, 16px, in the
+   legend's voice): dimmed until hover or focus, when the mark lights and a hairline
+   appears under it; each is a 28px target with its name as tooltip. The last keeps
+   its word, Support. The pins keep their cards and tags below 56px, so nothing in
+   a scene reaches this row. */
+.ss .hud-social { top: calc(20px + env(safe-area-inset-top, 0px)); right: 22px; display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 1.6px; }
+.ss .hud-social a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 28px; min-height: 28px; box-sizing: border-box; padding: 5px 6px 4px; color: var(--faint); text-decoration: none; border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; }
+.ss .hud-social a:hover, .ss .hud-social a:focus-visible { color: var(--ink); border-bottom-color: rgba(54, 230, 219, 0.55); }
+.ss .hud-social .support span { line-height: 1; padding-top: 1px; }
+
+/* Prototype controls (not part of the design). Folded to one chip under the links
+   row since round 11; the chip opens the panel. */
+.ss .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ss .chip {
+  font: inherit; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 10px; cursor: pointer;
+}
+.ss .chip:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.45); }
+.ss .chip[aria-pressed="true"] { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .note { margin: 0; color: var(--faint); letter-spacing: 0.3px; font-size: 11px; }
+
+.ss #fallback { position: fixed; inset: auto 0 0 0; margin: 0; padding: 10px 22px; z-index: 20; font: 11px/1.5 var(--mono); color: var(--faint); letter-spacing: 1px; }
+
+/* Project detail: where the dive lands. The same card as the Atlas preview, larger. */
+.ss html.locked { overflow: hidden; }
+.ss .detail { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; box-sizing: border-box; opacity: 0; pointer-events: none; }
+.ss .detail[hidden] { display: none; }
+.ss .detail.on { pointer-events: auto; }
+.ss .detail-card { width: min(100%, 720px); max-height: calc(var(--vh) - 96px);   /* clear of the top mark and the links row */ overflow: auto; border-radius: 12px; background: rgba(8, 9, 18, 0.86); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transform-origin: 50% 50%; }
+.ss .detail-media { position: relative; margin: 0; aspect-ratio: 16 / 10; background: #0c0d15; overflow: hidden; }
+.ss .detail-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss .detail-media img[hidden] { display: none; }
+/* the typographic cover at size, for pieces with no art */
+.ss .detail-type { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-family: var(--head); background: radial-gradient(ellipse at 50% 58%, rgba(54, 44, 86, 0.55), rgba(8, 9, 18, 0) 70%); }
+.ss .detail-type[hidden] { display: none; }
+.ss .detail-type b { font-weight: 200; font-size: clamp(72px, 14vw, 132px); line-height: 1; letter-spacing: 0.03em; color: var(--ink); }
+.ss .detail-type.fiction b { color: rgba(232, 206, 246, 0.95); }
+.ss .detail-type.letter b { color: rgba(186, 206, 255, 0.95); }
+.ss .detail-type.app b { color: rgba(186, 240, 232, 0.95); letter-spacing: 0.08em; }
+.ss .detail-type.essay b { color: rgba(250, 200, 222, 0.95); }
+.ss .detail-type.log b { color: rgba(170, 215, 245, 0.95); }
+.ss .detail-body { padding: 18px 24px 24px; text-align: left; }
+.ss .detail-body h2 { font-size: clamp(26px, 3vw, 36px); margin-top: 6px; max-width: none; }
+.ss .detail-body .lead { margin: 12px 0 0; max-width: none; font-size: 15px; }
+.ss .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin: 22px 0 0; }
+.ss .detail-actions .pill { margin-top: 0; padding: 12px 22px; letter-spacing: 2.4px; }
+.ss .detail-github { font: 600 11px/1.5 var(--mono); letter-spacing: 2.4px; text-transform: uppercase; color: var(--mute); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.ss .detail-github:hover { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .detail-github[hidden] { display: none; }
+.ss .detail-actions .chip { margin-left: auto; }
+/* an app's technologies on the detail (round 12): mark and name per item, the
+   row wrapping; two names stand as their marks alone (scenes.js) */
+.ss .detail-tech { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 16px 0 0; padding: 0; color: var(--mute); }
+.ss .detail-tech[hidden] { display: none; }
+.ss .detail-tech li { display: inline-flex; align-items: center; gap: 7px; font: 600 11px/1.5 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; }
+@media (max-width: 550px) {
+  .ss .detail { padding: 12px; }
+  .ss .detail-body { padding: 14px 16px 18px; }
+  .ss .detail-actions { gap: 10px 16px; }
+  .ss .detail-actions .chip { margin-left: 0; }
+}
+
+/* Direction: orbit. Content sits on the dark side, the body fills the right. */
+
+/* Direction: signal. Headlines are drawn by particles; the DOM text stays for readers. */
+
+/* Direction: hybrid. Signal's centred layout and dust headlines, Descent's travel,
+   and the Atlas galaxies for the projects (labels hang under each galaxy on desktop). */
+.ss .inner { text-align: center; }
+.ss h2, .ss .lead, .ss .hint { margin-inline: auto; }
+.ss .facts li { border-top: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+.ss .pieces { text-align: left; max-width: 760px; margin-inline: auto; }
+.ss .links { justify-content: center; }
+.ss .atlas-wrap { align-items: center; }
+.ss:not(.calm) .pin h1, .ss:not(.calm) .pin h2 { opacity: 0; }
+/* the Newsletter station reads as Orbit does: copy left, on the dark side of the body */
+.ss #newsletter .inner { text-align: left; }
+.ss #newsletter h2 { margin-inline: 0; }
+/* the moons' tags: the issue number under each moon, placed by the renderer */
+.ss .moon-tags { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.ss .moon-tags[hidden] { display: none; }
+.ss .moon-tag {
+  position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: auto; cursor: pointer;
+  font: 600 11px/1 var(--mono); letter-spacing: 1.4px;
+  color: rgba(255, 224, 184, 0.92); background: rgba(8, 9, 18, 0.72);
+  border: 1px solid rgba(255, 200, 140, 0.28); border-radius: 999px; padding: 5px 8px;
+  will-change: transform, opacity; transition: border-color .25s, color .25s;
+}
+.ss .moon-tag:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.5); }
+@media (min-width: 769px) {
+  /* each project is a small preview card hung off its galaxy */
+  .ss .ring { position: fixed; inset: 0; margin: 0; display: block; pointer-events: none; }
+  .ss .ring li { position: absolute; left: 0; top: 0; width: 162px; margin-left: -81px; text-align: center; visibility: hidden; pointer-events: auto; will-change: transform, opacity; }
+  .ss .ring a { display: block; border-top: 0; padding: 6px 6px 8px; border-radius: 10px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: box-shadow .25s; }
+  .ss .ring a:hover, .ss .ring a:focus-visible { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4), 0 10px 40px rgba(0, 0, 0, 0.5); }
+  .ss .ring .thumb, .ss .ring .cover { width: 100%; margin-bottom: 8px; border-radius: 6px; }
+  .ss .ring .cover b { font-size: 30px; }
+  .ss .ring strong { font-size: 16px; margin-bottom: 2px; }
+  .ss .ring .lab { font-size: 11px; letter-spacing: 1.4px; }
+  .ss .ring .tech { justify-content: center; margin-top: 6px; }
+  .ss .ring p { display: none; }
+  /* each piece of writing is a small card hung off its star in the constellation */
+  .ss .pieces { position: fixed; inset: 0; margin: 0; max-width: none; display: block; pointer-events: none; }
+  .ss .pieces li { position: absolute; left: 0; top: 0; width: 150px; margin-left: -75px; text-align: center; visibility: hidden; pointer-events: auto; will-change: transform, opacity; }
+  .ss .pieces a { display: block; padding: 6px 6px 8px; border-radius: 10px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: box-shadow .25s; }
+  .ss .pieces a:hover, .ss .pieces a:focus-visible { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4), 0 10px 40px rgba(0, 0, 0, 0.5); }
+  .ss .pieces .cover, .ss .pieces .thumb { width: 100%; margin-bottom: 8px; border-radius: 6px; }
+  .ss .pieces .cover b { font-size: 34px; }
+  .ss .pieces .cover .lab { display: block; font-size: 11px; letter-spacing: 1.4px; }
+  .ss .pieces strong { font-size: 14px; font-weight: 500; line-height: 1.25; }
+  .ss .pieces .kind { display: none; }
+  /* the wreath of sixteen stories: the cards a size down so they clear each other */
+  .ss #writing .pieces li { width: 120px; margin-left: -60px; }
+  .ss #writing .pieces .cover b { font-size: 26px; }
+  .ss #writing .pieces strong { font-size: 13px; }
+  /* the Newsletter station borrows Orbit: the copy and the list of letters sit on
+     the dark side, left; the ringed planet fills the right, its moons tagged by
+     the renderer. The list stays a list (no hung cards); its rows are at the end of this file. */
+  .ss #newsletter .inner { justify-self: start; margin-left: clamp(0px, 6vw, 110px); }
+}
+@media (max-width: 768px) {
+  .ss .ring a { border-top: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; text-align: left; }
+  .ss .pieces a { text-align: left; }
+  .ss .facts, .ss .ring { grid-template-columns: 1fr 1fr; }
+  .ss .pieces { gap: 12px 28px; }
+  .ss #newsletter .pin { align-items: start; padding-top: 12vh; }
+}
+@media (max-width: 550px) {
+  .ss .hud-top { display: none; }
+  .ss .hud-nav { gap: 6px 14px; font-size: 11px; letter-spacing: 1.2px; right: 22px; }
+  .ss .facts { grid-template-columns: 1fr; gap: 14px; }
+  /* every app stays on the phone: two columns of compact rows, no blurb */
+  .ss .ring { grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .ss .ring a { grid-template-columns: 64px 1fr; grid-template-rows: auto auto auto; column-gap: 10px; padding-top: 12px; }
+  .ss .ring .thumb, .ss .ring .cover { grid-row: 1 / 4; }
+  .ss .ring .tech { gap: 6px; margin-top: 5px; }
+  .ss .ring .cover b { font-size: 15px; }
+  .ss .ring strong { font-size: 15px; line-height: 1.3; margin-bottom: 3px; }
+  .ss .ring .lab { font-size: 11px; letter-spacing: 1.4px; }
+  .ss .ring p { display: none; }
+  .ss .ring a { padding: 0 0 10px; }
+  .ss .pieces { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; gap: 12px; }
+  .ss .pieces a { grid-template-columns: 64px 1fr; column-gap: 12px; }
+  /* the sixteen stories stay on the phone: two columns of eight compact rows */
+  .ss #writing .pieces { grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(8, auto); gap: 8px 12px; }
+  .ss #writing .pieces a { grid-template-columns: 40px 1fr; column-gap: 8px; }
+  .ss #writing .pieces strong { font-size: 13px; line-height: 1.25; }
+  .ss #writing .pieces .kind { display: none; }
+  .ss .bio { font-size: 14px; }
+  /* on a phone the bio carries the facts (the three repeat it), so the list goes */
+  .ss #about .facts { display: none; }
+  .ss .lead { margin-top: 16px; }
+  .ss .pill { margin-top: 22px; padding: 12px 22px; letter-spacing: 2.4px; }
+  .ss .hint { margin-top: 36px; }
+  .ss .pin { padding: 0 20px; }
+  .ss .note { display: none; }
+}
+
+/* Calm motion (prefers-reduced-motion, or the Calm chip): no autonomous animation. */
+.ss .calm .hint-line { animation: none; }
+.ss .calm .pill, .ss .calm .pill span, .ss .calm .hud-nav a, .ss .calm .hud-social a, .ss .calm .orbit-btn { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss .hint-line { animation: none; }
+}
+
+/* Without JavaScript the scenes stack as a plain page. */
+.ss .nojs .pin { position: static; opacity: 1; visibility: visible; }
+
+/* Dust headlines are set one weight up so each stroke holds particles and the solid text matches them. */
+.ss h1, .ss h2 { font-weight: 500; }
+
+/* The Newsletter station (rounds 9 and 10): the orbit controls under the headline,
+   the index of letters as one chip each (the lit one is at the front of the ring),
+   and the reader, a glass panel that shows the letter at the front: its number
+   and date, title, deck and opening, in the site's reading style (Montserrat
+   title, a hairline under the deck, a serif body). Beside the planet (Orbit, the
+   hybrid) the column is at most 600px or 45vw; Descent and Signal centre it; on
+   phones it is the width of the screen. The column is capped by the viewport
+   (clear of the links row above and the measured bottom stack below) and the
+   letter's text is what shrinks: since round 11 it is the whole letter, scrolling
+   inside the panel under fade masks that show where there is more. Nothing in the
+   panel takes the pointer but the text and its link, so sideways input passes
+   through to the ring; the vertical wheel over the text is scenes.js's. */
+.ss #newsletter .inner { display: flex; flex-direction: column; max-height: calc(var(--vh) - 84px - var(--hud-bottom)); width: min(100%, 600px); }
+.ss #newsletter h2 { font-size: clamp(26px, 2.8vw, 38px); max-width: none; flex: none; }
+.ss .orbit-nav { flex: none; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font: 600 11px/1 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; color: var(--mute); }
+.ss .orbit-btn { font: 400 16px/1 var(--mono); width: 26px; height: 26px; padding: 0 0 2px; box-sizing: border-box; color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; transition: color .25s, border-color .25s; }
+.ss .orbit-btn:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.5); }
+.ss .orbit-btn[aria-disabled="true"] { color: var(--faint); border-color: rgba(150, 170, 255, 0.1); cursor: default; }
+.ss .orbit-pos { min-width: 9ch; text-align: center; color: var(--ink); }
+.ss .orbit-hint { color: var(--faint); letter-spacing: 1.2px; text-transform: none; }
+/* the index: a chip per letter; the title and date stay in the chip for screen readers */
+.ss #newsletter .index { flex: none; position: static; display: flex; flex-wrap: wrap; gap: 4px; margin: 12px 0 0; max-width: none; pointer-events: auto; }
+/* (visibility is inherited, not set: a chip set visible outlived its hidden pin, round 11) */
+.ss #newsletter .index li { position: static; display: block; width: auto; margin: 0; visibility: inherit; }
+.ss #newsletter .index a { display: block; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; text-decoration: none; }
+.ss #newsletter .index .cover { width: 30px; height: 22px; margin: 0; aspect-ratio: auto; border-radius: 4px; }
+.ss #newsletter .index .cover b { font-size: 11px; color: var(--mute); }
+.ss #newsletter .index a:hover .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+.ss #newsletter .index .cover .lab, .ss #newsletter .index strong, .ss #newsletter .index .kind, .ss .vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ss #newsletter .index li.front .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.55) inset; }
+.ss #newsletter .index li.front .cover b { color: var(--cyan); }
+.ss .moon-tag.front { color: var(--ink); border-color: rgba(54, 230, 219, 0.55); }
+/* the reader */
+.ss .reader { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 14px 0 0; padding: 20px 24px 18px; box-sizing: border-box; border-radius: 12px; background: rgba(8, 9, 18, 0.74); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 14px 44px rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: left; pointer-events: none; will-change: opacity; }
+.ss .issue { display: flex; flex-direction: column; min-height: 0; }
+.ss .issue[hidden] { display: none; }
+.ss .issue-meta { margin: 0; flex: none; }
+.ss .issue h3 { flex: none; margin: 8px 0 0; font-family: var(--head); font-weight: 600; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.2; letter-spacing: -0.01em; color: var(--ink); }
+.ss .issue-deck { flex: none; margin: 10px 0 0; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font: 300 15px/1.55 var(--body); color: var(--mute); }
+/* the letter's text: a focusable region that scrolls; a thin scrollbar on its right,
+   fade masks at the ends that go when the text is at its top or its end */
+.ss .issue-body { flex: 0 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; pointer-events: auto; margin: 12px 0 0; padding: 2px 14px 0 0; font: 400 15.5px/1.7 Georgia, "Times New Roman", serif; color: rgba(220, 225, 240, 0.84); --mt: 28px; --mb: 36px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 var(--mt), #000 calc(100% - var(--mb)), transparent); mask-image: linear-gradient(180deg, transparent, #000 var(--mt), #000 calc(100% - var(--mb)), transparent); scrollbar-width: thin; scrollbar-color: rgba(150, 170, 255, 0.3) transparent; }
+.ss .issue-body.at-top { --mt: 0px; }
+.ss .issue-body.at-end { --mb: 0px; }
+.ss .issue-body::-webkit-scrollbar { width: 4px; }
+.ss .issue-body::-webkit-scrollbar-track { background: transparent; }
+.ss .issue-body::-webkit-scrollbar-thumb { background: rgba(150, 170, 255, 0.3); border-radius: 2px; }
+.ss .issue-body:focus-visible { outline-offset: -2px; }
+.ss .issue-body p { margin: 0 0 0.85em; max-width: 62ch; }
+.ss .issue-body > :last-child { margin-bottom: 36px; }
+.ss .issue-body h4 { margin: 1.5em 0 0.5em; max-width: 62ch; font: 600 16px/1.3 var(--head); letter-spacing: -0.01em; color: var(--ink); }
+.ss .issue-body code { font: 12px/1.5 var(--mono); background: rgba(255, 255, 255, 0.08); border-radius: 4px; padding: 0.1em 0.3em; }
+.ss .issue-body a { color: var(--cyan); text-decoration-color: rgba(54, 230, 219, 0.4); text-underline-offset: 3px; }
+.ss .issue-body figure { margin: 1.2em 0; max-width: 62ch; }
+.ss .issue-body img { display: block; width: 100%; height: auto; border-radius: 6px; opacity: 0.9; }
+.ss .issue-body figcaption { margin-top: 7px; font: 11px/1.5 var(--mono); letter-spacing: 0.4px; color: var(--faint); }
+.ss .issue-body ul, .ss .issue-body ol { margin: 0 0 0.85em; padding-left: 1.4em; max-width: 60ch; }
+.ss .issue-body pre { margin: 0 0 1em; padding: 10px 12px; max-width: 62ch; box-sizing: border-box; overflow-x: auto; background: rgba(255, 255, 255, 0.06); border-radius: 6px; }
+.ss .issue-body pre code { padding: 0; background: none; }
+@media (min-width: 769px) {
+  .ss #newsletter .inner { width: min(100%, 600px, 45vw); }
+}
+/* narrow desktops: the chips tighten so all fourteen stay on one row inside 45vw
+   (the column's height follows the measured bottom stack, so it needs no rule here) */
+@media (min-width: 769px) and (max-width: 1150px) {
+  .ss #newsletter .index { gap: 3px; }
+  .ss #newsletter .index .cover { width: 28px; }
+}
+@media (max-width: 768px) {
+  .ss #newsletter .inner, .ss #newsletter .inner { width: 100%; max-height: calc(var(--vh) - 9vh - 40px - var(--hud-bottom)); }
+  .ss #newsletter .pin, .ss #newsletter .pin { align-items: start; padding-top: 9vh; }
+  .ss .orbit-hint { display: none; }
+  .ss .reader { padding: 16px 18px 14px; }
+  .ss .issue-body { font-size: 15px; padding-right: 10px; }
+}
+@media (max-width: 550px) {
+  .ss .hud-social { gap: 2px; letter-spacing: 1.2px; }
+}
+
+/* Readable SSR fallback until the scene engine is available. */
+.ss .scene { height: auto; min-height: 100vh; }
+.ss .pin { position: relative; opacity: 1; visibility: visible; pointer-events: auto; min-height: 100vh; }
+.ss .ring, .ss .pieces { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; max-width: 980px; }
+.ss .ring li, .ss .pieces li { position: relative; left: auto; top: auto; margin: 0; width: auto; visibility: visible; }
+.ss #sky { display: none; }
+.ss .reader { pointer-events: auto; max-height: none; }
+.ss .issue { margin-bottom: 32px; }
+.ss .issue-body { max-height: none; overflow: visible; mask-image: none; -webkit-mask-image: none; }
+.ss .hud { z-index: 5; }
+.ss { font-size: max(11px, 1rem); background: #111; color: rgba(232, 236, 255, 0.96); }
+.ss .preview-list { max-width: 60ch; }
+.ss .preview-list article { margin: 24px 0; }
