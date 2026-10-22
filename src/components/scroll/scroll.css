@@ -2,7 +2,7 @@
 /* Scroll scenes prototype. Tokens follow the approved wormhole study and the
    site: near-black void, cyan accent, Montserrat headings, monospace labels. */
 
-.ss {
+html.ss-on, .ss {
   color-scheme: dark;
   --void: #111111;
   --ink: rgba(232, 236, 255, 0.96);
@@ -14,16 +14,28 @@
   --mono: "Courier New", "Lucida Console", monospace;
   --head: "SS Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --vh: 100vh;
-  --hud-bottom: 54px;   /* the measured height of the legend's band at the foot, set by scenes.js */
+  /* --vh and --hud-bottom (the legend band's measured height) are set on html by the
+     engine; they are not declared here, where they would shadow the engine's values.
+     Each use carries the prototype's :root default as its fallback (100vh, 54px). */
 }
 
-html.ss-on { background: var(--void); scroll-behavior: auto; }
+/* The site's global rules (layout.css: html, body and bare element selectors) do not
+   reach the scenes. Under html.ss-on, html and body take the prototype's own rules and
+   the values it left to the browser; every element under .ss starts from the
+   browser's defaults, as the prototype page did (SVG internals keep their
+   presentation attributes). Every rule below is more specific and still applies. */
+.ss :where(:not(svg *)) { all: revert; }
+/* Chrome maps the hidden attribute as an author-level hint, which the revert above undoes. */
+.ss [hidden] { display: none; }
+html.ss-on { background: var(--void); scroll-behavior: auto; font: 100%/normal serif; overflow: visible; box-sizing: content-box; -webkit-text-size-adjust: auto; text-size-adjust: auto; }
 html.ss-on body {
   margin: 0;
   color: var(--ink);
   font: 300 16px/1.6 var(--body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: auto;
+  overflow-wrap: normal; font-kerning: auto; font-feature-settings: normal;
+  background-color: transparent;
   overflow-x: hidden;
 }
 .ss a { color: inherit; }
@@ -33,8 +45,8 @@ html.ss-on body {
 .ss #sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 
 /* Scroll length comes from the spacer sections; the content is pinned. */
-.ss .scene { height: calc(var(--vh) * 3); position: relative; }
-.ss .scene:last-child { height: var(--vh); }
+.ss .scene { height: calc(var(--vh, 100vh) * 3); position: relative; }
+.ss .scene:last-child { height: var(--vh, 100vh); }
 .ss .pin {
   position: fixed; inset: 0; z-index: 2;
   display: grid; place-items: center;
@@ -50,6 +62,8 @@ html.ss-on body {
 /* Type */
 .ss h1, .ss h2 { font-family: var(--head); font-weight: 300; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
 .ss h1 { font-size: clamp(42px, 7.6vw, 108px); line-height: 1.02; }
+/* the site sets h1 sizes and margins with !important at 768px and 550px (layout.css); the scenes keep the prototype's */
+.ss h1 { font-size: clamp(42px, 7.6vw, 108px) !important; margin-left: 0 !important; }
 .ss h2 { font-size: clamp(30px, 4.6vw, 60px); line-height: 1.1; max-width: 17ch; }
 .ss .tag { font-family: var(--head); font-weight: 300; font-size: clamp(16px, 1.6vw, 21px); color: var(--mute); margin: 18px 0 0; letter-spacing: 0.01em; }
 .ss .lead { max-width: 36em; color: var(--mute); font-size: clamp(15px, 1.2vw, 17px); margin: 22px 0 0; }
@@ -186,11 +200,11 @@ html.ss-on body {
 .ss #fallback { position: fixed; inset: auto 0 0 0; margin: 0; padding: 10px 22px; z-index: 20; font: 11px/1.5 var(--mono); color: var(--faint); letter-spacing: 1px; }
 
 /* Project detail: where the dive lands. The same card as the Atlas preview, larger. */
-.ss html.locked { overflow: hidden; }
+html.ss-on.locked { overflow: hidden; }
 .ss .detail { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; box-sizing: border-box; opacity: 0; pointer-events: none; }
 .ss .detail[hidden] { display: none; }
 .ss .detail.on { pointer-events: auto; }
-.ss .detail-card { width: min(100%, 720px); max-height: calc(var(--vh) - 96px);   /* clear of the top mark and the links row */ overflow: auto; border-radius: 12px; background: rgba(8, 9, 18, 0.86); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transform-origin: 50% 50%; }
+.ss .detail-card { width: min(100%, 720px); max-height: calc(var(--vh, 100vh) - 96px);   /* clear of the top mark and the links row */ overflow: auto; border-radius: 12px; background: rgba(8, 9, 18, 0.86); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transform-origin: 50% 50%; }
 .ss .detail-media { position: relative; margin: 0; aspect-ratio: 16 / 10; background: #0c0d15; overflow: hidden; }
 .ss .detail-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .ss .detail-media img[hidden] { display: none; }
@@ -236,7 +250,7 @@ html.ss-on body {
 .ss .pieces { text-align: left; max-width: 760px; margin-inline: auto; }
 .ss .links { justify-content: center; }
 .ss .atlas-wrap { align-items: center; }
-.ss:not(.calm) .pin h1, .ss:not(.calm) .pin h2 { opacity: 0; }
+html.ss-on:not(.calm) .ss .pin h1, html.ss-on:not(.calm) .ss .pin h2 { opacity: 0; }
 /* the Newsletter station reads as Orbit does: copy left, on the dark side of the body */
 .ss #newsletter .inner { text-align: left; }
 .ss #newsletter h2 { margin-inline: 0; }
@@ -321,15 +335,14 @@ html.ss-on body {
 }
 
 /* Calm motion (prefers-reduced-motion, or the Calm chip): no autonomous animation. */
-.ss .calm .hint-line { animation: none; }
-.ss .calm .pill, .ss .calm .pill span, .ss .calm .hud-nav a, .ss .calm .hud-social a, .ss .calm .orbit-btn { transition: none; }
+html.ss-on.calm .ss .hint-line { animation: none; }
+html.ss-on.calm .ss .pill, html.ss-on.calm .ss .pill span, html.ss-on.calm .ss .hud-nav a, html.ss-on.calm .ss .hud-social a, html.ss-on.calm .ss .orbit-btn { transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .ss .hint-line { animation: none; }
 }
 
-/* Without JavaScript the scenes stack as a plain page. */
-.ss .nojs .pin { position: static; opacity: 1; visibility: visible; }
+/* Without JavaScript the scenes stack as a plain page: see NO_SCRIPT_CSS in ScrollScenes.tsx. */
 
 /* Dust headlines are set one weight up so each stroke holds particles and the solid text matches them. */
 .ss h1, .ss h2 { font-weight: 500; }
@@ -346,7 +359,7 @@ html.ss-on body {
    inside the panel under fade masks that show where there is more. Nothing in the
    panel takes the pointer but the text and its link, so sideways input passes
    through to the ring; the vertical wheel over the text is scenes.js's. */
-.ss #newsletter .inner { display: flex; flex-direction: column; max-height: calc(var(--vh) - 84px - var(--hud-bottom)); width: min(100%, 600px); }
+.ss #newsletter .inner { display: flex; flex-direction: column; max-height: calc(var(--vh, 100vh) - 84px - var(--hud-bottom, 54px)); width: min(100%, 600px); }
 .ss #newsletter h2 { font-size: clamp(26px, 2.8vw, 38px); max-width: none; flex: none; }
 .ss .orbit-nav { flex: none; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font: 600 11px/1 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; color: var(--mute); }
 .ss .orbit-btn { font: 400 16px/1 var(--mono); width: 26px; height: 26px; padding: 0 0 2px; box-sizing: border-box; color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; transition: color .25s, border-color .25s; }
@@ -403,7 +416,7 @@ html.ss-on body {
   .ss #newsletter .index .cover { width: 28px; }
 }
 @media (max-width: 768px) {
-  .ss #newsletter .inner, .ss #newsletter .inner { width: 100%; max-height: calc(var(--vh) - 9vh - 40px - var(--hud-bottom)); }
+  .ss #newsletter .inner, .ss #newsletter .inner { width: 100%; max-height: calc(var(--vh, 100vh) - 9vh - 40px - var(--hud-bottom, 54px)); }
   .ss #newsletter .pin, .ss #newsletter .pin { align-items: start; padding-top: 9vh; }
   .ss .orbit-hint { display: none; }
   .ss .reader { padding: 16px 18px 14px; }
@@ -412,17 +425,3 @@ html.ss-on body {
 @media (max-width: 550px) {
   .ss .hud-social { gap: 2px; letter-spacing: 1.2px; }
 }
-
-/* Readable SSR fallback until the scene engine is available. */
-.ss .scene { height: auto; min-height: 100vh; }
-.ss .pin { position: relative; opacity: 1; visibility: visible; pointer-events: auto; min-height: 100vh; }
-.ss .ring, .ss .pieces { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; max-width: 980px; }
-.ss .ring li, .ss .pieces li { position: relative; left: auto; top: auto; margin: 0; width: auto; visibility: visible; }
-.ss #sky { display: none; }
-.ss .reader { pointer-events: auto; max-height: none; }
-.ss .issue { margin-bottom: 32px; }
-.ss .issue-body { max-height: none; overflow: visible; mask-image: none; -webkit-mask-image: none; }
-.ss .hud { z-index: 5; }
-.ss { font-size: max(11px, 1rem); background: #111; color: rgba(232, 236, 255, 0.96); }
-.ss .preview-list { max-width: 60ch; }
-.ss .preview-list article { margin: 24px 0; }

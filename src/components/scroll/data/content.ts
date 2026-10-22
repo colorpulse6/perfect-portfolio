@@ -25,8 +25,31 @@ export const SCENE_COPY = {
   newsletter: { headline: "A weekly builder's notebook." },
   changelog: { headline: "A running ship log." },
   work: { headline: "Thoughtful software. From idea to working product.", lead: "I help product teams and agencies build features, connect systems, and turn manual workflows into useful software.", cta: "Start the conversation", link: "#contact" },
-  contact: { headline: "Tell me about your project.", lead: "Share what you want to build or improve, your existing stack, and your target timeline. Or write to colorpulse@gmail.com." },
+  contact: { headline: "Tell me about your project.", lead: "Share what you want to build or improve, your existing stack, and your target timeline. Or write to colorpulse@gmail.com.", email: "colorpulse@gmail.com" },
   atlas: { headline: "A living map of every medium.", lead: "A 3D galaxy map of the work. Drag to rotate, dive into a cluster, and explore projects, essays, and fiction.", cta: "Explore the Atlas", note: "The last station opens into it", link: "/atlas/" },
+}
+
+// The About facts under the bio (prototype index.html, r14).
+export const ABOUT_FACTS: { label: string; text: string }[] = [
+  { label: "Lived in", text: "Seattle, Berlin, Madrid" },
+  { label: "Builds", text: "Obsidian plugins, web applications, browser games, developer tools, AI agent systems" },
+  { label: "Also", text: "Composer and bandleader, Alex's Hand" },
+]
+
+// The one line each app card carries (prototype index.html, r14); the full blurb is the detail card's.
+export const CARD_LINE: Record<string, string> = {
+  Chimera: "A JRPG in a painted hill town.",
+  Cerebro: "Mission control for AI coding agents.",
+  "Brain Atlas": "Your vault as an animated 3D brain.",
+  GalAtlas: "A cinematic 3D atlas of exoplanets and the cosmos.",
+  "Polis Atlas": "An interactive atlas of political power.",
+  "Job Toast": "A shared home for the moving parts of a job search.",
+  "El Form": "AutoForm and hooks for complex forms.",
+  "Sector Zero": "Procedural space survival with drop-in co-op.",
+  "Claude Skills": "A personal marketplace of skills for the PR workflow.",
+  "Bot Battle": "LLM API testing metrics.",
+  Regexplain: "Explain your regex in a way that is easy to understand.",
+  "Knicks Knacks": "A browser arcade with profiles and stat tracking.",
 }
 
 export const PRODUCTS = ["Chimera", "Cerebro", "Brain Atlas", "GalAtlas", "Polis Atlas", "Job Toast", "El Form"]

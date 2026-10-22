@@ -37,3 +37,23 @@ test('legend renders the same data as the scene list', () => {
   assert.match(root, /data\.scenes\.map\(/)
   assert.match(root, /<Hud scenes=\{data\.scenes\}/)
 })
+test('engine boots only inside the cancellable effect', () => {
+  const src = read('src/components/scroll/ScrollScenes.tsx')
+  assert.match(src, /useEffect\([\s\S]*import\(["']\.\/engine\/createScrollScenes["']\)/)
+  assert.match(src, /if \(cancelled\) return/)
+  assert.match(src, /dispose\?\.\(\)/)
+})
+test('engine import is inert and listeners use the disposable input helper', () => {
+  const files = walk('src/components/scroll/engine').filter(file => /\.ts$/.test(file))
+  assert.ok(files.length)
+  for (const file of files) {
+    const src = read(file)
+    const importScope = file.endsWith('createScrollScenes.ts') ? src.split('export function createScrollScenes')[0] : src
+    assert.doesNotMatch(importScope, /^(?:const|let|var)\s+\w+\s*=\s*(?:window|document)\b/m, file)
+    if (!file.endsWith('input.ts')) assert.doesNotMatch(src, /\.addEventListener\(/, file)
+  }
+  const engine = read('src/components/scroll/engine/createScrollScenes.ts')
+  assert.match(engine, /html\.classList\.remove\(['"]ss-on['"],\s*['"]locked['"](?:,|\))/)
+  assert.match(engine, /loseContext\(\)/)
+  assert.match(engine, /delete window\.__ss/)
+})

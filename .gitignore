@@ -82,3 +82,4 @@ cosmos-captures/
 
 # scroll capture harness output
 scroll-captures/
+.tmp-config/

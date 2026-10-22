@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { graphql, useStaticQuery } from "gatsby"
 import { buildScrollData, type ScrollQueryData } from "./buildScrollData.ts"
 import type { ScrollData } from "./types.ts"
@@ -60,5 +61,6 @@ export function useScrollData(): ScrollData {
       }
     }
   `)
-  return buildScrollData(query, IMAGE_URLS)
+  // one object per query result, so ScrollScenes (memo) never re-renders over the engine or reboots it
+  return useMemo(() => buildScrollData(query, IMAGE_URLS), [query])
 }
