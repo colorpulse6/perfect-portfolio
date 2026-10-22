@@ -11,6 +11,7 @@ import {
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
 import { creativeWork } from "../helpers/structuredData"
+import { storyFromHash } from "../helpers/storySlug"
 
 interface WritingItem {
   title: string
@@ -135,6 +136,16 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
       },
     })
   }, [stopReveal])
+
+  useEffect(() => {
+    const openFromHash = () => {
+      const title = storyFromHash(window.location.hash, storiesData.map(story => story.title))
+      if (title) openStory(title)
+    }
+    openFromHash()
+    window.addEventListener("hashchange", openFromHash)
+    return () => window.removeEventListener("hashchange", openFromHash)
+  }, [openStory, storiesData])
 
   useEffect(() => {
     return () => stopReveal()

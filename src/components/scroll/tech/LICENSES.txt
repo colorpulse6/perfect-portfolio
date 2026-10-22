@@ -1,0 +1,34 @@
+Icons in this directory (scroll scenes prototype, rounds 12 and 14)
+
+From Simple Icons (https://simpleicons.org, CC0 1.0 Universal, no attribution
+required; each file rebuilt from the set's viewBox and single path, with
+currentColor, an explicit size and a title):
+  astro.svg         Astro             slug astro         (round 14, Chimera's site)
+  bash.svg          GNU Bash          slug gnubash
+  buymeacoffee.svg  Buy Me a Coffee   slug buymeacoffee  (the Support link)
+  canvas.svg        HTML5             slug html5         (stands for Canvas and Canvas 2D)
+  claude.svg        Claude            slug claude        (stands for Claude Code)
+  github.svg        GitHub            slug github
+  linkedin.svg      LinkedIn          slug linkedin
+  medium.svg        Medium            slug medium
+  npm.svg           npm               slug npm
+  obsidian.svg      Obsidian          slug obsidian      (stands for Obsidian API)
+  python.svg        Python            slug python
+  react.svg         React             slug react
+  swift.svg         Swift             slug swift
+  threejs.svg       Three.js          slug threedotjs
+  turborepo.svg     Turborepo         slug turborepo
+  typescript.svg    TypeScript        slug typescript
+  unrealengine.svg  Unreal Engine     slug unrealengine  (round 14; stands for Unreal Engine 5)
+  vite.svg          Vite              slug vite
+Fetched on 2026-10-22 from https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/<slug>.svg
+(the round 14 pair the same day, from the same address)
+Brand marks remain the property of their owners; Simple Icons' CC0 covers the
+icon files, not the trademarks.
+
+Drawn for this prototype in its own design system (no outside source, CC0):
+  swiftui.svg       a rounded tile with "UI" (Simple Icons has no SwiftUI mark)
+  zustand.svg       a rounded tile with "Z" (Simple Icons has no Zustand mark)
+  agents.svg        three linked nodes, for Cerebro's "Multi-agent"
+
+No Devicon (MIT) files are used; if one is added, its MIT notice goes here.
