@@ -1,6 +1,7 @@
 import type { ScrollData } from '../data/types';
 import { TECH_ICON as techIcon } from '../data/content';
 import { createInput } from './input';
+import { createProjectCarousel } from './projectCarousel';
 
 export function createScrollScenes(root: HTMLElement, options: { data: ScrollData }) {
 const { data } = options;
@@ -64,7 +65,6 @@ const orbitW = (sp) => 1 - smooth((Math.abs(sp - NEWS) - 0.45) / 0.35);
 // Content comes from buildScrollData, the same source as React markup.
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
 const adaptApp = (p) => ({ ...p, img: p.image, kind: 'app' });
-const PROJECTS = data.projects.map(adaptApp);
 const TOOLS = data.tools.map(adaptApp);
 const WRITING = data.stories;
 const ESSAYS = data.essays.map((p) => ({ ...p, img: p.image, kind: 'essay' }));
@@ -801,18 +801,6 @@ function makeGalaxies(L, seed) {
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   return { kind: 'galaxy', G, PER, pts, e1, e2, n: nn, sizes, dirs: L.dirs, centers, EDGES: L.edges, web: (aspect) => curveWeb(centers(aspect), L.edges, 0.12, 0.05) };
 }
-// Ring one, the products: a flattened heptagon since round 14 (seven apps), apex
-// at the top for Chimera, the newest; the upper pair wide and nearer with their
-// cards above, the side pair low with their cards beside, the lower pair pulled
-// in and farther with their cards below. The headline keeps the middle: the apex
-// galaxy is drawn at 0.85 so its glow stops above the dust at every desktop size,
-// and on portrait screens it drops behind the list's first rows (`syp`). Before
-// round 14 a flattened hexagon (side pair wide, upper and lower pairs pulled in).
-const GAL = makeGalaxies({
-  sx: [0, 0.97, 0.78, -0.78, -0.97, -0.45, 0.45], sy: [1, -0.2, 0.6, 0.6, -0.2, -0.95, -0.95], sz: [0.3, 0, -0.5, -0.5, 0, 0.5, 0.5], rx: 4.6, ry: 1.9,
-  syp: [0.25, -0.2, 0.6, 0.6, -0.2, -0.95, -0.95], scales: [0.85, 1, 1, 1, 1, 1, 1],
-  dirs: ['up', 'right', 'up', 'up', 'left', 'down', 'down'], edges: [[0, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 1], [1, 0], [2, 6], [3, 5]],
-}, 101);
 // Ring two, the rest of the apps: a pentagon since round 11 (five apps), apex at
 // the top, a little wider than ring one, the galaxies a size down.
 const GAL2 = makeGalaxies({
@@ -987,8 +975,6 @@ const MOONS = makeMoons(ORB_N);
 // Newsletter has neither (its letters are read on the station). `layout: 'panel'`
 // keeps the list in the panel (the letters are moons with tags, not hung cards).
 const SETS = {
-// @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
-  projects:   { name: 'projects',   scene: sceneIndex('projects'),   items: PROJECTS,  body: GAL,    size: (k) => GAL.sizes[k] * 0.95,  hoop: (k) => GAL.sizes[k] * 1.7,  open: 'Open project', back: 'Back to the cluster' },
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   tools:      { name: 'tools',      scene: sceneIndex('tools'),      items: TOOLS,     body: GAL2,   size: (k) => GAL2.sizes[k] * 0.95, hoop: (k) => GAL2.sizes[k] * 1.7, open: 'Open project', back: 'Back to the cluster' },
   writing:    { name: 'writing',    scene: sceneIndex('writing'),    items: WRITING,   body: CON,    size: () => 0.3, hoop: () => 1.3, go: true },
@@ -1530,6 +1516,7 @@ function layout() {
   renderer.resize();
   if (usesDust()) text.rebuild();
   readScroll();
+  projectCarousel.layout();
 }
 const usesDust = () => true;
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
@@ -1549,6 +1536,8 @@ function frame(now) {
   S.time = S.still ? S.stillT : S.time + dt;
   step(dt);
   stepOrbit(dt);
+  projectCarousel.frame(now);
+  projectCarousel.refresh();
   stepDive(dt);
   applyPoses();
   stepReader(dt);
@@ -1559,6 +1548,7 @@ function frame(now) {
   raf = requestAnimationFrame(frame);
 }
 
+const projectCarousel = createProjectCarousel(root, data.projects, input, () => Math.abs(S.sp - sceneIndex('projects')) < 0.45 && !DIVE.active, () => S.rm);
 bootRenderer();
 html.dataset.dir = S.dir;
 html.classList.toggle('calm', S.rm);
@@ -1765,11 +1755,12 @@ input.listen($('#detail-back'), 'click', (e) => { e.stopPropagation(); closeDive
 const diveQ = /^([tmc]?)(\d+)$/.exec(q.get('dive') || '');
 if (diveQ) {
   // captures: hold the dive at a progress (?dive=2 a project, t2 a tool, m0 an essay, c2 a log entry)
-  const set = { '': SETS.projects, t: SETS.tools, m: SETS.essays, c: SETS.changelog }[diveQ[1]];
+  const set = { t: SETS.tools, m: SETS.essays, c: SETS.changelog }[diveQ[1]];
+  if (set) {
   DIVE.hold = true; DIVE.t = clamp(parseFloat(q.get('dt') || '0.5'), 0, 1);
-// @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   startDive(set, clamp(parseInt(diveQ[2], 10) || 0, 0, set.items.length - 1), null);
   if (DIVE.t >= 1) { DIVE.dir = 0; DIVE.open = true; detail.classList.add('on'); }
+  }
 }
 // The dust headlines are rasterised from the headline face, so the first rasterise
 // waits for it (asked for by name: document.fonts.ready alone can settle before the
@@ -1805,6 +1796,8 @@ if (debug) window.__ss = {
       active: RD.shown, readerAlpha: RD.alpha, announced: RD.announced, announcement: announceEl.textContent,
       wheeled: RD.wheeled, held: RD.held, passed: RD.passed, scroll: RD.shown >= 0 ? readerBodies[RD.shown].scrollTop : 0 };
   },
+  get projectCarousel() { return { current: projectCarousel.current, name: data.projects[projectCarousel.current].name }; },
+  projectTo(k: number) { projectCarousel.go(k); },
   orbitTo,
   // what the sky draws for each set right now: its depth and alpha, and whether
   // the renderer draws it at all (a body behind the camera is culled)
@@ -1829,7 +1822,7 @@ if (debug) window.__ss = {
   get scenes() { return SCENES.map((s) => ({ id: s.id, label: s.label })); },
   // what a click on the item does (a dive, or for a story the story's page)
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
-  dive(k, which) { activate(SETS[which || 'projects'], k, null); },
+  dive(k, which) { if (which === 'projects' || !which) { projectCarousel.go(k); return; } activate(SETS[which], k, null); },
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   holdDive(t) { DIVE.hold = true; DIVE.t = clamp(t, 0, 1); },
   closeDive,
@@ -1854,6 +1847,7 @@ return { dispose() {
   window.cancelAnimationFrame(raf);
   window.clearTimeout(fontTimer);
   input.dispose();
+  projectCarousel.dispose();
   const gl = canvas.getContext('webgl2');
   const lose = gl && gl.getExtension('WEBGL_lose_context');
   if (lose) lose.loseContext();

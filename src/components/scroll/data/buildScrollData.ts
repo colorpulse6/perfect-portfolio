@@ -42,6 +42,10 @@ const APP_IMAGES: Record<string, string> = {
   "Sector Zero": "sector-zero.jpg", "Claude Skills": "claude-skills.jpg",
   "Bot Battle": "bot-battle.jpg", Regexplain: "regexplain.jpg", "Knicks Knacks": "knicks-knacks.jpg",
 }
+const APP_VIDEOS: Record<string, string> = {
+  Cerebro: "cerebro-mycelium.mp4", "Brain Atlas": "brain-atlas-spin.mp4",
+  GalAtlas: "galatlas.mp4", "Polis Atlas": "polis-atlas.mp4", "El Form": "elform-docs-dark.mp4",
+}
 
 const BIO_REPLACE = "Brain Atlas and Cerebro Mycelium (Obsidian plugins), El Form (a typed React form library), and Throttle (a macOS usage tracker)"
 const BIO_WITH = "Brain Atlas (an Obsidian plugin), and El Form (a typed form library)"
@@ -68,7 +72,7 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
     if (!node || node.status === "disabled") throw new Error(`Missing active project: ${name}`)
     return {
       name, medium: MEDIUM_OVERRIDE[name] ?? mediumLabel(node.medium), status: node.status,
-      image: imageUrls[APP_IMAGES[name]] ?? APP_IMAGES[name], link: node.link,
+      image: imageUrls[APP_IMAGES[name]] ?? APP_IMAGES[name], video: APP_VIDEOS[name] ? (imageUrls[APP_VIDEOS[name]] ?? APP_VIDEOS[name]) : undefined, link: node.link,
       github: node.github ?? "", tech: node.tech ?? [],
       blurb: BLURB_OVERRIDE[name] ?? node.description,
     }

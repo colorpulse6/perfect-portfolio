@@ -13,6 +13,8 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
     allFile: { nodes: [{ relativePath: "2026-W42/img/x.jpg", childImageSharp: { resize: { src: "/static/x.jpg", width: 720, height: 450 } } }] },
   })
   assert.deepEqual(result.projects.map(item => item.name), PRODUCTS)
+  assert.equal(result.projects.find(item => item.name === "Cerebro")?.video, "cerebro-mycelium.mp4")
+  assert.equal(result.projects.find(item => item.name === "Job Toast")?.video, undefined)
   assert.equal(result.projects[0].open, "Where the game stands")
   assert.equal(result.stories[0].link, "/writing/#jerks")
   assert.equal(result.bio[1].includes("Cerebro Mycelium"), false)

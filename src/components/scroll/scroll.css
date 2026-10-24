@@ -338,6 +338,65 @@ html.ss-on:not(.calm) .ss .pin h1, html.ss-on:not(.calm) .ss .pin h2 { opacity: 
 html.ss-on.calm .ss .hint-line { animation: none; }
 html.ss-on.calm .ss .pill, html.ss-on.calm .ss .pill span, html.ss-on.calm .ss .hud-nav a, html.ss-on.calm .ss .hud-social a, html.ss-on.calm .ss .orbit-btn { transition: none; }
 
+/* Projects: the approved ocean planet and seven orbiting project moons. */
+.ss #projects .project-inner { width: 100%; max-width: none; }
+.ss #projects .project-stage { position: relative; width: 100vw; height: min(640px, calc(var(--vh, 100vh) - var(--hud-bottom, 70px) - 140px)); margin-left: calc(50% - 50vw); overflow: hidden; touch-action: pan-y; text-align: left; }
+.ss #projects .project-globe { position: absolute; z-index: 200; border-radius: 50%; overflow: hidden; pointer-events: none; background: radial-gradient(circle at 70% 32%, rgba(200,255,246,.5), transparent 30%), radial-gradient(circle at 64% 38%, #2fb8ac, #177c88 24%, #0c4c68 50%, #072842 72%, #030b18); box-shadow: 0 0 50px 4px rgba(54,230,219,.2), 0 0 150px 30px rgba(40,120,200,.14); }
+.ss #projects .project-globe::before { content: ""; position: absolute; inset: 0; width: 200%; background: radial-gradient(ellipse 24% 3% at 22% 28%, rgba(225,255,250,.24), transparent 70%), radial-gradient(ellipse 32% 2.4% at 64% 43%, rgba(225,255,250,.16), transparent 70%), radial-gradient(ellipse 18% 4% at 36% 61%, rgba(225,255,250,.14), transparent 70%), linear-gradient(transparent 0 17%, rgba(3,36,58,.28) 17% 23%, transparent 23% 51%, rgba(3,36,58,.22) 51% 56%, transparent 56%); background-size: 50% 100%; animation: project-drift 120s linear infinite; }
+.ss #projects .project-globe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 70% 30%, transparent 36%, rgba(2,6,16,.5) 62%, rgba(1,3,10,.92) 86%); box-shadow: inset 10px -6px 24px rgba(160,255,240,.26), inset 0 0 0 1px rgba(150,255,240,.08); }
+@keyframes project-drift { to { transform: translateX(-50%); } }
+.ss #projects .project-track { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ss #projects .project-track path { fill: none; stroke: rgba(160,230,240,.24); stroke-width: 1; stroke-dasharray: 2 7; }
+.ss #projects .project-moon { position: absolute; left: 0; top: 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); cursor: pointer; }
+.ss #projects .project-orb { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150,170,255,.28), 0 8px 22px rgba(0,0,0,.55); }
+.ss #projects .project-orb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss #projects .project-orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 68% 30%, rgba(255,255,255,.14), transparent 40%, rgba(3,5,12,.55)); }
+.ss #projects .project-dim { position: absolute; inset: 0; background: #05060c; }
+.ss #projects .project-tag { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font: 600 11px/1.3 var(--mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--mute); white-space: nowrap; text-shadow: 0 1px 6px #000; pointer-events: none; }
+.ss #projects .project-moon[aria-current="true"] .project-orb { box-shadow: 0 0 0 2px rgba(54,230,219,.85), 0 0 28px 4px rgba(54,230,219,.4), 0 10px 26px rgba(0,0,0,.6); }
+.ss #projects .project-moon[aria-current="true"] .project-tag { color: var(--cyan); }
+.ss #projects .project-moon:hover .project-tag, .ss #projects .project-moon:focus-visible .project-tag { color: var(--ink); }
+.ss #projects .project-panel { position: absolute; z-index: 700; top: 50%; right: max(32px, calc((100% - 1240px) / 2)); width: min(46%, 580px); transform: translateY(-50%); box-sizing: border-box; padding: 10px; border-radius: 14px; background: rgba(8,9,18,.8); box-shadow: 0 0 0 1px rgba(150,170,255,.16), 0 24px 70px rgba(0,0,0,.55), 0 0 80px rgba(54,230,219,.06); backdrop-filter: blur(10px); }
+.ss #projects .project-leaf[hidden] { display: none; }
+.ss #projects .project-leaf:not([hidden]) { animation: project-fade .45s ease both; }
+.ss #projects .project-leaf.outgoing { position: absolute; inset: 10px; pointer-events: none; opacity: 0; animation: none; transition: opacity .4s ease; }
+@keyframes project-fade { from { opacity: 0; } to { opacity: 1; } }
+.ss #projects .project-media { position: relative; display: block; aspect-ratio: 16/9; border-radius: 7px; overflow: hidden; background: #0c0d15; }
+.ss #projects .project-media img, .ss #projects .project-media video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss #projects .project-media video { opacity: 0; transition: opacity .4s; }
+.ss #projects .project-media video.on { opacity: 1; }
+.ss #projects .project-more { padding: 14px 8px 6px; }
+.ss #projects .project-more h3 { margin: 0; font: 500 clamp(22px,2.4vw,28px)/1.15 var(--head); color: var(--ink); }
+.ss #projects .project-more .lab { margin-top: 6px; }
+.ss #projects .project-more > p:not(.project-actions) { margin: 10px 0 0; color: var(--mute); font-size: 15px; line-height: 1.5; }
+.ss #projects .project-tech { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.ss #projects .project-tech li { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1.4 var(--mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--faint); }
+.ss #projects .project-tech .ti { color: var(--mute); }
+.ss #projects .project-actions { display: flex; flex-wrap: wrap; gap: 10px 12px; margin: 16px 0 0; }
+.ss #projects .project-actions .pill { margin: 0; padding: 11px 20px; font-size: 12px; }
+.ss #projects .project-actions .secondary { border-color: var(--line); box-shadow: none; background: transparent; }
+.ss #projects .project-controls { position: absolute; z-index: 800; left: 0; width: 55%; bottom: calc(var(--hud-bottom, 54px) + 8px); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0; font: 600 12px/1.5 var(--mono); color: var(--mute); }
+.ss #projects .project-controls button { font: 400 18px/1 var(--mono); width: 36px; height: 36px; color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 50%; cursor: pointer; }
+.ss #projects .project-controls button:hover { color: var(--ink); border-color: var(--cyan); }
+.ss #projects .project-controls .lab { display: none; }
+@media (max-width: 819px) {
+  .ss #projects .project-stage { height: min(610px, calc(var(--vh, 100vh) - var(--hud-bottom, 70px) - 155px)); padding-top: 225px; box-sizing: border-box; overflow: visible; }
+  .ss #projects .project-panel { position: relative; top: auto; right: auto; width: auto; transform: none; margin: 0 16px; padding: 8px; max-height: calc(100% - 8px); overflow-y: auto; }
+  .ss #projects .project-moon:not([aria-current="true"]) .project-tag { display: none; }
+  .ss #projects .project-media { aspect-ratio: 5/2; }
+  .ss #projects .project-more { padding: 8px 5px 3px; }
+  .ss #projects .project-more > p:not(.project-actions) { font-size: 12px; line-height: 1.35; }
+  .ss #projects .project-tech { margin-top: 7px; gap: 4px 9px; }
+  .ss #projects .project-tech li { font-size: 11px; }
+  .ss #projects .project-actions { margin-top: 8px; }
+  .ss #projects .project-actions .pill { padding: 8px 12px; }
+  .ss #projects .project-controls { left: auto; right: 16px; width: auto; top: 160px; bottom: auto; }
+  .ss #projects .project-controls .lab { display: none; }
+}
+html.ss-on.calm .ss #projects .project-globe::before { animation: none; }
+html.ss-on.calm .ss #projects .project-leaf:not([hidden]) { animation: none; }
+html.ss-on.calm .ss #projects .project-leaf.outgoing { transition: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .ss .hint-line { animation: none; }
 }

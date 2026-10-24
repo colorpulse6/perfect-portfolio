@@ -19,6 +19,11 @@ const NO_SCRIPT_CSS = `
 .ss .issue[hidden] { display: flex; }
 .ss .issue { margin-bottom: 32px; }
 .ss .issue-body { max-height: none; overflow: visible; mask-image: none; -webkit-mask-image: none; }
+.ss #projects .project-stage { height: auto; padding: 0; overflow: visible; margin: 20px auto; width: min(100%, 980px); }
+.ss #projects .project-globe, .ss #projects .project-track, .ss #projects .project-moon, .ss #projects .project-controls { display: none; }
+.ss #projects .project-panel { position: relative; inset: auto; transform: none; width: 100%; max-height: none; overflow: visible; margin: 0; }
+.ss #projects .project-leaf[hidden] { display: block; }
+.ss #projects .project-leaf { margin-bottom: 28px; }
 .ss .hud { z-index: 5; }
 .ss { font-size: max(11px, 1rem); background: #111; color: rgba(232, 236, 255, 0.96); }
 `
@@ -45,6 +50,7 @@ const ScrollScenes = React.memo(function ScrollScenes({ data }: { data: ScrollDa
     <canvas id="sky" aria-hidden="true" />
     <TechSprite />
     <Hud scenes={data.scenes} />
+    <p className="vh" id="orbit-announce" aria-live="polite" aria-atomic="true" />
     <main id="scenes">{data.scenes.map((scene, index) => {
       const Component = components[index]
       return <Component key={scene.id} data={data} scene={scene} />

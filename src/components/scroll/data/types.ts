@@ -9,6 +9,7 @@ export interface AppItem {
   medium: string
   status: string
   image: string
+  video?: string
   link: string
   github: string
   tech: string[]

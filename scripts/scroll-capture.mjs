@@ -12,7 +12,7 @@
 //   --url=<page>   another server (default http://127.0.0.1:9123/scroll/?ss-debug)
 //
 // Groups: shell, engine, ghosts, copy, marks, stories, orbit, gestures, links,
-// panel, dives, context, a11y, fit, teardown. Needs Node 22 (fetch, WebSocket),
+// panel, projects, dives, context, a11y, fit, teardown. Needs Node 22 (fetch, WebSocket),
 // Google Chrome ($CHROME overrides the path) and ImageMagick's magick for the
 // pixel safeguard (the row fails without it).
 import { spawn, execFileSync } from 'node:child_process'
@@ -34,7 +34,7 @@ const pendingEngine = ['budget (M5)', 'frames mode']
 // The legend in scroll order, and each scene's stagger group: its class, step and
 // item count (prototype index.html, r14). Data-driven groups also match __ss.setSizes.
 const LEGEND = ['Intro', 'About', 'Projects', 'Tools and games', 'Writing', 'Essays', 'Newsletter', 'Changelog', 'Work with me', 'Contact', 'Atlas']
-const STAGGER = [['about', 'facts', '0.04', 3], ['projects', 'ring', '0.04', 7], ['tools', 'ring', '0.03', 5], ['writing', 'pieces', '0.02', 16], ['essays', 'pieces', '0.03', 2], ['newsletter', 'pieces index', '0.012', null], ['changelog', 'pieces', '0.03', null], ['contact', 'links', '0.03', 4]]
+const STAGGER = [['about', 'facts', '0.04', 3], ['tools', 'ring', '0.03', 5], ['writing', 'pieces', '0.02', 16], ['essays', 'pieces', '0.03', 2], ['newsletter', 'pieces index', '0.012', null], ['changelog', 'pieces', '0.03', null], ['contact', 'links', '0.03', 4]]
 const SCENE_IDS = ['hero', 'about', 'projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog', 'work', 'contact', 'atlas']
 const NEWS = LEGEND.indexOf('Newsletter')
 const SIZES = [[1440, 900], [1366, 768], [1280, 720], [1024, 768], [768, 1024], [390, 844]]
@@ -78,7 +78,10 @@ const slug = title => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^
 const PROJECT_TECH = Object.fromEntries(nodes.filter(n => n.internal.type === 'Project').map(n => [n.name, n.tech]))
 const EXTRA_TECH = { Chimera: ['Unreal Engine 5', 'Astro'] }
 const techOf = name => PROJECT_TECH[name] || EXTRA_TECH[name]
-const CHIMERA = { site: 'https://colorpulse6.github.io/project-chimera/', source: 'https://github.com/colorpulse6/project-chimera', cta: 'Where the game stands' }
+const PROJECT_NAMES = ['Chimera', 'Cerebro', 'Brain Atlas', 'GalAtlas', 'Polis Atlas', 'Job Toast', 'El Form']
+const PROJECT_DESCRIPTIONS = Object.fromEntries(nodes.filter(n => n.internal.type === 'Project').map(n => [n.name, n.description]))
+PROJECT_DESCRIPTIONS.Chimera = 'A JRPG in a painted hill town, with a hero who is drawn rather than modelled. Designed, art-directed and built in Unreal Engine 5; the site is the live status record of the build.'
+PROJECT_DESCRIPTIONS['Job Toast'] = 'A shared home for the moving parts of a job search: saved roles, application stages, notes and contacts in one workspace, with a browser extension for saving jobs and AI-assisted cover letter drafts.'
 // The marks' files: the sprite in the page is generated from these, one symbol per file.
 const techDir = path.join(repo, 'src', 'components', 'scroll', 'tech')
 const TECH_FILES = Object.fromEntries(readdirSync(techDir).filter(f => f.endsWith('.svg')).map(f => {
@@ -96,7 +99,7 @@ const GHOSTS = `(() => {
   const out = [];
   pins.forEach((pin, i) => {
     if (allowed.has(i)) return;
-    for (const el of pin.querySelectorAll('h1, h2, .lead, .bio, .facts li, .ring li, .pieces li, .index li, .reader, .pill, .links li, .orbit-nav, .hint, .atlas-wrap')) {
+    for (const el of pin.querySelectorAll('h1, h2, .lead, .bio, .facts li, .ring li, .pieces li, .index li, .reader, .project-stage, .pill, .links li, .orbit-nav, .hint, .atlas-wrap')) {
       const o = vis(el), r = el.getBoundingClientRect();
       if (o > 0.02 && on(r)) out.push(i + ':' + el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + '@' + o.toFixed(2));
     }
@@ -133,7 +136,7 @@ const WORDS = `(() => {
   const hits = [], gone = [], root = document.querySelector('.ss');
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   for (let n = w.nextNode(); n; n = w.nextNode()) {
-    if (n.nodeType === 3) { if (n.parentElement.closest('script, style, noscript')) continue; if (/${GONE.source}/.test(n.textContent)) gone.push(n.textContent.trim().slice(0, 60)); if (n.parentElement.closest('.reader .issue-body, svg.ti')) continue; if (/${BANNED.source}/.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60)); }
+    if (n.nodeType === 3) { if (n.parentElement.closest('script, style, noscript')) continue; if (/${GONE.source}/.test(n.textContent)) gone.push(n.textContent.trim().slice(0, 60)); if (n.parentElement.closest('.reader .issue-body, .project-tech, svg.ti')) continue; if (/${BANNED.source}/.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60)); }
     else { for (const a of ['aria-label', 'alt', 'title']) { const v = n.getAttribute(a); if (!v) continue; if (/${GONE.source}/.test(v)) gone.push(a + '=' + v.slice(0, 60)); if (!n.closest('svg.ti') && /${BANNED.source}/.test(v)) hits.push(a + '=' + v.slice(0, 60)); } }
   }
   return { hits, gone, essays: document.querySelector('.ss #essays h2').textContent.trim(), strip: document.querySelectorAll('${GONE_MARKUP}').length };
@@ -330,12 +333,12 @@ try {
       await session.open(page)
       const head = await session.evaluate(`({title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,robots:document.querySelector('meta[name="robots"]')?.content})`)
       row('SEO head', head.title === 'scroll | Nichalas Barnes' && head.canonical === 'https://nichalasbarnes.com/scroll/' && /noindex/.test(head.robots ?? ''), JSON.stringify(head))
-      const shell = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,links:document.querySelectorAll('.ss .hud-nav a').length,projects:document.querySelectorAll('.ss #projects .ring li').length,tools:document.querySelectorAll('.ss #tools .ring li').length,letters:document.querySelectorAll('.ss .issue').length})`)
+      const shell = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,links:document.querySelectorAll('.ss .hud-nav a').length,projects:document.querySelectorAll('.ss #projects .project-moon').length,tools:document.querySelectorAll('.ss #tools .ring li').length,letters:document.querySelectorAll('.ss .issue').length})`)
       row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
       await session.close(); session = await tab()
       await session.open(page, true)
-      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p')})`)
-      row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter, JSON.stringify(fallback))
+      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p'),projects:[...document.querySelectorAll('#projects .project-leaf')].filter(a => getComputedStyle(a).display !== 'none').length})`)
+      row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter && fallback.projects === 7, JSON.stringify(fallback))
       await session.close(); session = null
     })
     session = await tab()
@@ -375,7 +378,7 @@ try {
       // the DOM contract: each scene's stagger group, its step and its item count
       const groups = await s.evaluate(`({ found: [...document.querySelectorAll('.ss .stagger')].map(g => [g.closest('.scene').id, [...g.classList].filter(c => c !== 'stagger').join(' '), g.dataset.step, g.children.length]), sizes: __ss.setSizes })`)
       const groupsWant = STAGGER.map(([id, cls, step, n]) => [id, cls, step, n ?? groups.sizes[id]])
-      const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && ['projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog'].every(id => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[id])
+      const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && ['tools', 'writing', 'essays', 'newsletter', 'changelog'].every(id => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[id])
       row('stagger groups', groupsOk, groups.found.map(g => `${g[0]} ${g[2]} x${g[3]}`).join(', '))
 
       await s.openEngine(page)
@@ -399,7 +402,7 @@ try {
       row('stations show their own headline', wrong.length === 0, wrong.join('; ') || `${LEGEND.length} stations`)
 
       // no line of copy shows twice, and the dust draws only the window's headlines
-      const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill')].map(el => ${NORM}(el.textContent))`)
+      const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill:not(.project-actions *)')].map(el => ${NORM}(el.textContent))`)
       const dupStatic = lines.filter((l, i) => lines.indexOf(l) !== i)
       const dupLive = [], stray = []
       for (let p = 0; p <= LEGEND.length - 1 + 0.001; p += 0.1) {
@@ -514,8 +517,8 @@ try {
       for (const sym of sprite) if (!TECH_FILES[sym.id.slice(2)]) spriteBad.push(`${sym.id}: no file`)
       const cardBad = [], detailBad = []
       let marks = 0
-      for (const set of ['projects', 'tools']) {
-        const scene = LEGEND.indexOf(set === 'projects' ? 'Projects' : 'Tools and games')
+      for (const set of ['tools']) {
+        const scene = LEGEND.indexOf('Tools and games')
         for (const [w, h] of [[1440, 900], [390, 844]]) {
           await s.openEngine(join(`p=${scene}`), w, h); await sleep(200)
           const cards = await s.evaluate(CARDS(set))
@@ -527,7 +530,7 @@ try {
             for (const i of c.icons) { marks++; if (!(i.symbol && i.role === 'img' && i.title === i.name && i.w >= 14 && i.w <= 16 && i.h === i.w && i.box >= 7)) cardBad.push(`${c.name} ${w} ${i.name}: ${JSON.stringify(i)}`) }
             if (!(c.dim > 0.5 && c.dim < 1) || c.pxText < 11) cardBad.push(`${c.name} ${w}: dim ${c.dim}, text ${c.pxText}px`)
           }
-          if (cards.length !== (set === 'projects' ? 7 : 5)) cardBad.push(`${set} ${w}: ${cards.length} cards`)
+          if (cards.length !== 5) cardBad.push(`${set} ${w}: ${cards.length} cards`)
         }
         await s.viewport(1440, 900)
         const n = (await s.evaluate('__ss.setSizes'))[set]
@@ -538,13 +541,21 @@ try {
           for (const i of items) if (i.shown !== (BANNED.test(i.name) ? '' : i.name)) detailBad.push(`${name} ${i.name}: shows "${i.shown}"`)
         }
       }
-      // the detail row drawn, with a dive open: one project, one tool, desktop and phone
-      for (const [w, h, q] of [[1440, 900, `p=${LEGEND.indexOf('Projects')}&dive=3&dt=1`], [390, 844, `p=${LEGEND.indexOf('Projects')}&dive=1&dt=1`], [1440, 900, `p=${LEGEND.indexOf('Tools and games')}&dive=t1&dt=1`]]) {
+      // Tools and the other dive scenes still use the detail card.
+      for (const [w, h, q] of [[1440, 900, `p=${LEGEND.indexOf('Tools and games')}&dive=t1&dt=1`], [390, 844, `p=${LEGEND.indexOf('Tools and games')}&dive=t1&dt=1`]]) {
         await s.openEngine(join(q), w, h); await sleep(250)
         const d = await s.evaluate(DETAIL)
         if (d.hidden || !d.inside || !d.items.length || d.items.some(i => !(i.w === 16 && i.box >= 7 && i.px >= 11 && i.named))) detailBad.push(`${q} at ${w}: ${JSON.stringify(d)}`)
       }
-      row('technology marks', !spriteBad.length && !cardBad.length && !detailBad.length, `${Object.keys(TECH_FILES).length} files, ${sprite.length} symbols, ${marks} marks on cards at 1440 and 390; sprite ${spriteBad.join('; ') || 'same as the files'}; cards ${cardBad.join('; ').slice(0, 300) || 'right'}; details ${detailBad.join('; ').slice(0, 300) || 'right'}`)
+      for (const [w, h] of [[1440, 900], [390, 844]]) {
+        await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}`), w, h)
+        for (let k = 0; k < 7; k++) {
+          await s.evaluate(`__ss.projectTo(${k})`); await sleep(100)
+          const p = await s.evaluate(`(() => { const a = document.querySelector('.ss #projects .project-leaf:not([hidden]):not(.outgoing)'); return { name: a.querySelector('h3').textContent, names: [...a.querySelectorAll('.project-tech li')].map(li => li.textContent.trim()), marks: [...a.querySelectorAll('.project-tech svg.ti')].map(s => { const u = s.querySelector('use'); return !!document.querySelector(u.getAttribute('href')) && s.getAttribute('aria-hidden') === 'true' }) } })()`)
+          if (p.names.join('|') !== techOf(p.name)?.join('|') || !p.marks.every(Boolean)) cardBad.push(`${p.name} panel marks at ${w}: ${p.names.join(', ')}`)
+        }
+      }
+      row('technology marks', !spriteBad.length && !cardBad.length && !detailBad.length, `${Object.keys(TECH_FILES).length} files, ${sprite.length} symbols, ${marks} marks on Tools cards; Projects panel checked for all seven; sprite ${spriteBad.join('; ') || 'same as the files'}; cards ${cardBad.join('; ').slice(0, 300) || 'right'}; details ${detailBad.join('; ').slice(0, 300) || 'right'}`)
     })
 
     // ---------------------------------------------------------------- stories
@@ -740,7 +751,7 @@ try {
         row(`links on every scene (${w}x${h})`, !bad.length && hrefsOk && namesOk, `${hrefsOk ? 'the five links' : 'hrefs differ'}, ${namesOk ? 'named' : 'names differ'}, row ${width}px; ${bad.join('; ') || 'clear at all 11'}`)
       }
       for (const [w, h] of [[1440, 900], [1024, 768], [390, 844]]) {
-        await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}&dive=3&dt=1`), w, h); await sleep(200)
+        await s.openEngine(join(`p=${LEGEND.indexOf('Tools and games')}&dive=t1&dt=1`), w, h); await sleep(200)
         const r = await s.evaluate(SOCIAL)
         row(`links while a detail is open (${w}x${h})`, r.ok, `visible ${r.visible}, inside ${r.inside}, under ${r.over || 'nothing'}`)
       }
@@ -755,13 +766,56 @@ try {
       }
     })
 
-    // ---------------------------------------------------------------- dives, and Chimera
+    // ---------------------------------------------------------------- Projects planet carousel
+    await group('projects', async () => {
+      const atProjects = join(`p=${LEGEND.indexOf('Projects')}`)
+      await s.openEngine(atProjects)
+      const initial = await s.evaluate(`(() => ({ names: [...document.querySelectorAll('#projects .project-moon')].map(b => b.querySelector('.project-tag').textContent), current: __ss.projectCarousel.current, live: document.getElementById('orbit-announce').getAttribute('aria-live'), panel: document.querySelector('#projects .project-panel').getAttribute('aria-label'), dive: __ss.detailSets.includes('projects') }))()`)
+      row('moons reachable', initial.names.join('|') === PROJECT_NAMES.join('|') && initial.current === 0 && initial.live === 'polite' && initial.panel === 'Active project', JSON.stringify(initial))
+      const badText = [], badVideo = [], ghosts = []
+      await s.evaluate('__ss.projectTo(1)'); await sleep(300) // so the first step is a real change and announces
+      for (let k = 0; k < PROJECT_NAMES.length; k++) {
+        await s.evaluate(`__ss.projectTo(${k})`); await sleep(500)
+        const state = await s.evaluate(`(() => { const leaves = [...document.querySelectorAll('#projects .project-leaf')], a = leaves.find(x => !x.hidden && !x.classList.contains('outgoing')), vids = leaves.map((x, k) => ({ k, src: x.querySelector('video')?.getAttribute('src') || '', playing: !!x.querySelector('video') && !x.querySelector('video').paused })); return { current: __ss.projectCarousel.current, name: a.querySelector('h3').textContent, description: a.querySelector('.project-more > p').textContent, medium: a.querySelector('.lab').textContent, visible: leaves.filter(x => !x.hidden).length, links: [...a.querySelectorAll('.project-actions a')].map(x => x.textContent.trim()), video: vids, moon: document.querySelectorAll('#projects .project-moon[aria-current="true"]').length, announce: document.getElementById('orbit-announce').textContent } })()`)
+        if (state.name !== PROJECT_NAMES[k] || state.description !== PROJECT_DESCRIPTIONS[state.name] || state.current !== k) badText.push(`${k}: ${state.name}: ${state.description.slice(0, 40)}`)
+        if (state.visible !== 1 || state.moon !== 1 || !state.announce.includes(state.name)) ghosts.push(`${k}: ${state.visible} leaves, ${state.moon} front moons, ${state.announce}`)
+        const videoWanted = !['Chimera', 'Job Toast'].includes(state.name)
+        if (state.video.filter(v => v.src).length !== (videoWanted ? 1 : 0) || state.video.some(v => v.k !== k && (v.src || v.playing))) badVideo.push(`${k}: ${JSON.stringify(state.video)}`)
+        if (state.name === 'Cerebro' && state.links.join('|') !== 'Download↗|Site↗') badText.push(`Cerebro links ${state.links.join('|')}`)
+        if (state.name === 'Brain Atlas' && !state.links[0].startsWith('Live')) badText.push('Brain Atlas live label')
+      }
+      row('panel equals data', !badText.length, badText.join('; ') || 'seven full descriptions, media labels and links')
+      row('video active only', !badVideo.length, badVideo.join('; ') || 'inactive videos have no source')
+      row('no panel ghost', !ghosts.length, ghosts.join('; ') || 'one visible panel and one front moon at each step')
+      await s.evaluate('__ss.projectTo(6)'); await sleep(80)
+      await s.key('ArrowRight', 39, 80)
+      const forward = await s.evaluate('__ss.projectCarousel.current')
+      await s.key('ArrowLeft', 37, 80)
+      const backward = await s.evaluate('__ss.projectCarousel.current')
+      await s.evaluate('__ss.projectTo(0)'); await sleep(80)
+      await s.key('ArrowLeft', 37, 80)
+      const reverse = await s.evaluate('__ss.projectCarousel.current')
+      row('wraps both ways', forward === 0 && backward === 6 && reverse === 6, `${forward}, ${backward}, ${reverse}`)
+      await s.evaluate('__ss.projectTo(0)'); await sleep(100)
+      await s.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 400, y: 400, deltaX: 120, deltaY: 0 }); await sleep(100)
+      const wheel = await s.evaluate('__ss.projectCarousel.current')
+      await s.key('ArrowRight', 39, 80)
+      const key = await s.evaluate('__ss.projectCarousel.current')
+      row('wheel and keys turn', wheel === 1 && key === 2, `wheel ${wheel}, key ${key}`)
+      const noDive = await s.evaluate(`({ detail: document.getElementById('detail').hidden, active: __ss.diveState.active, included: __ss.detailSets.includes('projects') })`)
+      row('projects: no dive', noDive.detail && !noDive.active && !noDive.included, JSON.stringify(noDive))
+      await s.openEngine(atProjects, 390, 844)
+      const phone = await s.evaluate(`(() => { const r = document.querySelector('#projects .project-panel').getBoundingClientRect(), g = document.querySelector('#projects .project-globe').getBoundingClientRect(), hud = document.querySelector('.hud-nav').getBoundingClientRect(), panel = document.querySelector('#projects .project-panel'); return { panel: [r.left,r.top,r.right,r.bottom], globe: [g.top,g.bottom], hud: hud.top, scroll: panel.scrollHeight > panel.clientHeight, text: parseFloat(getComputedStyle(panel.querySelector('.project-more > p')).fontSize), overflow: document.documentElement.scrollWidth > innerWidth } })()`)
+      row('phone fit', phone.panel[0] >= 0 && phone.panel[2] <= 390 && phone.panel[1] >= phone.globe[1] && phone.panel[3] <= phone.hud && phone.text >= 11 && !phone.overflow, JSON.stringify(phone))
+      await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}&rm=1`))
+      const calm = await s.evaluate(`(() => { const v = [...document.querySelectorAll('#projects video')]; return v.every(x => !x.getAttribute('src') && x.paused) })()`)
+      row('projects: reduced motion stills', calm, `video sources absent: ${calm}`)
+    })
+
+    // ---------------------------------------------------------------- dives on the remaining detail scenes
     await group('dives', async () => {
       // in, landed, out, with the scroll position intact
       const DIVES = [
-        ['projects, GalAtlas', 1440, 900, 'projects', '__ss.dive(3)', ''], ['projects, GalAtlas (390)', 390, 844, 'projects', '__ss.dive(3)', ''],
-        ['projects, Job Toast (typographic)', 1440, 900, 'projects', '__ss.dive(5)', ''], ['projects, Chimera (the apex)', 1440, 900, 'projects', '__ss.dive(0)', ''],
-        ['projects, GalAtlas (?rm=1)', 1440, 900, 'projects', '__ss.dive(3)', 'rm=1'],
         ['tools', 1440, 900, 'tools', "__ss.dive(0, 'tools')", ''], ['tools (390)', 390, 844, 'tools', "__ss.dive(4, 'tools')", ''],
         ['essays', 1440, 900, 'essays', "__ss.dive(0, 'essays')", ''], ['essays (390)', 390, 844, 'essays', "__ss.dive(0, 'essays')", ''],
         ['essays, the second', 1440, 900, 'essays', "__ss.dive(1, 'essays')", ''],
@@ -786,29 +840,7 @@ try {
       }
       await s.viewport(1440, 900)
 
-      // Chimera (round 14): first card, its picture and marks; the apex body highest and clear of the headline; its detail
-      await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}`)); await sleep(250)
-      const card = await s.evaluate(`(() => { const li = document.querySelector('.ss #projects .ring li'), a = li.querySelector('a'), img = a.querySelector('img'), r = li.getBoundingClientRect(), cs = getComputedStyle(li); return { name: a.querySelector('strong').textContent.trim(), k: a.dataset.k, href: a.getAttribute('href'), src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth === 960 && img.naturalHeight === 600, marks: [...a.querySelectorAll('.tech svg.ti')].map(s => s.getAttribute('aria-label')), shown: cs.visibility === 'visible' && parseFloat(cs.opacity) > 0.9 && r.top >= 0 && r.bottom <= innerHeight, text: a.textContent } })()`)
-      const bodies = []; for (let k = 0; k < 7; k++) bodies.push(await s.evaluate(`__ss.bodyPos('projects', ${k})`))
-      const box = await s.evaluate('__ss.dustBox()')
-      const apex = bodies[0], highest = bodies.slice(1).every(b => apex.y < b.y), clear = box && box.n > 0 && apex.y + apex.radius <= box.top
-      const text = await s.evaluate("__ss.detailText('projects', 0)")
-      const tech = (await s.evaluate("__ss.detailTech('projects', 0)")).map(i => i.name)
-      const detail = await s.evaluate(`(() => { const a = document.getElementById('detail-link'), g = document.getElementById('detail-github'); return { title: document.getElementById('detail-title').textContent, blurb: document.getElementById('detail-blurb').textContent, href: a.href, label: document.getElementById('detail-link-label').textContent, newTab: a.target === '_blank' && /noopener/.test(a.rel), source: g.hidden ? '' : g.href } })()`)
-      const wrong = []
-      if (card.name !== 'Chimera' || card.k !== '0') wrong.push(`first card ${card.name} (k ${card.k})`)
-      if (card.href !== CHIMERA.site) wrong.push(`card href ${card.href}`)
-      if (!/chimera/.test(card.src) || !card.loaded) wrong.push(`picture ${card.src} ${card.loaded ? '' : 'not loaded at 960x600'}`)
-      if (card.marks.join('|') !== EXTRA_TECH.Chimera.join('|')) wrong.push(`card marks ${card.marks.join(', ')}`)
-      if (!card.shown) wrong.push('card not shown at the hold')
-      if (BANNED.test(card.text) || BANNED.test(text || '')) wrong.push('React, TypeScript or Node in the copy')
-      if (!highest) wrong.push(`apex not the highest body: ${bodies.map(b => Math.round(b.y)).join(' ')}`)
-      if (!clear) wrong.push(`apex glow to ${Math.round(apex.y + apex.radius)} against the headline from ${box && Math.round(box.top)}`)
-      if (detail.title !== 'Chimera' || !/Unreal Engine 5/.test(detail.blurb) || !/painted hill town/.test(detail.blurb)) wrong.push(`detail copy: ${detail.title}: ${detail.blurb.slice(0, 60)}`)
-      if (detail.href !== CHIMERA.site || detail.label !== CHIMERA.cta || !detail.newTab) wrong.push(`detail link ${detail.label} ${detail.href} ${detail.newTab ? '' : 'not a new tab'}`)
-      if (detail.source !== CHIMERA.source) wrong.push(`source link ${detail.source}`)
-      if (tech.join('|') !== EXTRA_TECH.Chimera.join('|')) wrong.push(`detail marks ${tech.join(', ')}`)
-      row('chimera: first card, apex body, detail', !wrong.length, wrong.join('; ') || `apex y ${Math.round(apex.y)} above the headline at ${box && Math.round(box.top)}, "${detail.label}"`)
+
     })
 
     // ---------------------------------------------------------------- a forced context loss
@@ -872,8 +904,8 @@ try {
       const diveBad = []
       for (const how of ['click', 'Enter']) {
         await s.openEngine(page)
-        await s.evaluate(at(LEGEND.indexOf('Projects'))); await sleep(1400)
-        const cardSel = '.ss #projects a[data-set="projects"][data-k="3"]'
+        await s.evaluate(at(LEGEND.indexOf('Tools and games'))); await sleep(1400)
+        const cardSel = '.ss #tools a[data-set="tools"][data-k="3"]'
         if (how === 'click') await s.click(cardSel)
         else { await s.evaluate(`document.querySelector('${cardSel}').focus()`); await s.key('Enter', 13, 0) }
         const opened = await until(() => s.evaluate('__ss.diveState.open'), 4000, 50)
@@ -892,7 +924,7 @@ try {
 
     // ---------------------------------------------------------------- every card fits
     await group('fit', async () => {
-      const SETS = [['projects', '#projects .ring'], ['tools', '#tools .ring'], ['writing', '#writing .pieces'], ['essays', '#essays .pieces'], ['newsletter', '#newsletter .pieces'], ['changelog', '#changelog .pieces']]
+      const SETS = [['tools', '#tools .ring'], ['writing', '#writing .pieces'], ['essays', '#essays .pieces'], ['newsletter', '#newsletter .pieces'], ['changelog', '#changelog .pieces']]
       for (const [w, h] of SIZES) {
         const bad = [], spans = []
         for (const [id, sel] of SETS) {

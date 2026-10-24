@@ -17,6 +17,11 @@ import image10 from "../images/knicks-knacks.jpg"
 import image11 from "../images/polis-atlas.jpg"
 import image12 from "../images/regexplain.jpg"
 import image13 from "../images/sector-zero.jpg"
+import video0 from "../../../images/cerebro-mycelium.mp4"
+import video1 from "../../../images/brain-atlas-spin.mp4"
+import video2 from "../../../images/galatlas.mp4"
+import video3 from "../../../images/polis-atlas.mp4"
+import video4 from "../../../images/elform-docs-dark.mp4"
 
 const IMAGE_URLS: Record<string, string> = {
   "bot-battle.jpg": image0,
@@ -33,6 +38,11 @@ const IMAGE_URLS: Record<string, string> = {
   "polis-atlas.jpg": image11,
   "regexplain.jpg": image12,
   "sector-zero.jpg": image13,
+  "cerebro-mycelium.mp4": video0,
+  "brain-atlas-spin.mp4": video1,
+  "galatlas.mp4": video2,
+  "polis-atlas.mp4": video3,
+  "elform-docs-dark.mp4": video4,
 }
 
 export function useScrollData(): ScrollData {

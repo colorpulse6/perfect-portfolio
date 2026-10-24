@@ -36,15 +36,8 @@ export const ABOUT_FACTS: { label: string; text: string }[] = [
   { label: "Also", text: "Composer and bandleader, Alex's Hand" },
 ]
 
-// The one line each app card carries (prototype index.html, r14); the full blurb is the detail card's.
+// The one line each Tools card carries; Projects uses the full description in its panel.
 export const CARD_LINE: Record<string, string> = {
-  Chimera: "A JRPG in a painted hill town.",
-  Cerebro: "Mission control for AI coding agents.",
-  "Brain Atlas": "Your vault as an animated 3D brain.",
-  GalAtlas: "A cinematic 3D atlas of exoplanets and the cosmos.",
-  "Polis Atlas": "An interactive atlas of political power.",
-  "Job Toast": "A shared home for the moving parts of a job search.",
-  "El Form": "AutoForm and hooks for complex forms.",
   "Sector Zero": "Procedural space survival with drop-in co-op.",
   "Claude Skills": "A personal marketplace of skills for the PR workflow.",
   "Bot Battle": "LLM API testing metrics.",
