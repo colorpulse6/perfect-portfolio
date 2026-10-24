@@ -29,9 +29,9 @@ test("site changelog supplies the six approved latest entries", () => {
   })
   const items = changelogItems(nodes)
   assert.deepEqual(items.map(item => item.title), [
-    "The Atlas: A Galaxy Around a Black Hole", "Cerebro: Public Beta for macOS",
-    "Sector Zero: A Cinematic Opening", "Job Toast: Interview Prep",
-    "Brain Atlas 0.2: A WebGL2 Renderer", "Regexplain: A Terminal Workbench",
+    "Chimera: The Town Reaches the Sea", "Portfolio: Scroll Through the Work",
+    "Chimera: A New Public Record", "Sector Zero: Salvage and Fighter Polish",
+    "Job Toast: More Complete Saved Postings", "Sector Zero: Settlements and Ground Missions",
   ])
-  assert.equal(items[0].meta, "Update · Web · 27 September 2026")
+  assert.equal(items[0].meta, "Update · Game · 24 October 2026")
 })
