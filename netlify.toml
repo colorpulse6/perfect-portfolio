@@ -5,3 +5,16 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Preserve links to the former preview route.
+[[redirects]]
+  from = "/scroll"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/scroll/"
+  to = "/"
+  status = 301
+  force = true

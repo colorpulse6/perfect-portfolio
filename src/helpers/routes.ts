@@ -1,3 +1,3 @@
 export function isScrollPath(path: string): boolean {
-  return path === "/scroll" || path === "/scroll/"
+  return path === "/" || path === "/scroll" || path === "/scroll/"
 }

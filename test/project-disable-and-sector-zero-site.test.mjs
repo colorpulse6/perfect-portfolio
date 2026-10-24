@@ -63,7 +63,6 @@ test("Sector Zero exposes a Site action next to Play in atlas and featured cards
   const projectComponent = readSource("src", "components", "Project.tsx")
   const projectTemplate = readSource("src", "templates", "project.tsx")
   const wProject = readSource("src", "components", "atlas", "panels", "WProject.tsx")
-  const indexPage = readSource("src", "pages", "index.tsx")
   const domArtifacts = readSource("src", "components", "nebula", "DomArtifacts.tsx")
   const markdown = readChangelogEntry("sector-zero-new-modes")
 
@@ -78,7 +77,6 @@ test("Sector Zero exposes a Site action next to Play in atlas and featured cards
   assert.equal(frontmatterValue(markdown, "cta"), "Play")
   assert.equal(frontmatterValue(markdown, "secondaryCta"), "Site")
   assert.equal(frontmatterValue(markdown, "secondaryLink"), "https://colorpulse6.github.io/sector-zero/site/")
-  assert.match(indexPage, /secondaryLink: n\.frontmatter\.secondaryLink/)
   assert.match(domArtifacts, /entry\.secondaryLink[\s\S]*entry\.secondaryCta \|\| "Site"/)
 })
 

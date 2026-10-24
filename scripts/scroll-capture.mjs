@@ -9,7 +9,7 @@
 //
 //   node scripts/scroll-capture.mjs --check                 every row (about 8 minutes)
 //   node scripts/scroll-capture.mjs --check --only=dives,a11y   some groups (names below)
-//   --url=<page>   another server (default http://127.0.0.1:9123/scroll/?ss-debug)
+//   --url=<page>   another server (default http://127.0.0.1:9123/?ss-debug)
 //
 // Groups: shell, engine, ghosts, copy, marks, stories, essays, creative, orbit, gestures, links,
 // panel, projects, dives, context, a11y, fit, teardown. Needs Node 22 (fetch, WebSocket),
@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url'
 import { ESSAYS, COLORPULSE_ALBUMS, RELEASES } from '../src/components/scroll/data/content.ts'
 import { formatTextContent } from '../src/helpers/wordReveal.ts'
 const argv = process.argv.slice(2)
-const page = (argv.find(a => a.startsWith('--url=')) || '--url=http://127.0.0.1:9123/scroll/?ss-debug').slice(6)
+const page = (argv.find(a => a.startsWith('--url=')) || '--url=http://127.0.0.1:9123/?ss-debug').slice(6)
 const origin = new URL(page).origin
 const only = (argv.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean)
 const want = group => !only.length || only.includes(group)
@@ -336,7 +336,7 @@ try {
       await session.viewport(1440, 900)
       await session.open(page)
       const head = await session.evaluate(`({title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,robots:document.querySelector('meta[name="robots"]')?.content})`)
-      row('SEO head', head.title === 'scroll | Nichalas Barnes' && head.canonical === 'https://nichalasbarnes.com/scroll/' && /noindex/.test(head.robots ?? ''), JSON.stringify(head))
+      row('SEO head', head.title === 'Software engineer and composer | Nichalas Barnes' && head.canonical === 'https://nichalasbarnes.com/' && !/noindex/.test(head.robots ?? ''), JSON.stringify(head))
       const shell = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,links:document.querySelectorAll('.ss .hud-nav a').length,projects:document.querySelectorAll('.ss #projects .project-moon').length,tools:document.querySelectorAll('.ss #tools .ring li').length,letters:document.querySelectorAll('.ss .issue').length})`)
       row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
       await session.close(); session = await tab()

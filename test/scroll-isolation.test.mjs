@@ -11,7 +11,7 @@ test('scroll route has a dedicated chrome-free layout branch', () => {
   assert.match(branch, /CosmosStage/)
   for (const name of ['Header','SideBar','SideBarCollapsed','ParticleBackground','TerminalConsole','AudioToggle','TransitionSound','footer','cursor']) assert.doesNotMatch(branch, new RegExp(`<${name}|${name}\\s*\\(`))
 })
-test('sitemap excludes the experiment', () => assert.match(read('gatsby-config.js'), /excludes:\s*\[\s*['"`]\/scroll\/?['"`]\s*\]/))
+test('sitemap excludes the legacy redirect route', () => assert.match(read('gatsby-config.js'), /excludes:\s*\[\s*['"`]\/scroll\/?['"`]\s*\]/))
 test('scroll source never imports docs or prototype', () => {
   for (const file of walk('src')) if (/\.(tsx?|jsx?)$/.test(file)) assert.doesNotMatch(read(file), /(?:from\s*['"][^'"]*|import\s*\(['"][^'"]*)(?:docs\/|prototype\/)/, file)
 })
