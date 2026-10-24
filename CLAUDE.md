@@ -66,10 +66,10 @@ node scripts/cosmos-capture.mjs --help   # Headless captures and checks
 
 - A noindex, chrome-free route (`isScrollPath` in `src/helpers/routes.ts`; `layout.tsx` has a third branch with no particles, header, sidebar, terminal or cursor; sitemap-excluded). Home and Atlas are untouched.
 - **Engine**: `src/components/scroll/engine/createScrollScenes.ts`, raw WebGL2 with a Canvas2D fallback, ported from the approved prototype (`docs/features/scroll-scenes-experiment/prototype/`). It boots in a cancellable effect in `ScrollScenes.tsx` and `dispose()` frees listeners, the context and the `html.ss-on` class. Port-first: the pure-module split (like the cosmos engine) is deferred.
-- **Content**: `data/content.ts` (curated copy, projects, tools, essays) plus `data/useScrollData.ts` (static query: stories, newsletter, changelog). Fiction links go to `/writing/#<slug>`, which opens that story.
+- **Content**: `data/content.ts` (curated copy, projects, tools, essays, Alex's Hand releases) plus `data/useScrollData.ts` (static query: stories, newsletter, changelog). Eleven scenes place Essays before Creative, with Newsletter at index 6. Creative holds the 16 story wreath and the Alex's Hand record orbit. Fiction links go to `/writing/#<slug>`, which opens that story. Essays are full reading cards with direct Medium links and no dive.
 - **CSS**: `scroll.css` is scoped under `html.ss-on` and `.ss` (reverts site styles inside `.ss`).
 - **Debug hook**: `?ss-debug` exposes `window.__ss` and the prototype's hold params (`?p ?v ?t ?dive ?dt ?orb ?rd ?rm ?nogl`).
-- **Harness**: `node scripts/scroll-capture.mjs --check [--only=<groups>]` against `npx gatsby serve -p 9123 -H 127.0.0.1` (76 rows, about 6 minutes).
+- **Harness**: `node scripts/scroll-capture.mjs --check [--only=<groups>]` against `npx gatsby serve -p 9123 -H 127.0.0.1`; `essays` and `creative` are separate groups.
 
 ## Environment Variables
 

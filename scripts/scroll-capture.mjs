@@ -11,7 +11,7 @@
 //   node scripts/scroll-capture.mjs --check --only=dives,a11y   some groups (names below)
 //   --url=<page>   another server (default http://127.0.0.1:9123/scroll/?ss-debug)
 //
-// Groups: shell, engine, ghosts, copy, marks, stories, orbit, gestures, links,
+// Groups: shell, engine, ghosts, copy, marks, stories, essays, creative, orbit, gestures, links,
 // panel, projects, dives, context, a11y, fit, teardown. Needs Node 22 (fetch, WebSocket),
 // Google Chrome ($CHROME overrides the path) and ImageMagick's magick for the
 // pixel safeguard (the row fails without it).
@@ -22,6 +22,7 @@ import sharp from 'sharp'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ESSAYS, MUSIC_LINKS, RELEASES } from '../src/components/scroll/data/content.ts'
 const argv = process.argv.slice(2)
 const page = (argv.find(a => a.startsWith('--url=')) || '--url=http://127.0.0.1:9123/scroll/?ss-debug').slice(6)
 const origin = new URL(page).origin
@@ -34,9 +35,9 @@ const pendingEngine = ['budget (M5)', 'frames mode']
 // ------------------------------------------------------------------ what the page must show
 // The legend in scroll order, and each scene's stagger group: its class, step and
 // item count (prototype index.html, r14). Data-driven groups also match __ss.setSizes.
-const LEGEND = ['Intro', 'About', 'Projects', 'Tools and games', 'Writing', 'Essays', 'Newsletter', 'Changelog', 'Work with me', 'Contact', 'Atlas']
-const STAGGER = [['about', 'facts', '0.04', 3], ['tools', 'ring', '0.03', 5], ['writing', 'pieces', '0.02', 16], ['essays', 'pieces', '0.03', 2], ['newsletter', 'pieces index', '0.012', null], ['changelog', 'pieces', '0.03', null], ['contact', 'links', '0.03', 4]]
-const SCENE_IDS = ['hero', 'about', 'projects', 'tools', 'writing', 'essays', 'newsletter', 'changelog', 'work', 'contact', 'atlas']
+const LEGEND = ['Intro', 'About', 'Projects', 'Tools and games', 'Essays', 'Creative', 'Newsletter', 'Changelog', 'Work with me', 'Contact', 'Atlas']
+const STAGGER = [['about', 'facts', '0.04', 3], ['tools', 'ring', '0.03', 5], ['essays', 'essay-spread', '0.05', 2], ['newsletter', 'pieces index', '0.012', null], ['changelog', 'pieces', '0.03', null], ['contact', 'links', '0.03', 4]]
+const SCENE_IDS = ['hero', 'about', 'projects', 'tools', 'essays', 'creative', 'newsletter', 'changelog', 'work', 'contact', 'atlas']
 const NEWS = LEGEND.indexOf('Newsletter')
 const SIZES = [[1440, 900], [1366, 768], [1280, 720], [1024, 768], [768, 1024], [390, 844]]
 // Nic's links, as the site's header has them, and their names in the row (the last shows its word)
@@ -402,7 +403,7 @@ try {
       // the DOM contract: each scene's stagger group, its step and its item count
       const groups = await s.evaluate(`({ found: [...document.querySelectorAll('.ss .stagger')].map(g => [g.closest('.scene').id, [...g.classList].filter(c => c !== 'stagger').join(' '), g.dataset.step, g.children.length]), sizes: __ss.setSizes })`)
       const groupsWant = STAGGER.map(([id, cls, step, n]) => [id, cls, step, n ?? groups.sizes[id]])
-      const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && ['tools', 'writing', 'essays', 'newsletter', 'changelog'].every(id => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[id])
+      const groupsOk = JSON.stringify(groups.found) === JSON.stringify(groupsWant) && [['tools', 'tools'], ['newsletter', 'newsletter'], ['changelog', 'changelog']].every(([id, set]) => groups.found.find(g => g[0] === id)?.[3] === groups.sizes[set])
       row('stagger groups', groupsOk, groups.found.map(g => `${g[0]} ${g[2]} x${g[3]}`).join(', '))
 
       await s.openEngine(page)
@@ -426,7 +427,7 @@ try {
       row('stations show their own headline', wrong.length === 0, wrong.join('; ') || `${LEGEND.length} stations`)
 
       // no line of copy shows twice, and the dust draws only the window's headlines
-      const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill:not(.project-actions *)')].map(el => ${NORM}(el.textContent))`)
+      const lines = await s.evaluate(`[...document.querySelectorAll('.ss .pin h1, .ss .pin h2, .ss .pin .pill:not(.project-actions *):not(.record-leaf *)')].map(el => ${NORM}(el.textContent))`)
       const dupStatic = lines.filter((l, i) => lines.indexOf(l) !== i)
       const dupLive = [], stray = []
       for (let p = 0; p <= LEGEND.length - 1 + 0.001; p += 0.1) {
@@ -528,7 +529,7 @@ try {
       row('copy: React, TypeScript and Node named nowhere', !words.hits.length && !detailHits.length && bioOk, `page ${words.hits.join(' | ') || 'none'}; ${cards} detail cards (${detailSets.join(' ')}): ${detailHits.join(' | ') || 'none'}; bio from aboutFaq.ts ${bioOk}`)
       await s.goto(LEGEND.indexOf('Essays')); await sleep(160)
       const essaysDust = await s.evaluate('__ss.dust')
-      const goneOk = !goneHits.length && words.strip === 0 && words.essays === 'Essays.' && essaysDust === 'Essays.'
+      const goneOk = !goneHits.length && words.strip === 0 && words.essays === 'Ideas worth sitting with.' && essaysDust === 'Ideas worth sitting with.'
       row('copy: rounds 12 and 13 words and markup gone', goneOk, `still there ${goneHits.join(' | ') || 'none'}; strip or link elements ${words.strip}; Essays h2 "${words.essays}", dust "${essaysDust}"`)
     })
 
@@ -582,37 +583,104 @@ try {
       row('technology marks', !spriteBad.length && !cardBad.length && !detailBad.length, `${Object.keys(TECH_FILES).length} files, ${sprite.length} symbols, ${marks} marks on Tools cards; Projects panel checked for all seven; sprite ${spriteBad.join('; ') || 'same as the files'}; cards ${cardBad.join('; ').slice(0, 300) || 'right'}; details ${detailBad.join('; ').slice(0, 300) || 'right'}`)
     })
 
+    // ---------------------------------------------------------------- essays and Creative
+    await group('essays', async () => {
+      for (const [w, h] of [[1440, 813], [1280, 720], [1024, 768], [390, 844]]) {
+        await s.openEngine(join('p=4'), w, h)
+        const r = await s.evaluate(`(() => { const area = document.querySelector('#essays .essay-spread'), cards = [...area.querySelectorAll('.essay-card')], h = document.querySelector('.hud-nav').getBoundingClientRect(), top = document.querySelector('.hud-top').getBoundingClientRect(), box = area.getBoundingClientRect(); return { headline:document.querySelector('#essays h2').textContent, dust:__ss.dust, detail:__ss.detailSets.includes('essays'), area:[box.left,box.top,box.right,box.bottom], hud:h.top, header:top.bottom, overflow:document.documentElement.scrollWidth>innerWidth, cards:cards.map(c=>({ title:c.querySelector('h3').textContent, meta:c.querySelector('.lab').textContent, excerpt:c.querySelector('p').textContent, href:c.querySelector('a').href, label:c.querySelector('a').textContent.trim(), rel:c.querySelector('a').rel, image:c.querySelector('img').naturalWidth })) } })()`)
+        const copy = r.cards.length === ESSAYS.length && r.cards.every((card, i) => card.title === ESSAYS[i].title && card.meta === ESSAYS[i].meta && card.excerpt === ESSAYS[i].excerpt && card.href === ESSAYS[i].link && card.label.includes('Read on Medium') && card.rel.includes('noopener') && card.image > 0)
+        row(`essays: reading cards (${w}x${h})`, copy && !r.detail && r.headline === 'Ideas worth sitting with.' && r.dust === r.headline && r.area[0] >= 0 && r.area[2] <= w && r.area[1] >= r.header && r.area[3] <= r.hud && !r.overflow, `${r.cards.length} cards, copy ${copy}, detail ${r.detail}, box ${r.area.join(',')}, header ${r.header}, legend ${r.hud}`)
+      }
+      await s.openEngine(join('p=4'), 390, 844)
+      const edge = await s.evaluate(`(() => { const a=document.querySelector('#essays .essay-spread'), r=a.getBoundingClientRect(); return { x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2), scrollable:a.scrollHeight>a.clientHeight+1, page:scrollY } })()`)
+      await s.send('Input.dispatchMouseEvent', { type:'mouseWheel', x:edge.x, y:edge.y, deltaX:0, deltaY:120 }); await sleep(200)
+      const first = await s.evaluate('scrollY')
+      if (first === edge.page) { await sleep(450); await s.send('Input.dispatchMouseEvent', { type:'mouseWheel', x:edge.x, y:edge.y, deltaX:0, deltaY:120 }); await sleep(200) }
+      const passed = await s.evaluate('scrollY')
+      row('essays: scene wheel moves on', !edge.scrollable && passed > edge.page, `scrollable ${edge.scrollable}, page ${edge.page} to ${first} to ${passed}`)
+    })
+    await group('creative', async () => {
+      const sizes = [[1440, 813], [1366, 768], [1280, 720], [1024, 768], [390, 844]]
+      const fit = `(() => {
+        const box = el => { const r=el.getBoundingClientRect(); return [r.left,r.top,r.right,r.bottom] },
+          inside = (a,b) => a[0]>=b[0]-1&&a[1]>=b[1]-1&&a[2]<=b[2]+1&&a[3]<=b[3]+1,
+          stories=document.getElementById('creative-stories'), music=document.getElementById('creative-music'),
+          worlds=[stories,music], visible=worlds.filter(x=>!x.hidden), header=box(document.querySelector('.hud-top')),
+          legend=box(document.querySelector('.hud-nav')), headline=box(document.querySelector('#creative h2')),
+          all=visible.flatMap(w=>[...w.querySelectorAll('.story-bead,.story-planet,.record-disc,.record-sleeve,.story-panel,.record-panel,.creative-controls,.music-links')].filter(x=>getComputedStyle(x).display!=='none').map(box)),
+          worldBoxes=visible.map(box), bounds=[0,header[3],innerWidth,legend[1]],
+          fit=worldBoxes.every((w,i)=>inside(w,bounds)&&all.filter(r=>inside(r,w)).length>=1),
+          children=visible.every(w=>[...w.querySelectorAll('.story-bead,.story-planet,.record-disc,.record-sleeve,.story-panel,.record-panel,.creative-controls')].filter(x=>getComputedStyle(x).display!=='none' && !x.closest('[hidden]')).every(x=>inside(box(x),box(w)))),
+          separate=visible.length<2||worldBoxes[0][2]<worldBoxes[1][0],
+          clear=worldBoxes.every(w=>w[1]>headline[3]&&w[3]<legend[1]);
+        return {visible:visible.length, fit, children, separate, clear, overflow:document.documentElement.scrollWidth>innerWidth, beads:stories.querySelectorAll('.story-bead').length, records:music.querySelectorAll('.record-disc').length, links:[...stories.querySelectorAll('.story-leaf a')].map(x=>x.getAttribute('href')), recordLinks:[...music.querySelectorAll('.record-leaf a')].map(x=>x.href), extras:[...music.querySelectorAll('.music-links a')].map(x=>[x.textContent,x.href,x.rel]), covers:[...music.querySelectorAll('.record-sleeve img')].map(x=>x.complete&&x.naturalWidth>0), text:[...stories.querySelectorAll('.story-leaf h4')].map(x=>x.textContent), recordTitles:[...music.querySelectorAll('.record-leaf h4')].map(x=>x.textContent), box:worldBoxes };
+      })()`
+      for (const [w,h] of sizes) {
+        await s.openEngine(join('p=5'),w,h)
+        const r=await s.evaluate(fit)
+        const phone=w<820
+        const expected=r.text.join('|')===STORIES.join('|')&&r.links.join('|')===STORIES.map(x=>`/writing/#${slug(x)}`).join('|')&&r.recordTitles.join('|')===RELEASES.map(x=>x.title).join('|')&&r.recordLinks.join('|')===RELEASES.map(x=>x.link).join('|')&&r.extras.length===MUSIC_LINKS.length&&r.extras.every((x,i)=>x[0]===MUSIC_LINKS[i].label&&x[1]===MUSIC_LINKS[i].link&&x[2].includes('noopener'))&&r.covers.length===6&&r.covers.every(Boolean)
+        row(`creative: both worlds visible (${w}x${h})`,r.visible===(phone?1:2)&&r.fit&&r.children&&r.separate&&r.clear&&!r.overflow&&r.beads===16&&r.records===9&&expected,`visible ${r.visible}, fit ${r.fit}, children ${r.children}, separate ${r.separate}, clear ${r.clear}, links ${expected}, boxes ${JSON.stringify(r.box)}`)
+        if (phone) { await s.evaluate(`document.getElementById('creative-tab-music').click()`); const mobile=await s.evaluate(fit); row('creative: phone music fits',mobile.visible===1&&mobile.children&&mobile.clear&&!mobile.overflow,JSON.stringify(mobile.box)) }
+      }
+      await s.openEngine(join('p=5'),1440,813)
+      const bad=[]
+      for (let k=0;k<16;k++) { await s.evaluate(`document.querySelectorAll('.story-bead')[${k}].click()`); const r=await s.evaluate(`({index:__ss.creativeCarousel.story,shown:[...document.querySelectorAll('.story-leaf')].filter(x=>!x.hidden).length})`); if(r.index!==k||r.shown!==1)bad.push(`story ${k}`) }
+      for (let k=0;k<9;k++) { await s.evaluate(`document.querySelectorAll('.record-disc')[${k}].click()`); const r=await s.evaluate(`({index:__ss.creativeCarousel.record,shown:[...document.querySelectorAll('.record-leaf')].filter(x=>!x.hidden).length})`); if(r.index!==k||r.shown!==1)bad.push(`record ${k}`) }
+      await s.evaluate(`__ss.creativeWorld('stories'); __ss.creativeTo(0); document.querySelector('.story-bead').focus()`); await s.key('ArrowLeft',37,80)
+      const storyWrap=await s.evaluate('__ss.creativeCarousel.story')
+      await s.evaluate(`document.querySelector('.record-disc').focus()`); await s.key('ArrowRight',39,80)
+      const recordWrap=await s.evaluate('__ss.creativeCarousel.record')
+      const sb=await s.evaluate(`(() => {const r=document.querySelector('.story-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sb.x,y:sb.y,deltaX:120,deltaY:0});await sleep(80)
+      const storyWheel=await s.evaluate('__ss.creativeCarousel.story')
+      const rb=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:rb.x,y:rb.y,deltaX:120,deltaY:0});await sleep(80)
+      const recordWheel=await s.evaluate('__ss.creativeCarousel.record')
+      row('creative: beads and records keyboard and wheel',!bad.length&&storyWrap===15&&recordWrap===0&&storyWheel===0&&recordWheel===1,`clicks ${bad.join(' ')||'25'}, wrap ${storyWrap}/${recordWrap}, wheel ${storyWheel}/${recordWheel}`)
+      await s.openEngine(join('p=5'),1440,813)
+      const reach=[]
+      await s.evaluate(`document.querySelector('.story-bead').focus()`)
+      for(let k=1;k<=16;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story key ${k}`)}
+      await s.evaluate(`document.querySelector('.record-disc').focus()`)
+      for(let k=1;k<=9;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record key ${k}`)}
+      const storyPoint=await s.evaluate(`(() => {const r=document.querySelector('.story-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      for(let k=1;k<=16;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:storyPoint.x,y:storyPoint.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story wheel ${k}`)}
+      const recordPoint=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      for(let k=1;k<=9;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:recordPoint.x,y:recordPoint.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record wheel ${k}`)}
+      row('creative: all turns by keyboard and wheel',!reach.length,reach.join('; ')||'16 stories and 9 records by each input')
+      await s.openEngine(join('p=5'),390,844)
+      await s.evaluate(`document.getElementById('creative-tab-stories').focus()`);await s.key('ArrowRight',39,0)
+      const tab=await s.evaluate(`({selected:document.getElementById('creative-tab-music').getAttribute('aria-selected'),role:document.getElementById('creative-music').getAttribute('role'),stories:document.getElementById('creative-stories').hidden,music:document.getElementById('creative-music').hidden})`)
+      const touch=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width*.8),y:Math.round(r.top+r.height/2)}})()`)
+      await s.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch]})
+      await s.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:touch.x-80,y:touch.y}]})
+      await s.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})
+      const swiped=await s.evaluate('__ss.creativeCarousel.record')
+      row('creative: phone tabs and swipe',tab.selected==='true'&&tab.role==='tabpanel'&&tab.stories&&!tab.music&&swiped===1,`${JSON.stringify(tab)}, record ${swiped}`)
+    })
+
     // ---------------------------------------------------------------- stories
     await group('stories', async () => {
-      // every story in gatsby-node.js is on the Writing scene, in its order, and in the sky as a star
-      await s.openEngine(join(`p=${LEGEND.indexOf('Writing')}`)); await sleep(200)
-      const r = await s.evaluate("({ titles: [...document.querySelectorAll('.ss #writing .pieces li strong')].map(x => x.textContent.trim()), nums: [...document.querySelectorAll('.ss #writing .pieces li .cover b')].map(x => x.textContent.trim()), cards: [...document.querySelectorAll('.ss #writing .pieces li')].filter(l => getComputedStyle(l).visibility === 'visible').length, stars: __ss.setSizes.writing, links: [...document.querySelectorAll('.ss #writing .pieces li a')].map(a => a.getAttribute('href')) })")
+      // The visible story panel preserves the source order and destination links.
+      await s.openEngine(join(`p=${LEGEND.indexOf('Creative')}`)); await sleep(200)
+      const r = await s.evaluate(`({ titles:[...document.querySelectorAll('#creative .story-leaf h4')].map(x=>x.textContent.trim()), nums:[...document.querySelectorAll('#creative .story-leaf .story-number')].map(x=>x.textContent.trim()), beads:document.querySelectorAll('#creative .story-bead').length, links:[...document.querySelectorAll('#creative .story-leaf a')].map(x=>x.getAttribute('href')) })`)
       const linksWant = STORIES.map(t => `/writing/#${slug(t)}`)
-      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.cards === STORIES.length && r.stars === STORIES.length && r.links.join('|') === linksWant.join('|'), `${STORIES.length} in gatsby-node.js, ${r.titles.length} on the scene, ${r.cards} shown at the hold, ${r.stars} stars, links ${r.links.join('|') === linksWant.join('|') ? '/writing/#<slug>' : r.links.join(' ')}`)
-
-      // A story opens where it lives: its card, its star (a real click on the sky) and
-      // Enter on its card each ask for /writing/#<slug> and open no detail. The
-      // navigation is intercepted (document requests fail as aborted; the page stays).
+      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.beads === STORIES.length && r.links.join('|') === linksWant.join('|'), `${r.beads} beads, ${r.links.length} links`)
       const nav = []
-      s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId: p.requestId, errorReason: 'Aborted' }).catch(() => {}) })
-      await s.goto(LEGEND.indexOf('Writing')); await sleep(250)
-      await s.send('Fetch.enable', { patterns: [{ urlPattern: '*', resourceType: 'Document', requestStage: 'Request' }] })
+      s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId:p.requestId, errorReason:'Aborted' }).catch(() => {}) })
+      await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', resourceType:'Document', requestStage:'Request' }] })
       const storyBad = []
-      let probes = 0
-      const probe = async (label, k, act) => {
-        const n0 = nav.length; probes++
-        await act()
-        await until(async () => nav.length > n0, 1500, 50)
-        await sleep(120)
-        const st = await s.evaluate("({ active: __ss.diveState.active, hidden: document.getElementById('detail').hidden, locked: document.documentElement.classList.contains('locked') })").catch(() => null)
-        if (!st || nav.length !== n0 + 1 || nav[n0] !== new URL(linksWant[k], origin).href || st.active || !st.hidden || st.locked) storyBad.push(`${label} ${k}: ${JSON.stringify({ url: nav[n0], asked: nav.length - n0, st })}`)
-      }
       try {
-        for (let k = 0; k < r.links.length; k++) await probe('card', k, () => s.evaluate(`document.querySelectorAll('.ss #writing .pieces li a')[${k}].click()`))
-        for (let k = 0; k < r.links.length; k++) { const pos = await s.evaluate(`__ss.bodyPos('writing', ${k})`); await probe('star', k, () => s.mouse(Math.round(pos.x), Math.round(pos.y))) }
-        for (const k of [0, 7, 15]) await probe('enter', k, async () => { await s.evaluate(`document.querySelectorAll('.ss #writing .pieces li a')[${k}].focus()`); await s.key('Enter', 13, 0) })
+        for (let k=0;k<STORIES.length;k++) {
+          await s.evaluate(`document.querySelectorAll('#creative .story-bead')[${k}].click()`)
+          const before=nav.length
+          await s.evaluate(`document.querySelectorAll('#creative .story-leaf a')[${k}].click()`)
+          await until(async()=>nav.length>before,1500,50)
+          if (nav[before]!==new URL(linksWant[k],origin).href) storyBad.push(`${k}: ${nav[before]}`)
+        }
       } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
-      row('stories open where they live', !storyBad.length && probes === 35, `${probes} probes (card, star, Enter), ${nav.length} navigations asked; ${storyBad.join('; ').slice(0, 400) || 'each to its own /writing/#<slug>, no detail'}`)
+      row('stories open where they live',!storyBad.length&&nav.length===STORIES.length,`${nav.length} navigations; ${storyBad.join('; ')||'all match'}`)
 
       // and /writing/#<slug> opens that story as a click on its title does: the reader
       // fades in and the title's words are revealed. The page is the site's; its
@@ -913,8 +981,6 @@ try {
       // in, landed, out, with the scroll position intact
       const DIVES = [
         ['tools', 1440, 900, 'tools', "__ss.dive(0, 'tools')", ''], ['tools (390)', 390, 844, 'tools', "__ss.dive(4, 'tools')", ''],
-        ['essays', 1440, 900, 'essays', "__ss.dive(0, 'essays')", ''], ['essays (390)', 390, 844, 'essays', "__ss.dive(0, 'essays')", ''],
-        ['essays, the second', 1440, 900, 'essays', "__ss.dive(1, 'essays')", ''],
         ['changelog', 1440, 900, 'changelog', "__ss.dive(1, 'changelog')", ''], ['changelog (390)', 390, 844, 'changelog', "__ss.dive(5, 'changelog')", ''],
       ]
       for (const [label, w, h, sceneId, call, extra] of DIVES) {
@@ -1020,7 +1086,7 @@ try {
 
     // ---------------------------------------------------------------- every card fits
     await group('fit', async () => {
-      const SETS = [['tools', '#tools .ring'], ['writing', '#writing .pieces'], ['essays', '#essays .pieces'], ['newsletter', '#newsletter .pieces'], ['changelog', '#changelog .pieces']]
+      const SETS = [['tools', '#tools .ring'], ['newsletter', '#newsletter .pieces'], ['changelog', '#changelog .pieces']]
       for (const [w, h] of SIZES) {
         const bad = [], spans = []
         for (const [id, sel] of SETS) {
@@ -1029,6 +1095,10 @@ try {
           spans.push(`${id} ${fit.shown}`)
           if (!fit.inside || fit.overlaps || fit.overflowX) bad.push(`${id}: ${JSON.stringify(fit)}`)
         }
+        await s.openEngine(join('p=5'),w,h)
+        const c=await s.evaluate(`(() => {const b=e=>e.getBoundingClientRect(),a=document.getElementById('creative-stories'),m=document.getElementById('creative-music'),hud=b(document.querySelector('.hud-nav')), items=[...a.querySelectorAll('.story-bead,.story-panel,.creative-controls')], pass=items.every(e=>{const r=b(e),w=b(a);return r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1})&&b(a).bottom<hud.top; return {pass,beads:a.querySelectorAll('.story-bead').length,records:m.querySelectorAll('.record-disc').length,overlap:!m.hidden&&b(a).right>=b(m).left,overflow:document.documentElement.scrollWidth>innerWidth}})()`)
+        spans.push(`creative ${c.beads}/${c.records}`)
+        if (!c.pass||c.beads!==16||c.records!==9||c.overlap||c.overflow) bad.push(`creative: ${JSON.stringify(c)}`)
         row(`cards fit (${w}x${h})`, !bad.length, bad.join('; ').slice(0, 400) || spans.join(', '))
       }
       await s.viewport(1440, 900)

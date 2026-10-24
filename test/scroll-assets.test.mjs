@@ -7,7 +7,7 @@ test("scroll asset set and generated sprite match the approved counts", () => {
   const base = new URL("../src/components/scroll/", import.meta.url)
   const images = readdirSync(new URL("images/", base)).filter(name => name.endsWith(".jpg"))
   const tech = readdirSync(new URL("tech/", base)).filter(name => name.endsWith(".svg"))
-  assert.equal(images.length, 14)
+  assert.equal(images.length, 20)
   assert.equal(tech.length, 21)
   const sprite = readFileSync(new URL("techSprite.generated.ts", base), "utf8")
   assert.equal((sprite.match(/<symbol /g) || []).length, 21)

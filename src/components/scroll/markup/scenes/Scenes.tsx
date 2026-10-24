@@ -1,6 +1,12 @@
 import React from "react"
-import { ABOUT_FACTS, CARD_LINE, SCENE_COPY, SOCIAL } from "../../data/content"
-import type { AppItem, EssayItem, Letter, LogItem, SceneItem, ScrollData, StoryItem } from "../../data/types"
+import { ABOUT_FACTS, CARD_LINE, MUSIC_LINKS, RELEASES, SCENE_COPY, SOCIAL } from "../../data/content"
+import hungarianSpa from "../../images/alexs-hand-hungarian-spa.jpg"
+import katatak from "../../images/alexs-hand-katatak.jpg"
+import kunstler from "../../images/alexs-hand-kunstler-scheisse.jpg"
+import goblinsz from "../../images/alexs-hand-goblinsz.jpg"
+import roaches from "../../images/alexs-hand-the-roaches.jpg"
+import cancumbia from "../../images/alexs-hand-cancumbia.jpg"
+import type { AppItem, Letter, LogItem, SceneItem, ScrollData } from "../../data/types"
 import { TechMark } from "../TechMark"
 import { LetterBody } from "../LetterBody"
 import { useNetlifyForm } from "../../../../helpers/useNetlifyForm"
@@ -22,16 +28,14 @@ function AppCards({ items, set, step }: { items: AppItem[]; set: string; step: s
     </a>
   </li>)}</ul>
 }
-// the line under a piece's title: "Short fiction", an essay's date, a log entry's kind and medium
+// the line under a log entry's title names its kind and medium
 const parts = (meta: string) => meta.split(" · ")
-function PieceCards({ items, set, step }: { items: (StoryItem | EssayItem | LogItem)[]; set: "writing" | "essays" | "changelog"; step: string }) {
+function PieceCards({ items, step }: { items: LogItem[]; step: string }) {
   return <ul className="pieces stagger" data-step={step}>{items.map((item, index) => <li key={item.title}>
-    <a href={item.link} data-set={set} data-k={index}>
-      {'image' in item
-        ? <span className="thumb"><img src={item.image} alt="" decoding="async" /></span>
-        : <span className={`cover ${set === "writing" ? "fiction" : "log"}`}><b>{item.num}</b><span className="lab">{'kindLabel' in item ? item.kindLabel : "Fiction"}</span></span>}
+    <a href={item.link} data-set="changelog" data-k={index}>
+      <span className="cover log"><b>{item.num}</b><span className="lab">{item.kindLabel}</span></span>
       <strong>{item.title}</strong>
-      <span className="lab kind">{set === "writing" ? "Short fiction" : 'meta' in item ? (set === "essays" ? parts(item.meta).slice(-1)[0] : parts(item.meta).slice(0, -1).join(" · ")) : ""}</span>
+      <span className="lab kind">{parts(item.meta).slice(0, -1).join(" · ")}</span>
     </a>
   </li>)}</ul>
 }
@@ -62,8 +66,53 @@ export function ProjectsScene({ data, scene }: Props) { return <Scene scene={sce
   <div className="project-controls" role="group" aria-label="Turn the projects"><button type="button" data-project-step="-1" aria-label="Previous project">‹</button><span id="project-count">1 of {data.projects.length}</span><button type="button" data-project-step="1" aria-label="Next project">›</button><span className="lab">sideways scroll or arrow keys</span></div>
 </Scene> }
 export function ToolsScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.tools.headline}</h2><AppCards items={data.tools} set="tools" step="0.03" /></Scene> }
-export function WritingScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.writing.headline}</h2><PieceCards items={data.stories} set="writing" step="0.02" /></Scene> }
-export function EssaysScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.essays.headline}</h2><PieceCards items={data.essays} set="essays" step="0.03" /></Scene> }
+const releaseCovers: Record<string, string> = {
+  "alexs-hand-hungarian-spa.jpg": hungarianSpa, "alexs-hand-katatak.jpg": katatak,
+  "alexs-hand-kunstler-scheisse.jpg": kunstler, "alexs-hand-goblinsz.jpg": goblinsz,
+  "alexs-hand-the-roaches.jpg": roaches, "alexs-hand-cancumbia.jpg": cancumbia,
+}
+export function CreativeScene({ data, scene }: Props) { return <Scene scene={scene} inner="inner creative-inner">
+  <h2>{SCENE_COPY.creative.headline}</h2>
+  <div className="creative-switch" role="tablist" aria-label="Creative worlds">
+    <button type="button" role="tab" id="creative-tab-stories" aria-controls="creative-stories" aria-selected="true" tabIndex={0} data-creative-world="stories">Stories</button>
+    <button type="button" role="tab" id="creative-tab-music" aria-controls="creative-music" aria-selected="false" tabIndex={-1} data-creative-world="music">Alex&apos;s Hand</button>
+  </div>
+  <div className="creative-stage">
+    <div id="creative-stories" className="creative-world stories-world" role="region" aria-label="Stories carousel">
+      <h3>Stories</h3>
+      <div className="story-stage" aria-label="Choose a story">
+        <div className="story-planet" aria-hidden="true" />
+        {data.stories.map((item, index) => <button className="story-bead" type="button" key={item.link} data-story={index} aria-label={`Show ${item.title}, story ${index + 1} of ${data.stories.length}`} aria-current={index === 0 ? "true" : "false"}>{item.num}</button>)}
+      </div>
+      <section className="story-panel" aria-label="Active story">
+        {data.stories.map((item, index) => <article className="story-leaf" key={item.link} data-story-leaf={index} hidden={index !== 0}>
+          <span className="story-number">{item.num}</span><div><span className="lab">Fiction</span><h4>{item.title}</h4><a href={item.link}>Read the story <span aria-hidden="true">↗</span></a></div>
+        </article>)}
+      </section>
+      <div className="creative-controls" role="group" aria-label="Turn stories"><button type="button" data-creative-step="-1" data-creative-target="stories" aria-label="Previous story">‹</button><span id="story-count">1 of {data.stories.length}</span><button type="button" data-creative-step="1" data-creative-target="stories" aria-label="Next story">›</button></div>
+    </div>
+    <div id="creative-music" className="creative-world music-world" role="region" aria-label="Alex's Hand records">
+      <h3>Alex&apos;s Hand</h3>
+      <p className="creative-deck">Alex&apos;s Hand was a ten-piece ensemble founded in 2011 by Kellen Mills and Nic Barnes. We toured the US and Europe through 2019. Hungarian Spa was our final album.</p>
+      <div className="record-stage" aria-label="Choose a release">
+        {RELEASES.map((release, index) => <button className="record-disc" type="button" key={release.title} data-record={index} aria-label={`Show ${release.title}, record ${index + 1} of ${RELEASES.length}`} aria-current={index === 0 ? "true" : "false"}>
+          <span className="vinyl-grooves" aria-hidden="true" /><span className="vinyl-label">{release.cover ? <img src={releaseCovers[release.cover]} alt="" decoding="async" /> : <span className="record-type">{release.title}</span>}</span><span className="vinyl-hole" aria-hidden="true" />
+        </button>)}
+      </div>
+      <section className="record-panel" aria-label="Active record">
+        {RELEASES.map((release, index) => <article className="record-leaf" key={release.title} data-record-leaf={index} hidden={index !== 0}>
+          <span className="record-sleeve">{release.cover ? <img src={releaseCovers[release.cover]} alt="" decoding="async" /> : <span>{release.title}</span>}</span>
+          <span className="record-copy"><span className="lab">Release {index + 1} of {RELEASES.length}</span><h4>{release.title}</h4><a href={release.link} target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></span>
+        </article>)}
+      </section>
+      <div className="music-links" aria-label="More music">{MUSIC_LINKS.map(item => <a key={item.label} href={item.link} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div>
+      <div className="creative-controls" role="group" aria-label="Turn records"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous record">‹</button><span id="record-count">1 of {RELEASES.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next record">›</button></div>
+    </div>
+  </div>
+</Scene> }
+export function EssaysScene({ data, scene }: Props) { return <Scene scene={scene} inner="inner essays-inner"><h2>{SCENE_COPY.essays.headline}</h2><div className="essay-spread stagger" data-step="0.05">{data.essays.map(item => <article className="essay-card" key={item.link}>
+  <img src={item.image} alt="" decoding="async" /><div className="essay-copy"><span className="lab">{item.meta}</span><h3>{item.title}</h3><p>{item.excerpt}</p><a href={item.link} target="_blank" rel="noopener noreferrer">Read on Medium <span aria-hidden="true">↗</span></a></div>
+</article>)}</div></Scene> }
 // the letter's week, from its link (/newsletter/2026-W42/): the article carries it as data-week
 const weekOf = (letter: Letter) => letter.link.split("/").filter(Boolean).pop()
 function LetterArticle({ letter, index }: { letter: Letter; index: number }) {
@@ -79,7 +128,7 @@ export function NewsletterScene({ data, scene }: Props) { return <Scene scene={s
   <ul className="pieces index stagger" data-step="0.012" aria-label="Every letter">{data.letters.map((letter, index) => <li key={letter.link}><a href={letter.link} data-set="newsletter" data-k={index}><span className="cover letter"><b>{letter.num}</b><span className="lab">Letter</span></span><strong>{letter.title}</strong><span className="lab kind">{letter.date}</span></a></li>)}</ul>
   <section className="reader" aria-label="The letter at the front">{data.letters.map((letter, index) => <LetterArticle key={letter.link} letter={letter} index={index} />)}</section>
 </Scene> }
-export function ChangelogScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.changelog.headline}</h2><PieceCards items={data.changelog} set="changelog" step="0.03" /></Scene> }
+export function ChangelogScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.changelog.headline}</h2><PieceCards items={data.changelog} step="0.03" /></Scene> }
 export function WorkScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.work.headline}</h2><p className="lead">{SCENE_COPY.work.lead}</p><a className="pill" href={SCENE_COPY.work.link}>{SCENE_COPY.work.cta} <span aria-hidden="true">↗</span></a></Scene> }
 export function ContactScene({ scene }: Props) {
   const { form, setForm, status, submit } = useNetlifyForm()

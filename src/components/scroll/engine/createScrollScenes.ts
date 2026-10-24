@@ -2,6 +2,8 @@ import type { ScrollData } from '../data/types';
 import { TECH_ICON as techIcon } from '../data/content';
 import { createInput } from './input';
 import { createProjectCarousel } from './projectCarousel';
+import { createCreativeCarousel } from './creativeCarousel';
+import { attachVerticalHandoff } from './verticalHandoff';
 
 export function createScrollScenes(root: HTMLElement, options: { data: ScrollData }) {
 const { data } = options;
@@ -66,8 +68,6 @@ const orbitW = (sp) => 1 - smooth((Math.abs(sp - NEWS) - 0.45) / 0.35);
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
 const adaptApp = (p) => ({ ...p, img: p.image, kind: 'app' });
 const TOOLS = data.tools.map(adaptApp);
-const WRITING = data.stories;
-const ESSAYS = data.essays.map((p) => ({ ...p, img: p.image, kind: 'essay' }));
 const CHANGELOG = data.changelog.map((p) => ({ ...p, kind: 'log' }));
 const LETTERS = data.letters;
 const TECH_ICON = techIcon;
@@ -837,14 +837,8 @@ function curveWeb(c, EDGES, bulge, base) {
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   return new Float32Array(out);
 }
-// The writing constellation. In the Atlas, Writing is the one elliptical galaxy,
-// its works on a ring and a brighter knot for fiction. A scroll station has room
-// for a figure instead: nine stars, the fiction asterism on the left in the
-// Atlas's lilac, the letters on the right in the scene's blue, one line between
-// them, joined by the same dotted web. Each star gets a card hung outward.
 // A figure of stars: positions (x, y, z, card direction) at the station, the
-// lines between them, one colour. Used by the writing constellation, the Medium
-// arc and the changelog ladder.
+// lines between them, one colour. Used by the changelog ladder.
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
 function makeStars(DEF, EDGES, colour, base) {
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
@@ -877,26 +871,6 @@ function makeStars(DEF, EDGES, colour, base) {
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   return { kind: 'stars', N, dirs, EDGES, colors, centers, stars, web: (aspect) => curveWeb(centers(aspect), EDGES, 0.05, base) };
 }
-// Writing: every story (sixteen since round 11) as a wreath of stars around the
-// headline, in the Atlas's lilac (its Writing galaxy is elliptical with a lilac
-// fiction knot): six across the top with their cards hung up, two down each side
-// hung outward, six across the bottom hung down, in the site's order clockwise
-// from the top left; one line runs the wreath. Rows 2.0 units up and down and
-// sides 5.3 out keep sixteen 120px cards clear of each other and of the headline
-// from 1024 by 768 up.
-const CON = makeStars([
-  [-5.5, 2.0, -0.2, 'up'], [-3.3, 2.0, -0.2, 'up'], [-1.1, 2.0, -0.2, 'up'], [1.1, 2.0, -0.2, 'up'], [3.3, 2.0, -0.2, 'up'], [5.5, 2.0, -0.2, 'up'],
-  [5.3, 0.85, 0, 'right'], [5.3, -0.85, 0, 'right'],
-  [5.5, -2.0, 0.2, 'down'], [3.3, -2.0, 0.2, 'down'], [1.1, -2.0, 0.2, 'down'], [-1.1, -2.0, 0.2, 'down'], [-3.3, -2.0, 0.2, 'down'], [-5.5, -2.0, 0.2, 'down'],
-  [-5.3, -0.85, 0, 'left'], [-5.3, 0.85, 0, 'left'],
-], Array.from({ length: 16 }, (_, i) => [i, (i + 1) % 16]), [0.78, 0.55, 0.86], 0.16);
-// (The Newsletter's figure is the ringed planet and its moons, below.)
-// Essays: a lintel above the headline, in rose. Two stars, one each side, joined
-// by one line (round 12: the profile card at the apex went, so the figure is the
-// pair rather than an arc with a gap); a third essay would take the apex again.
-const ARC = makeStars([
-  [-2.7, 2.0, 0, 'up'], [2.7, 2.0, 0, 'up'],
-], [[0, 1]], [0.95, 0.62, 0.78], 0.18);
 // Changelog: a ladder, two uprights either side of the headline with rungs across,
 // newest at the top left and reading across and down; the pulses climb. Steel blue.
 const LADDER = makeStars([
@@ -978,8 +952,6 @@ const MOONS = makeMoons(ORB_N);
 const SETS = {
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   tools:      { name: 'tools',      scene: sceneIndex('tools'),      items: TOOLS,     body: GAL2,   size: (k) => GAL2.sizes[k] * 0.95, hoop: (k) => GAL2.sizes[k] * 1.7, open: 'Open project', back: 'Back to the cluster' },
-  writing:    { name: 'writing',    scene: sceneIndex('writing'),    items: WRITING,   body: CON,    size: () => 0.3, hoop: () => 1.3, go: true },
-  essays:     { name: 'essays',     scene: sceneIndex('essays'),     items: ESSAYS,    body: ARC,    size: () => 0.3, hoop: () => 1.3, open: 'Read on Medium', back: 'Back to the arc' },
   newsletter: { name: 'newsletter', scene: sceneIndex('newsletter'), items: LETTERS,   body: MOONS,  size: () => 0.3, hoop: () => 1.3, layout: 'panel' },
   changelog:  { name: 'changelog',  scene: sceneIndex('changelog'),  items: CHANGELOG, body: LADDER, size: () => 0.3, hoop: () => 1.3, open: 'Open the changelog', back: 'Back to the log' },
 };
@@ -1518,6 +1490,7 @@ function layout() {
   if (usesDust()) text.rebuild();
   readScroll();
   projectCarousel.layout();
+  creativeCarousel.layout();
 }
 const usesDust = () => true;
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
@@ -1539,6 +1512,7 @@ function frame(now) {
   stepOrbit(dt);
   projectCarousel.frame(now);
   projectCarousel.refresh();
+  creativeCarousel.frame(now);
   stepDive(dt);
   applyPoses();
   stepReader(dt);
@@ -1550,6 +1524,9 @@ function frame(now) {
 }
 
 const projectCarousel = createProjectCarousel(root, data.projects, input, () => Math.abs(S.sp - sceneIndex('projects')) < 0.45 && !DIVE.active, () => S.rm);
+const creativeCarousel = createCreativeCarousel(root, data.stories.length, input, () => Math.abs(S.sp - sceneIndex('creative')) < 0.45 && !DIVE.active, () => S.rm);
+attachVerticalHandoff(root, '#essays .essay-spread', input, () => Math.abs(S.sp - sceneIndex('essays')) < 0.45 && !DIVE.active);
+attachVerticalHandoff(root, '#creative .creative-inner', input, () => Math.abs(S.sp - sceneIndex('creative')) < 0.45 && !DIVE.active);
 bootRenderer();
 html.dataset.dir = S.dir;
 html.classList.toggle('calm', S.rm);
@@ -1561,7 +1538,7 @@ input.listen(window, 'resize', layout);
 
 // What a click does: cards (click, tap, Enter) and bodies (hit test on the sky)
 // activate their item; for a dive, Escape and clicks skip or close, Back reverses.
-// cards carry data-set="projects|tools|writing|essays|newsletter|changelog" and data-k
+// cards carry data-set="tools|newsletter|changelog" and data-k
 $$('[data-set][data-k]').forEach((a) => input.listen(a, 'click', (e) => {
   // a story's card is a plain link to the story (round 13): the browser follows it,
   // so a modified click or a middle click still opens a new tab
@@ -1611,8 +1588,9 @@ input.listen(window, 'click', (e) => {
     if (DIVE.dir === 0 && !detail.querySelector('.detail-card').contains(e.target)) closeDive();
     return;
   }
-// @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
-  if (e.target.closest('a, button, .inner, .controls, .hud')) return;
+  const target = e.target as HTMLElement;
+  if (target.closest('a, button, .controls, .hud')) return;
+  if (target.closest('.inner') && !target.closest('#creative .creative-inner')) return;
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   const hit = bodyAt(e.clientX, e.clientY);
   if (!hit) return;
@@ -1755,8 +1733,8 @@ input.listen(window, 'touchcancel', () => { touch.id = -1; }, { passive: true })
 input.listen($('#detail-back'), 'click', (e) => { e.stopPropagation(); closeDive(); });
 const diveQ = /^([tmc]?)(\d+)$/.exec(q.get('dive') || '');
 if (diveQ) {
-  // captures: hold the dive at a progress (?dive=2 a project, t2 a tool, m0 an essay, c2 a log entry)
-  const set = { t: SETS.tools, m: SETS.essays, c: SETS.changelog }[diveQ[1]];
+  // captures: hold the dive at a progress (?dive=t2 a tool, c2 a log entry)
+  const set = { t: SETS.tools, c: SETS.changelog }[diveQ[1]];
   if (set) {
   DIVE.hold = true; DIVE.t = clamp(parseFloat(q.get('dt') || '0.5'), 0, 1);
   startDive(set, clamp(parseInt(diveQ[2], 10) || 0, 0, set.items.length - 1), null);
@@ -1799,6 +1777,9 @@ if (debug) window.__ss = {
   },
   get projectCarousel() { return { current: projectCarousel.current, name: data.projects[projectCarousel.current].name }; },
   projectTo(k: number) { projectCarousel.go(k); },
+  get creativeCarousel() { return { world: creativeCarousel.world, story: creativeCarousel.story, record: creativeCarousel.record }; },
+  creativeWorld(which: 'stories' | 'music') { creativeCarousel.select(which); },
+  creativeTo(k: number) { creativeCarousel.go(k); },
   orbitTo,
   // what the sky draws for each set right now: its depth and alpha, and whether
   // the renderer draws it at all (a body behind the camera is culled)

@@ -6,8 +6,8 @@ export const SCENES: SceneItem[] = [
   { id: "about", label: "About", tint: [[0.86, 0.65, 0.31], [0.70, 0.50, 0.30]] },
   { id: "projects", label: "Projects", tint: [[0.55, 0.31, 0.82], [0.31, 0.20, 0.63]] },
   { id: "tools", label: "Tools and games", tint: [[0.30, 0.50, 0.80], [0.24, 0.31, 0.63]] },
-  { id: "writing", label: "Writing", tint: [[0.24, 0.31, 0.47], [0.31, 0.35, 0.47]] },
   { id: "essays", label: "Essays", tint: [[0.62, 0.36, 0.52], [0.47, 0.30, 0.50]] },
+  { id: "creative", label: "Creative", tint: [[0.24, 0.31, 0.47], [0.31, 0.35, 0.47]] },
   { id: "newsletter", label: "Newsletter", tint: [[0.62, 0.46, 0.30], [0.42, 0.34, 0.42]] },
   { id: "changelog", label: "Changelog", tint: [[0.30, 0.44, 0.62], [0.27, 0.36, 0.56]] },
   { id: "work", label: "Work with me", tint: [[0.24, 0.55, 0.47], [0.27, 0.55, 0.78]] },
@@ -20,8 +20,8 @@ export const SCENE_COPY = {
   about: { headline: "Composer first, then engineer." },
   projects: { headline: "Software you can explore." },
   tools: { headline: "Tools, games and experiments." },
-  writing: { headline: "Short fiction." },
-  essays: { headline: "Essays." },
+  essays: { headline: "Ideas worth sitting with." },
+  creative: { headline: "Stories and songs." },
   newsletter: { headline: "A weekly builder's notebook." },
   changelog: { headline: "A running ship log." },
   work: { headline: "Thoughtful software. From idea to working product.", lead: "I help product teams and agencies build features, connect systems, and turn manual workflows into useful software.", cta: "Start the conversation", link: "#contact" },
@@ -75,6 +75,24 @@ export const ESSAYS: EssayItem[] = [
   { num: "01", title: "Agile Anarchy: What’s Left?", meta: "Essay · Medium · 30 March 2026", link: "https://medium.com/@colorpulse_6839/agile-anarchy-whats-left-7679ffe91fa8", image: "essay-agile-anarchy.jpg", excerpt: "There is a lot of talk about engineers and designers being replaced by AI. Everyone can feel the ground moving, in fact its practically breaking apart under our feet, but very few are willing to follow that logic all the way to its absolute conclusion." },
   { num: "02", title: "Codex & the Human Coder: Why AI Needs Our Wisdom (And Our IDE(A)s)", meta: "Essay · Medium · 9 June 2025", link: "https://medium.com/@colorpulse_6839/codex-the-human-coder-why-ai-needs-our-wisdom-and-our-ide-a-s-140f35f6af16", image: "codex-eye.jpg", excerpt: "This article offers a more optimistic take: Codex and its kin are transformative assistants, not replacements. They are the next logical step in the long history of programming abstraction." },
 ]
+
+export const RELEASES = [
+  { title: "Hungarian Spa", link: "https://alexshand.bandcamp.com/album/hungarian-spa", cover: "alexs-hand-hungarian-spa.jpg" },
+  { title: "KaTaTaK", link: "https://alexshand.bandcamp.com/album/katatak", cover: "alexs-hand-katatak.jpg" },
+  { title: "Künstler Scheiße", link: "https://alexshand.bandcamp.com/album/k-nstler-schei-e", cover: "alexs-hand-kunstler-scheisse.jpg" },
+  { title: "Goblinsz...?1!", link: "https://alexshand.bandcamp.com/album/goblinsz-1", cover: "alexs-hand-goblinsz.jpg" },
+  { title: "Alex's Hand presents: The Roaches", link: "https://alexshand.bandcamp.com/album/alexs-hand-presents-the-roaches", cover: "alexs-hand-the-roaches.jpg" },
+  { title: "Cancumbia", link: "https://alexshand.bandcamp.com/album/cancumbia", cover: "alexs-hand-cancumbia.jpg" },
+  { title: "An Albatross Around The Neck", link: "https://alexshand.bandcamp.com/album/an-albatross-around-the-neck", cover: null },
+  { title: "This cat is a genius.", link: "https://alexshand.bandcamp.com/album/this-cat-is-a-genius", cover: null },
+  { title: "Madame Psychosis", link: "https://alexshand.bandcamp.com/album/madame-psychosis", cover: null },
+] as const
+
+export const MUSIC_LINKS = [
+  { label: "Spotify", link: "https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v" },
+  { label: "SoundCloud", link: "https://soundcloud.com/colorpulse" },
+  { label: "Priaprizm on Bandcamp", link: "https://priaprizm.bandcamp.com/track/im-inflammed" },
+] as const
 
 export const SOCIAL = [
   { label: "GitHub", href: "https://github.com/colorpulse6", icon: "github" },

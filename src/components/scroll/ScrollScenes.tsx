@@ -3,7 +3,7 @@ import type { ScrollData } from "./data/types"
 import { Hud } from "./markup/Hud"
 import { TechSprite } from "./markup/TechSprite"
 import { DetailDialog } from "./markup/DetailDialog"
-import { HeroScene, AboutScene, ProjectsScene, ToolsScene, WritingScene, EssaysScene, NewsletterScene, ChangelogScene, WorkScene, ContactScene, AtlasScene } from "./markup/scenes/Scenes"
+import { HeroScene, AboutScene, ProjectsScene, ToolsScene, CreativeScene, EssaysScene, NewsletterScene, ChangelogScene, WorkScene, ContactScene, AtlasScene } from "./markup/scenes/Scenes"
 
 // Without JavaScript the scenes stack as a plain page: every heading, card and letter
 // in flow. Inside <noscript>, so with scripts on it never applies and the scenes keep
@@ -24,10 +24,18 @@ const NO_SCRIPT_CSS = `
 .ss #projects .project-panel { position: relative; inset: auto; transform: none; width: 100%; max-height: none; overflow: visible; margin: 0; }
 .ss #projects .project-leaf[hidden] { display: block; }
 .ss #projects .project-leaf { margin-bottom: 28px; }
+.ss #creative .creative-world[hidden] { display: block; }
+.ss #creative .record-disc, .ss #creative .record-orbit, .ss #creative .creative-switch, .ss #creative .creative-controls { display: none; }
+.ss #creative .record-stage { height: auto; }
+.ss #creative .record-panel { position: relative; inset: auto; transform: none; width: 100%; }
+.ss #creative .record-leaf[hidden] { display: block; }
+.ss #creative .record-leaf { margin: 0 0 20px; }
+.ss #essays .essays-inner, .ss #creative .creative-inner { height: auto; max-height: none; }
+.ss #essays .essay-spread, .ss #creative .stories-world .pieces { position: relative; overflow: visible; max-height: none; }
 .ss .hud { z-index: 5; }
 .ss { font-size: max(11px, 1rem); background: #111; color: rgba(232, 236, 255, 0.96); }
 `
-const components = [HeroScene, AboutScene, ProjectsScene, ToolsScene, WritingScene, EssaysScene, NewsletterScene, ChangelogScene, WorkScene, ContactScene, AtlasScene]
+const components = [HeroScene, AboutScene, ProjectsScene, ToolsScene, EssaysScene, CreativeScene, NewsletterScene, ChangelogScene, WorkScene, ContactScene, AtlasScene]
 const ScrollScenes = React.memo(function ScrollScenes({ data }: { data: ScrollData }) {
   const root = useRef<HTMLDivElement>(null)
   useEffect(() => {
