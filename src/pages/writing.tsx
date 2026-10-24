@@ -11,6 +11,7 @@ import {
 import { GatsbyLocation } from "../types/gatsby"
 import { usePageTransition } from "../helpers/usePageTransition"
 import { creativeWork } from "../helpers/structuredData"
+import { storyFromHash } from "../helpers/storySlug"
 
 interface WritingItem {
   title: string
@@ -55,7 +56,9 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
 
   usePageTransition(transitionStatus, ".writings", { enter: 1, exit: 0.03, mount: 0.5 })
 
+  const revealFrame = useRef(0)
   const stopReveal = useCallback(() => {
+    cancelAnimationFrame(revealFrame.current)
     if (revealTimer.current) {
       clearTimeout(revealTimer.current)
       revealTimer.current = 0
@@ -68,7 +71,14 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
     setReaderMode(true)
     setScrollProgress(0)
 
-    requestAnimationFrame(() => {
+    // The reader mounts on the next render. A click renders it before the next
+    // frame; an open from the URL hash on load (the page still hydrating) can
+    // take a few frames more, so the reveal waits for it, half a second at most.
+    const reveal = (frames = 0): void => {
+      if (!document.querySelector(".reader-container")) {
+        if (frames < 30) revealFrame.current = requestAnimationFrame(() => reveal(frames + 1))
+        return
+      }
       gsap.fromTo(
         ".reader-container",
         { autoAlpha: 0 },
@@ -118,7 +128,8 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
         // Start content reveal after title has time to begin
         revealTimer.current = window.setTimeout(revealContent, 1200)
       }
-    })
+    }
+    revealFrame.current = requestAnimationFrame(() => reveal())
   }, [stopReveal])
 
   const closeReader = useCallback(() => {
@@ -135,6 +146,16 @@ const Writing: React.FC<WritingProps> = ({ transitionStatus, location }) => {
       },
     })
   }, [stopReveal])
+
+  useEffect(() => {
+    const openFromHash = () => {
+      const title = storyFromHash(window.location.hash, storiesData.map(story => story.title))
+      if (title) openStory(title)
+    }
+    openFromHash()
+    window.addEventListener("hashchange", openFromHash)
+    return () => window.removeEventListener("hashchange", openFromHash)
+  }, [openStory, storiesData])
 
   useEffect(() => {
     return () => stopReveal()

@@ -42,7 +42,7 @@ module.exports = {
       },
     },
     `gatsby-plugin-react-helmet`,
-    `gatsby-plugin-sitemap`,
+    { resolve: `gatsby-plugin-sitemap`, options: { excludes: ["/scroll/"] } },
     `gatsby-plugin-image`,
     {
       resolve: `gatsby-source-filesystem`,

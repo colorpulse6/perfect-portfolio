@@ -19,6 +19,7 @@ import { resolveTheme } from "./nebula/particleThemes"
 import { AmbientAudioProvider, useAmbientAudio } from "./audio/AmbientAudioProvider"
 import { useInteractionSounds } from "./audio/useInteractionSounds"
 import { GatsbyLocation } from "../types/gatsby"
+import { isScrollPath } from "../helpers/routes"
 import "./layout.css"
 
 // Type for the GraphQL query result
@@ -129,6 +130,7 @@ const Layout: React.FC<LayoutProps> = ({
   const pagePath = location?.pathname || "/"
   // The atlas is a full-bleed standalone view: suppress all global chrome on it.
   const isAtlas = pagePath === "/atlas" || pagePath === "/atlas/"
+  const isScroll = isScrollPath(pagePath)
 
   React.useEffect(() => {
     setNavOpen(false)
@@ -160,12 +162,23 @@ const Layout: React.FC<LayoutProps> = ({
   React.useEffect(() => {
     if (typeof document === "undefined" || typeof window === "undefined") return
     const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
-    if (!isAtlas && !hasTouch && !prefersReducedMotion && window.innerWidth > 550) {
+    if (!isAtlas && !isScroll && !hasTouch && !prefersReducedMotion && window.innerWidth > 550) {
       document.body.classList.add("custom-cursor")
     } else {
       document.body.classList.remove("custom-cursor")
     }
-  }, [isAtlas, prefersReducedMotion])
+  }, [isAtlas, isScroll, prefersReducedMotion])
+
+  if (isScroll) {
+    return (
+      <AmbientAudioProvider pagePath={pagePath}>
+        <div className="layout-container">
+          <CosmosStage key="cosmos-stage" path={pagePath} />
+          {children}
+        </div>
+      </AmbientAudioProvider>
+    )
+  }
 
   if (isAtlas) {
     // Full-bleed atlas: keep the global header + sidebar nav (so the social

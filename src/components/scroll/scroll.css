@@ -1,0 +1,585 @@
+@font-face { font-family: "SS Montserrat"; src: url("./fonts/montserrat-var.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+/* Scroll scenes prototype. Tokens follow the approved wormhole study and the
+   site: near-black void, cyan accent, Montserrat headings, monospace labels. */
+
+html.ss-on, .ss {
+  color-scheme: dark;
+  --void: #111111;
+  --ink: rgba(232, 236, 255, 0.96);
+  --mute: rgba(225, 232, 250, 0.94);
+  --faint: rgba(160, 172, 220, 0.46);
+  --line: rgba(150, 170, 255, 0.18);
+  --cyan: #36e6db;
+  --panel: rgba(8, 9, 18, 0.7);
+  --mono: "Courier New", "Lucida Console", monospace;
+  --head: "SS Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* --vh and --hud-bottom (the legend band's measured height) are set on html by the
+     engine; they are not declared here, where they would shadow the engine's values.
+     Each use carries the prototype's :root default as its fallback (100vh, 54px). */
+}
+
+/* The site's global rules (layout.css: html, body and bare element selectors) do not
+   reach the scenes. Under html.ss-on, html and body take the prototype's own rules and
+   the values it left to the browser; every element under .ss starts from the
+   browser's defaults, as the prototype page did (SVG internals keep their
+   presentation attributes). Every rule below is more specific and still applies. */
+.ss :where(:not(svg *)) { all: revert; }
+/* Chrome maps the hidden attribute as an author-level hint, which the revert above undoes. */
+.ss [hidden] { display: none; }
+html.ss-on { background: var(--void); scroll-behavior: auto; font: 100%/normal serif; overflow: visible; box-sizing: content-box; -webkit-text-size-adjust: auto; text-size-adjust: auto; }
+html.ss-on body {
+  margin: 0;
+  color: var(--ink);
+  font: 300 16px/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: auto;
+  overflow-wrap: normal; font-kerning: auto; font-feature-settings: normal;
+  background-color: transparent;
+  overflow-x: hidden;
+}
+.ss a { color: inherit; }
+.ss :focus-visible { outline: 2px solid #7cc4ff; outline-offset: 3px; border-radius: 3px; }
+.ss :focus:not(:focus-visible) { outline: none; }
+
+.ss #sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+
+/* Scroll length comes from the spacer sections; the content is pinned. */
+.ss .scene { height: calc(var(--vh, 100vh) * 3); position: relative; }
+.ss .scene:last-child { height: var(--vh, 100vh); }
+.ss .pin {
+  position: fixed; inset: 0; z-index: 2;
+  display: grid; place-items: center;
+  padding: 0 24px; box-sizing: border-box;
+  opacity: 0; visibility: hidden;
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+.ss .inner { width: min(100%, 980px); pointer-events: auto; }
+.ss .stagger > * { will-change: transform, opacity; }
+
+/* Type */
+.ss h1, .ss h2 { font-family: var(--head); font-weight: 300; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
+.ss h1 { font-size: clamp(42px, 7.6vw, 108px); line-height: 1.02; }
+/* the site sets h1 sizes and margins with !important at 768px and 550px (layout.css); the scenes keep the prototype's */
+.ss h1 { font-size: clamp(42px, 7.6vw, 108px) !important; margin-left: 0 !important; }
+.ss h2 { font-size: clamp(30px, 4.6vw, 60px); line-height: 1.1; max-width: 17ch; }
+.ss .tag { font-family: var(--head); font-weight: 300; font-size: clamp(16px, 1.6vw, 21px); color: var(--mute); margin: 18px 0 0; letter-spacing: 0.01em; }
+.ss .lead { max-width: 36em; color: var(--mute); font-size: clamp(15px, 1.2vw, 17px); margin: 22px 0 0; text-shadow: 0 1px 8px #05050d, 0 1px 16px #05050d; }
+.ss .lead a { color: var(--ink); text-decoration-color: rgba(54, 230, 219, 0.5); text-underline-offset: 3px; }
+.ss .lab {
+  display: block;
+  font: 600 11px/1.5 var(--mono);
+  letter-spacing: 2.4px; text-transform: uppercase;
+  color: var(--faint);
+}
+.ss .lab.small { font-size: 11px; letter-spacing: 1.6px; }
+
+.ss .hero { text-align: center; }
+.ss .hero .lead { margin-inline: auto; }
+.ss .hint {
+  margin: 56px auto 0; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font: 600 11px/1.5 var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--faint);
+}
+.ss .hint-line { width: 1px; height: 46px; background: linear-gradient(180deg, rgba(54, 230, 219, 0), var(--cyan) 50%, rgba(54, 230, 219, 0)); background-size: 100% 200%; animation: hint 2.6s ease-in-out infinite; }
+@keyframes hint { 0% { background-position: 0 100%; } 100% { background-position: 0 -100%; } }
+
+/* About: the bio (round 11) is a readable block under the headline, in the site's
+   own words; the facts sit under it */
+.ss .bio { max-width: 62ch; margin: 22px 0 0; color: var(--mute); font-size: clamp(14px, 1.1vw, 16px); line-height: 1.6; text-align: left; background: rgba(6, 7, 16, 0.72); border-radius: 12px; padding: 12px 16px; box-shadow: 0 0 28px 22px rgba(6, 7, 16, 0.4); }
+.ss .bio p { margin: 0 0 0.8em; }
+.ss .bio p:last-child { margin-bottom: 0; }
+.ss .bio { margin-inline: auto; }
+.ss .facts { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 32px; }
+.ss .facts li { padding: 12px 8px 8px; border-top: 1px solid var(--line); color: var(--ink); font-size: 15px; line-height: 1.5; background: rgba(6, 7, 16, 0.68); border-radius: 6px; text-shadow: 0 1px 8px #05050d; }
+.ss .facts .lab { margin-bottom: 6px; }
+.ss #about .facts .lab { color: var(--mute); }
+
+/* Projects. Screenshots use the Atlas preview-card treatment: a 16:10 window on
+   the void, quiet until hovered, no loud border. */
+.ss .ring { list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 28px; }
+.ss .ring a { display: grid; grid-template-columns: 72px 1fr; grid-template-rows: auto auto auto auto; column-gap: 14px; text-decoration: none; padding: 16px 0 0; border-top: 1px solid var(--line); min-height: 100%; }
+.ss .ring .thumb { grid-row: 1 / 5; align-self: start; display: block; aspect-ratio: 16 / 10; border-radius: 6px; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset, 0 6px 20px rgba(0, 0, 0, 0.35); }
+/* an app's technologies as marks (round 12): a 14px row under the kind, dim until
+   the card is hovered or focused; each mark carries its name as tooltip */
+.ss .ring .tech { display: flex; flex-wrap: wrap; gap: 7px; margin: 7px 0 0; color: var(--faint); opacity: 0.75; transition: opacity .25s, color .25s; }
+.ss .ring .tech .ti { width: 14px; height: 14px; }
+.ss .ring a:hover .tech, .ss .ring a:focus-visible .tech { opacity: 1; color: var(--mute); }
+.ss .ring .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0.82; filter: saturate(0.85); transition: opacity .25s, filter .25s; }
+.ss .ring strong { display: block; font-family: var(--head); font-weight: 500; font-size: 19px; letter-spacing: -0.01em; margin-bottom: 4px; }
+.ss .ring p { margin: 8px 0 0; color: var(--mute); font-size: 14px; line-height: 1.5; }
+.ss .ring a:hover strong, .ss .ring a:focus-visible strong { color: var(--cyan); }
+.ss .ring a:hover .thumb img, .ss .ring a:focus-visible .thumb img { opacity: 1; filter: none; }
+/* an app with no screenshot in the repo wears a typographic cover: its mark, in the thumb's window */
+.ss .ring .cover { grid-row: 1 / 5; align-self: start; }
+.ss .ring .cover b { font-size: 18px; }
+.ss .ring a:hover .cover, .ss .ring a:focus-visible .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+
+/* Writing and the newsletter. The pieces have no cover art, so each wears a
+   typographic cover: its number set light on the void, fiction in the Atlas's
+   lilac, letters in blue. Two columns, filled down then across. */
+.ss .pieces { list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 14px 48px; }
+.ss .pieces a { display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto; column-gap: 14px; align-items: center; text-decoration: none; }
+.ss .pieces .cover { grid-row: 1 / 3; }
+/* a piece with real art (the essays' hero images) wears the same window as the
+   project screenshots: 16:10, hairline, dim until hover */
+.ss .pieces .thumb { grid-row: 1 / 3; display: block; aspect-ratio: 16 / 10; border-radius: 5px; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset; transition: box-shadow .25s; }
+.ss .pieces .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0.82; filter: saturate(0.85); transition: opacity .25s, filter .25s; }
+.ss .pieces a:hover .thumb img, .ss .pieces a:focus-visible .thumb img { opacity: 1; filter: none; }
+.ss .pieces strong { display: block; align-self: end; font-family: var(--head); font-weight: 400; font-size: 17px; line-height: 1.3; }
+.ss .pieces .kind { display: block; align-self: start; margin-top: 3px; }
+.ss .cover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; aspect-ratio: 16 / 10; border-radius: 5px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset; font-family: var(--head); line-height: 1; transition: box-shadow .25s; }
+.ss .cover b { font-weight: 300; font-size: 15px; letter-spacing: 0.04em; color: var(--ink); }
+.ss .cover .lab { display: none; }
+.ss .cover.letter b { color: rgba(186, 206, 255, 0.95); }
+.ss .cover.app b { color: rgba(186, 240, 232, 0.95); letter-spacing: 0.08em; }
+.ss .cover.essay b { color: rgba(250, 200, 222, 0.95); }
+.ss .cover.log b { color: rgba(170, 215, 245, 0.95); }
+.ss .cover.more { background: rgba(8, 9, 18, 0.5); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.12) inset, 0 0 0 1px rgba(150, 170, 255, 0.06); }
+.ss .pieces a:hover strong, .ss .pieces a:focus-visible strong { color: var(--cyan); }
+.ss .pieces a:hover .cover, .ss .pieces a:focus-visible .cover, .ss .pieces a:hover .thumb, .ss .pieces a:focus-visible .thumb { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+/* Writing holds every story (sixteen since round 11): two columns of eight, compact rows */
+.ss #writing .pieces { grid-template-rows: repeat(8, auto); gap: 8px 32px; }
+.ss #writing .pieces a { grid-template-columns: 48px 1fr; column-gap: 12px; }
+.ss #writing .pieces strong { font-size: 15px; }
+
+/* Work, contact */
+.ss .pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 30px; padding: 14px 28px;
+  border: 1px solid rgba(54, 230, 219, 0.35); border-radius: 999px;
+  color: var(--ink); text-decoration: none; white-space: nowrap;
+  font: 400 12px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase;
+  background: rgba(54, 230, 219, 0.04); box-shadow: 0 0 30px rgba(54, 230, 219, 0.08);
+  transition: background .25s, box-shadow .25s, transform .25s;
+}
+.ss .pill span { color: var(--cyan); transition: transform .25s; }
+.ss .pill:hover { background: rgba(54, 230, 219, 0.12); box-shadow: 0 0 50px rgba(54, 230, 219, 0.22); transform: translateY(-2px); }
+.ss .pill:hover span { transform: translate(3px, -3px); }
+.ss .contact-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; width: 100%; box-sizing: border-box; max-width: 610px; margin: 18px auto 0; padding: 16px; border-radius: 12px; background: rgba(6, 7, 16, 0.8); box-shadow: 0 0 34px rgba(6, 7, 16, 0.45); }
+.ss .contact-form label { display: grid; gap: 5px; color: var(--mute); font: 600 11px/1.5 var(--mono); letter-spacing: 1.4px; text-transform: uppercase; }
+.ss .contact-form .contact-message { grid-column: 1 / -1; }
+.ss .contact-form input:not([type="hidden"]), .ss .contact-form textarea { box-sizing: border-box; width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid rgba(150, 170, 255, 0.4); border-radius: 6px; background: rgba(14, 17, 31, 0.95); color: var(--ink); font: 400 14px/1.4 var(--body); letter-spacing: normal; text-transform: none; resize: vertical; }
+.ss .contact-form input:focus-visible, .ss .contact-form textarea:focus-visible { outline: 2px solid #7cc4ff; outline-offset: 2px; }
+.ss .contact-form .pill { margin: 0; cursor: pointer; justify-self: start; }
+.ss .contact-form .pill:disabled { opacity: 0.65; cursor: wait; }
+.ss .contact-status { margin: 0; align-self: center; min-height: 1.5em; color: var(--mute); font: 12px/1.5 var(--body); }
+.ss .contact-status:empty { visibility: hidden; }
+.ss .contact-form .contact-status { grid-column: 1 / -1; }
+.ss #contact > .pin .inner > .contact-status { margin-top: 22px; color: #98efbb; }
+.ss .contact-form .contact-status.error { color: #ffaaaa; }
+@media (max-width: 550px) { .ss .contact-form { grid-template-columns: 1fr; gap: 8px; padding: 12px; } .ss .contact-form .contact-message, .ss .contact-form .contact-status { grid-column: 1; } .ss .contact-form textarea { min-height: 60px; } }
+.ss .links { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.ss .links a { font: 600 11px/1.5 var(--mono); letter-spacing: 2.4px; text-transform: uppercase; color: var(--mute); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.ss .links a:hover { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .atlas-wrap { margin: 40px 0 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.ss .atlas-wrap .lab { margin-left: 2px; }
+
+/* HUD: the study's top-left mark and bottom-left list. */
+.ss .hud { position: fixed; z-index: 5; font: 600 12px/1.5 var(--mono); letter-spacing: 2px; text-transform: uppercase; }
+.ss .hud-top { top: calc(20px + env(safe-area-inset-top, 0px)); left: 22px; color: var(--ink); pointer-events: none; }
+.ss .hud-top .dot { display: inline-block; width: 7px; height: 7px; border-radius: 99px; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); margin-right: 9px; vertical-align: 1px; }
+.ss .hud-top .sub { color: var(--faint); }
+.ss .hud-nav { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 22px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 11px; }
+.ss .hud-nav a { color: var(--faint); text-decoration: none; transition: color .3s; padding: 4px 0; }
+.ss .hud-nav a:hover { color: var(--mute); }
+.ss .hud-nav a[aria-current="true"] { color: var(--ink); }
+/* A mark from the sprite (round 12): one colour, the text's, so it dims and tints
+   with whatever holds it. Sized where it is used. */
+.ss .ti { display: inline-block; width: 16px; height: 16px; flex: none; fill: currentColor; vertical-align: middle; }
+/* Nic's links, top right on every scene (round 12: the site's marks, 16px, in the
+   legend's voice): dimmed until hover or focus, when the mark lights and a hairline
+   appears under it; each is a 28px target with its name as tooltip. The last keeps
+   its word, Support. The pins keep their cards and tags below 56px, so nothing in
+   a scene reaches this row. */
+.ss .hud-social { top: calc(20px + env(safe-area-inset-top, 0px)); right: 22px; display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 1.6px; }
+.ss .hud-social a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 28px; min-height: 28px; box-sizing: border-box; padding: 5px 6px 4px; color: var(--faint); text-decoration: none; border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; }
+.ss .hud-social a:hover, .ss .hud-social a:focus-visible { color: var(--ink); border-bottom-color: rgba(54, 230, 219, 0.55); }
+.ss .hud-social .support span { line-height: 1; padding-top: 1px; }
+
+/* Prototype controls (not part of the design). Folded to one chip under the links
+   row since round 11; the chip opens the panel. */
+.ss .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ss .chip {
+  font: inherit; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 10px; cursor: pointer;
+}
+.ss .chip:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.45); }
+.ss .chip[aria-pressed="true"] { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .note { margin: 0; color: var(--faint); letter-spacing: 0.3px; font-size: 11px; }
+
+.ss #fallback { position: fixed; inset: auto 0 0 0; margin: 0; padding: 10px 22px; z-index: 20; font: 11px/1.5 var(--mono); color: var(--faint); letter-spacing: 1px; }
+
+/* Project detail: where the dive lands. The same card as the Atlas preview, larger. */
+html.ss-on.locked { overflow: hidden; }
+.ss .detail { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; box-sizing: border-box; opacity: 0; pointer-events: none; }
+.ss .detail[hidden] { display: none; }
+.ss .detail.on { pointer-events: auto; }
+.ss .detail-card { width: min(100%, 720px); max-height: calc(var(--vh, 100vh) - 96px);   /* clear of the top mark and the links row */ overflow: auto; border-radius: 12px; background: rgba(8, 9, 18, 0.86); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transform-origin: 50% 50%; }
+.ss .detail-media { position: relative; margin: 0; aspect-ratio: 16 / 10; background: #0c0d15; overflow: hidden; }
+.ss .detail-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss .detail-media img[hidden] { display: none; }
+/* the typographic cover at size, for pieces with no art */
+.ss .detail-type { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-family: var(--head); background: radial-gradient(ellipse at 50% 58%, rgba(54, 44, 86, 0.55), rgba(8, 9, 18, 0) 70%); }
+.ss .detail-type[hidden] { display: none; }
+.ss .detail-type b { font-weight: 200; font-size: clamp(72px, 14vw, 132px); line-height: 1; letter-spacing: 0.03em; color: var(--ink); }
+.ss .detail-type.fiction b { color: rgba(232, 206, 246, 0.95); }
+.ss .detail-type.letter b { color: rgba(186, 206, 255, 0.95); }
+.ss .detail-type.app b { color: rgba(186, 240, 232, 0.95); letter-spacing: 0.08em; }
+.ss .detail-type.essay b { color: rgba(250, 200, 222, 0.95); }
+.ss .detail-type.log b { color: rgba(170, 215, 245, 0.95); }
+.ss .detail-body { padding: 18px 24px 24px; text-align: left; }
+.ss .detail-body h2 { font-size: clamp(26px, 3vw, 36px); margin-top: 6px; max-width: none; }
+.ss .detail-body .lead { margin: 12px 0 0; max-width: none; font-size: 15px; }
+.ss .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin: 22px 0 0; }
+.ss .detail-actions .pill { margin-top: 0; padding: 12px 22px; letter-spacing: 2.4px; }
+.ss .detail-github { font: 600 11px/1.5 var(--mono); letter-spacing: 2.4px; text-transform: uppercase; color: var(--mute); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.ss .detail-github:hover { color: var(--cyan); border-color: rgba(54, 230, 219, 0.5); }
+.ss .detail-github[hidden] { display: none; }
+.ss .detail-actions .chip { margin-left: auto; }
+/* an app's technologies on the detail (round 12): mark and name per item, the
+   row wrapping; two names stand as their marks alone (scenes.js) */
+.ss .detail-tech { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 16px 0 0; padding: 0; color: var(--mute); }
+.ss .detail-tech[hidden] { display: none; }
+.ss .detail-tech li { display: inline-flex; align-items: center; gap: 7px; font: 600 11px/1.5 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; }
+@media (max-width: 550px) {
+  .ss .detail { padding: 12px; }
+  .ss .detail-body { padding: 14px 16px 18px; }
+  .ss .detail-actions { gap: 10px 16px; }
+  .ss .detail-actions .chip { margin-left: 0; }
+}
+
+/* Direction: orbit. Content sits on the dark side, the body fills the right. */
+
+/* Direction: signal. Headlines are drawn by particles; the DOM text stays for readers. */
+
+/* Direction: hybrid. Signal's centred layout and dust headlines, Descent's travel,
+   and the Atlas galaxies for the projects (labels hang under each galaxy on desktop). */
+.ss .inner { text-align: center; }
+.ss h2, .ss .lead, .ss .hint { margin-inline: auto; }
+.ss .facts li { border-top: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+.ss .pieces { text-align: left; max-width: 760px; margin-inline: auto; }
+.ss .links { justify-content: center; }
+.ss .atlas-wrap { align-items: center; }
+html.ss-on:not(.calm) .ss .pin h1, html.ss-on:not(.calm) .ss .pin h2 { opacity: 0; }
+/* the Newsletter station reads as Orbit does: copy left, on the dark side of the body */
+.ss #newsletter .inner { text-align: left; }
+.ss #newsletter h2 { margin-inline: 0; }
+/* the moons' tags: the issue number under each moon, placed by the renderer */
+.ss .moon-tags { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.ss .moon-tags[hidden] { display: none; }
+.ss .moon-tag {
+  position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: auto; cursor: pointer;
+  font: 600 11px/1 var(--mono); letter-spacing: 1.4px;
+  color: rgba(255, 224, 184, 0.92); background: rgba(8, 9, 18, 0.72);
+  border: 1px solid rgba(255, 200, 140, 0.28); border-radius: 999px; padding: 5px 8px;
+  will-change: transform, opacity; transition: border-color .25s, color .25s;
+}
+.ss .moon-tag:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.5); }
+@media (min-width: 769px) {
+  /* each project is a small preview card hung off its galaxy */
+  .ss .ring { position: fixed; inset: 0; margin: 0; display: block; pointer-events: none; }
+  .ss .ring li { position: absolute; left: 0; top: 0; width: 162px; margin-left: -81px; text-align: center; visibility: hidden; pointer-events: auto; will-change: transform, opacity; }
+  .ss .ring a { display: block; border-top: 0; padding: 6px 6px 8px; border-radius: 10px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: box-shadow .25s; }
+  .ss .ring a:hover, .ss .ring a:focus-visible { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4), 0 10px 40px rgba(0, 0, 0, 0.5); }
+  .ss .ring .thumb, .ss .ring .cover { width: 100%; margin-bottom: 8px; border-radius: 6px; }
+  .ss .ring .cover b { font-size: 30px; }
+  .ss .ring strong { font-size: 16px; margin-bottom: 2px; }
+  .ss .ring .lab { font-size: 11px; letter-spacing: 1.4px; }
+  .ss .ring .tech { justify-content: center; margin-top: 6px; }
+  .ss .ring p { display: none; }
+  /* each piece of writing is a small card hung off its star in the constellation */
+  .ss .pieces { position: fixed; inset: 0; margin: 0; max-width: none; display: block; pointer-events: none; }
+  .ss .pieces li { position: absolute; left: 0; top: 0; width: 150px; margin-left: -75px; text-align: center; visibility: hidden; pointer-events: auto; will-change: transform, opacity; }
+  .ss .pieces a { display: block; padding: 6px 6px 8px; border-radius: 10px; background: rgba(8, 9, 18, 0.72); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 10px 40px rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: box-shadow .25s; }
+  .ss .pieces a:hover, .ss .pieces a:focus-visible { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4), 0 10px 40px rgba(0, 0, 0, 0.5); }
+  .ss .pieces .cover, .ss .pieces .thumb { width: 100%; margin-bottom: 8px; border-radius: 6px; }
+  .ss .pieces .cover b { font-size: 34px; }
+  .ss .pieces .cover .lab { display: block; font-size: 11px; letter-spacing: 1.4px; }
+  .ss .pieces strong { font-size: 14px; font-weight: 500; line-height: 1.25; }
+  .ss .pieces .kind { display: none; }
+  /* the wreath of sixteen stories: the cards a size down so they clear each other */
+  /* the Newsletter station borrows Orbit: the copy and the list of letters sit on
+     the dark side, left; the ringed planet fills the right, its moons tagged by
+     the renderer. The list stays a list (no hung cards); its rows are at the end of this file. */
+  .ss #newsletter .inner { justify-self: start; margin-left: clamp(0px, 6vw, 110px); }
+}
+@media (max-width: 768px) {
+  .ss .ring a { border-top: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; text-align: left; }
+  .ss .pieces a { text-align: left; }
+  .ss .facts, .ss .ring { grid-template-columns: 1fr 1fr; }
+  .ss .pieces { gap: 12px 28px; }
+  .ss #newsletter .pin { align-items: start; padding-top: 12vh; }
+}
+@media (max-width: 550px) {
+  .ss .hud-top { display: none; }
+  .ss .hud-nav { gap: 6px 14px; font-size: 11px; letter-spacing: 1.2px; right: 22px; }
+  .ss .facts { grid-template-columns: 1fr; gap: 14px; }
+  /* every app stays on the phone: two columns of compact rows, no blurb */
+  .ss .ring { grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .ss .ring a { grid-template-columns: 64px 1fr; grid-template-rows: auto auto auto; column-gap: 10px; padding-top: 12px; }
+  .ss .ring .thumb, .ss .ring .cover { grid-row: 1 / 4; }
+  .ss .ring .tech { gap: 6px; margin-top: 5px; }
+  .ss .ring .cover b { font-size: 15px; }
+  .ss .ring strong { font-size: 15px; line-height: 1.3; margin-bottom: 3px; }
+  .ss .ring .lab { font-size: 11px; letter-spacing: 1.4px; }
+  .ss .ring p { display: none; }
+  .ss .ring a { padding: 0 0 10px; }
+  .ss .pieces { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; gap: 12px; }
+  .ss .pieces a { grid-template-columns: 64px 1fr; column-gap: 12px; }
+  /* the sixteen stories stay on the phone: two columns of eight compact rows */
+  .ss .bio { font-size: 14px; }
+  /* on a phone the bio carries the facts (the three repeat it), so the list goes */
+  .ss #about .facts { display: none; }
+  .ss .lead { margin-top: 16px; }
+  .ss .pill { margin-top: 22px; padding: 12px 22px; letter-spacing: 2.4px; }
+  .ss .hint { margin-top: 36px; }
+  .ss .pin { padding: 0 20px; }
+  .ss .note { display: none; }
+}
+
+/* Calm motion (prefers-reduced-motion, or the Calm chip): no autonomous animation. */
+html.ss-on.calm .ss .hint-line { animation: none; }
+html.ss-on.calm .ss .pill, html.ss-on.calm .ss .pill span, html.ss-on.calm .ss .hud-nav a, html.ss-on.calm .ss .hud-social a, html.ss-on.calm .ss .orbit-btn { transition: none; }
+
+/* Projects: the approved ocean planet and seven orbiting project moons. */
+.ss #projects .project-inner { width: 100%; max-width: none; }
+.ss #projects .project-stage { position: relative; width: 100vw; height: min(640px, calc(var(--vh, 100vh) - var(--hud-bottom, 70px) - 140px)); margin-left: calc(50% - 50vw); overflow: hidden; touch-action: pan-y; text-align: left; }
+.ss #projects .project-globe { position: absolute; z-index: 200; border-radius: 50%; overflow: hidden; pointer-events: none; background: radial-gradient(circle at 70% 32%, rgba(200,255,246,.5), transparent 30%), radial-gradient(circle at 64% 38%, #2fb8ac, #177c88 24%, #0c4c68 50%, #072842 72%, #030b18); box-shadow: 0 0 50px 4px rgba(54,230,219,.2), 0 0 150px 30px rgba(40,120,200,.14); }
+.ss #projects .project-globe::before { content: ""; position: absolute; inset: 0; width: 200%; background: radial-gradient(ellipse 24% 3% at 22% 28%, rgba(225,255,250,.24), transparent 70%), radial-gradient(ellipse 32% 2.4% at 64% 43%, rgba(225,255,250,.16), transparent 70%), radial-gradient(ellipse 18% 4% at 36% 61%, rgba(225,255,250,.14), transparent 70%), linear-gradient(transparent 0 17%, rgba(3,36,58,.28) 17% 23%, transparent 23% 51%, rgba(3,36,58,.22) 51% 56%, transparent 56%); background-size: 50% 100%; animation: project-drift 120s linear infinite; }
+.ss #projects .project-globe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 70% 30%, transparent 36%, rgba(2,6,16,.5) 62%, rgba(1,3,10,.92) 86%); box-shadow: inset 10px -6px 24px rgba(160,255,240,.26), inset 0 0 0 1px rgba(150,255,240,.08); }
+@keyframes project-drift { to { transform: translateX(-50%); } }
+.ss #projects .project-track { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ss #projects .project-track path { fill: none; stroke: rgba(160,230,240,.24); stroke-width: 1; stroke-dasharray: 2 7; }
+.ss #projects .project-moon { position: absolute; left: 0; top: 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); cursor: pointer; }
+.ss #projects .project-orb { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #0c0d15; box-shadow: 0 0 0 1px rgba(150,170,255,.28), 0 8px 22px rgba(0,0,0,.55); }
+.ss #projects .project-orb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 57% 53%; }
+.ss #projects .project-orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 68% 30%, rgba(255,255,255,.14), transparent 40%, rgba(3,5,12,.55)); }
+.ss #projects .project-dim { position: absolute; inset: 0; background: #05060c; }
+.ss #projects .project-tag { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font: 600 11px/1.3 var(--mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--mute); white-space: nowrap; text-shadow: 0 1px 6px #000; pointer-events: none; }
+.ss #projects .project-moon[aria-current="true"] .project-orb { box-shadow: 0 0 0 2px rgba(54,230,219,.85), 0 0 28px 4px rgba(54,230,219,.4), 0 10px 26px rgba(0,0,0,.6); }
+.ss #projects .project-moon[aria-current="true"] .project-tag { color: var(--cyan); }
+.ss #projects .project-moon:hover .project-tag, .ss #projects .project-moon:focus-visible .project-tag { color: var(--ink); }
+.ss #projects .project-panel { position: absolute; z-index: 700; top: 50%; right: max(32px, calc((100% - 1240px) / 2)); width: min(46%, 580px); transform: translateY(-50%); box-sizing: border-box; padding: 10px; border-radius: 14px; background: rgba(8,9,18,.8); box-shadow: 0 0 0 1px rgba(150,170,255,.16), 0 24px 70px rgba(0,0,0,.55), 0 0 80px rgba(54,230,219,.06); backdrop-filter: blur(10px); }
+.ss #projects .project-leaf[hidden] { display: none; }
+.ss #projects .project-leaf:not([hidden]) { animation: project-fade .45s ease both; }
+.ss #projects .project-leaf.outgoing { position: absolute; inset: 10px; pointer-events: none; opacity: 0; animation: none; transition: opacity .4s ease; }
+@keyframes project-fade { from { opacity: 0; } to { opacity: 1; } }
+.ss #projects .project-media { position: relative; display: block; width: 100%; aspect-ratio: 16/9; max-height: max(150px, calc(var(--vh, 100vh) - var(--hud-bottom, 54px) - 470px)); border-radius: 7px; overflow: hidden; background: #0c0d15; }
+.ss #projects .project-media img, .ss #projects .project-media video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss #projects .project-media video { opacity: 0; transition: opacity .4s; }
+.ss #projects .project-media video.on { opacity: 1; }
+.ss #projects .project-more { padding: 14px 8px 6px; }
+.ss #projects .project-more h3 { margin: 0; font: 500 clamp(22px,2.4vw,28px)/1.15 var(--head); color: var(--ink); }
+.ss #projects .project-more .lab { margin-top: 6px; }
+.ss #projects .project-more > p:not(.project-actions) { margin: 10px 0 0; color: var(--mute); font-size: 15px; line-height: 1.5; }
+.ss #projects .project-tech { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.ss #projects .project-tech li { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1.4 var(--mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--faint); }
+.ss #projects .project-tech .ti { color: var(--mute); }
+.ss #projects .project-actions { display: flex; flex-wrap: wrap; gap: 10px 12px; margin: 16px 0 0; }
+.ss #projects .project-actions .pill { margin: 0; padding: 11px 20px; font-size: 12px; }
+.ss #projects .project-actions .secondary { border-color: var(--line); box-shadow: none; background: transparent; }
+.ss #projects .project-controls { position: absolute; z-index: 800; left: 0; width: min(52%, calc(100% - 628px)); bottom: calc(var(--hud-bottom, 54px) + 8px); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0; font: 600 12px/1.5 var(--mono); color: var(--mute); }
+.ss #projects .project-controls button { font: 400 18px/1 var(--mono); width: 36px; height: 36px; color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 50%; cursor: pointer; }
+.ss #projects .project-controls button:hover { color: var(--ink); border-color: var(--cyan); }
+.ss #projects .project-controls .lab { display: none; }
+@media (max-width: 819px) {
+  .ss #projects .project-stage { height: min(610px, calc(var(--vh, 100vh) - var(--hud-bottom, 70px) - 155px)); padding-top: 245px; box-sizing: border-box; overflow: visible; }
+  .ss #projects .project-panel { position: relative; top: auto; right: auto; width: auto; transform: none; margin: 0 16px; padding: 8px; max-height: calc(100% - 8px); overflow-y: auto; }
+  .ss #projects .project-moon:not([aria-current="true"]) .project-tag { display: none; }
+  .ss #projects .project-media { aspect-ratio: 5/2; }
+  .ss #projects .project-more { padding: 8px 5px 3px; }
+  .ss #projects .project-more > p:not(.project-actions) { font-size: 12px; line-height: 1.35; }
+  .ss #projects .project-tech { margin-top: 7px; gap: 4px 9px; }
+  .ss #projects .project-tech li { font-size: 11px; }
+  .ss #projects .project-actions { margin-top: 8px; }
+  .ss #projects .project-actions .pill { padding: 8px 12px; }
+  .ss #projects .project-controls { left: auto; right: 16px; width: auto; top: 160px; bottom: auto; }
+  .ss #projects .project-controls .lab { display: none; }
+}
+html.ss-on.calm .ss #projects .project-globe::before { animation: none; }
+html.ss-on.calm .ss #projects .project-leaf:not([hidden]) { animation: none; }
+html.ss-on.calm .ss #projects .project-leaf.outgoing { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss .hint-line { animation: none; }
+}
+
+/* Without JavaScript the scenes stack as a plain page: see NO_SCRIPT_CSS in ScrollScenes.tsx. */
+
+/* Dust headlines are set one weight up so each stroke holds particles and the solid text matches them. */
+.ss h1, .ss h2 { font-weight: 500; }
+
+/* The Newsletter station (rounds 9 and 10): the orbit controls under the headline,
+   the index of letters as one chip each (the lit one is at the front of the ring),
+   and the reader, a glass panel that shows the letter at the front: its number
+   and date, title, deck and opening, in the site's reading style (Montserrat
+   title, a hairline under the deck, a serif body). Beside the planet (Orbit, the
+   hybrid) the column is at most 600px or 45vw; Descent and Signal centre it; on
+   phones it is the width of the screen. The column is capped by the viewport
+   (clear of the links row above and the measured bottom stack below) and the
+   letter's text is what shrinks: since round 11 it is the whole letter, scrolling
+   inside the panel under fade masks that show where there is more. Nothing in the
+   panel takes the pointer but the text and its link, so sideways input passes
+   through to the ring; the vertical wheel over the text is scenes.js's. */
+.ss #newsletter .inner { display: flex; flex-direction: column; max-height: calc(var(--vh, 100vh) - 84px - var(--hud-bottom, 54px)); width: min(100%, 600px); }
+.ss #newsletter h2 { font-size: clamp(26px, 2.8vw, 38px); max-width: none; flex: none; }
+.ss .orbit-nav { flex: none; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font: 600 11px/1 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; color: var(--mute); }
+.ss .orbit-btn { font: 400 16px/1 var(--mono); width: 26px; height: 26px; padding: 0 0 2px; box-sizing: border-box; color: var(--mute); background: transparent; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; transition: color .25s, border-color .25s; }
+.ss .orbit-btn:hover { color: var(--ink); border-color: rgba(54, 230, 219, 0.5); }
+.ss .orbit-btn[aria-disabled="true"] { color: var(--faint); border-color: rgba(150, 170, 255, 0.1); cursor: default; }
+.ss .orbit-pos { min-width: 9ch; text-align: center; color: var(--ink); }
+.ss .orbit-hint { color: var(--faint); letter-spacing: 1.2px; text-transform: none; }
+/* the index: a chip per letter; the title and date stay in the chip for screen readers */
+.ss #newsletter .index { flex: none; position: static; display: flex; flex-wrap: wrap; gap: 4px; margin: 12px 0 0; max-width: none; pointer-events: auto; }
+/* (visibility is inherited, not set: a chip set visible outlived its hidden pin, round 11) */
+.ss #newsletter .index li { position: static; display: block; width: auto; margin: 0; visibility: inherit; }
+.ss #newsletter .index a { display: block; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; text-decoration: none; }
+.ss #newsletter .index .cover { width: 30px; height: 22px; margin: 0; aspect-ratio: auto; border-radius: 4px; }
+.ss #newsletter .index .cover b { font-size: 11px; color: var(--mute); }
+.ss #newsletter .index a:hover .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.4) inset; }
+.ss #newsletter .index .cover .lab, .ss #newsletter .index strong, .ss #newsletter .index .kind, .ss .vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ss #newsletter .index li.front .cover { box-shadow: 0 0 0 1px rgba(54, 230, 219, 0.55) inset; }
+.ss #newsletter .index li.front .cover b { color: var(--cyan); }
+.ss .moon-tag.front { color: var(--ink); border-color: rgba(54, 230, 219, 0.55); }
+/* the reader */
+.ss .reader { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 14px 0 0; padding: 20px 24px 18px; box-sizing: border-box; border-radius: 12px; background: rgba(8, 9, 18, 0.74); box-shadow: 0 0 0 1px rgba(150, 170, 255, 0.14), 0 14px 44px rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-align: left; pointer-events: none; will-change: opacity; }
+.ss .issue { display: flex; flex-direction: column; min-height: 0; }
+.ss .issue[hidden] { display: none; }
+.ss .issue-meta { margin: 0; flex: none; }
+.ss .issue h3 { flex: none; margin: 8px 0 0; font-family: var(--head); font-weight: 600; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.2; letter-spacing: -0.01em; color: var(--ink); }
+.ss .issue-deck { flex: none; margin: 10px 0 0; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font: 300 15px/1.55 var(--body); color: var(--mute); }
+/* the letter's text: a focusable region that scrolls; a thin scrollbar on its right,
+   fade masks at the ends that go when the text is at its top or its end */
+.ss .issue-body { flex: 0 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; pointer-events: auto; margin: 12px 0 0; padding: 2px 14px 0 0; font: 400 15.5px/1.7 Georgia, "Times New Roman", serif; color: rgba(220, 225, 240, 0.84); --mt: 28px; --mb: 36px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 var(--mt), #000 calc(100% - var(--mb)), transparent); mask-image: linear-gradient(180deg, transparent, #000 var(--mt), #000 calc(100% - var(--mb)), transparent); scrollbar-width: thin; scrollbar-color: rgba(150, 170, 255, 0.3) transparent; }
+.ss .issue-body.at-top { --mt: 0px; }
+.ss .issue-body.at-end { --mb: 0px; }
+.ss .issue-body::-webkit-scrollbar { width: 4px; }
+.ss .issue-body::-webkit-scrollbar-track { background: transparent; }
+.ss .issue-body::-webkit-scrollbar-thumb { background: rgba(150, 170, 255, 0.3); border-radius: 2px; }
+.ss .issue-body:focus-visible { outline-offset: -2px; }
+.ss .issue-body p { margin: 0 0 0.85em; max-width: 62ch; }
+.ss .issue-body > :last-child { margin-bottom: 36px; }
+.ss .issue-body h4 { margin: 1.5em 0 0.5em; max-width: 62ch; font: 600 16px/1.3 var(--head); letter-spacing: -0.01em; color: var(--ink); }
+.ss .issue-body code { font: 12px/1.5 var(--mono); background: rgba(255, 255, 255, 0.08); border-radius: 4px; padding: 0.1em 0.3em; }
+.ss .issue-body a { color: var(--cyan); text-decoration-color: rgba(54, 230, 219, 0.4); text-underline-offset: 3px; }
+.ss .issue-body figure { margin: 1.2em 0; max-width: 62ch; }
+.ss .issue-body img { display: block; width: 100%; height: auto; border-radius: 6px; opacity: 0.9; }
+.ss .issue-body figcaption { margin-top: 7px; font: 11px/1.5 var(--mono); letter-spacing: 0.4px; color: var(--faint); }
+.ss .issue-body ul, .ss .issue-body ol { margin: 0 0 0.85em; padding-left: 1.4em; max-width: 60ch; }
+.ss .issue-body pre { margin: 0 0 1em; padding: 10px 12px; max-width: 62ch; box-sizing: border-box; overflow-x: auto; background: rgba(255, 255, 255, 0.06); border-radius: 6px; }
+.ss .issue-body pre code { padding: 0; background: none; }
+@media (min-width: 769px) {
+  .ss #newsletter .inner { width: min(100%, 600px, 45vw); }
+}
+/* narrow desktops: the chips tighten so all fourteen stay on one row inside 45vw
+   (the column's height follows the measured bottom stack, so it needs no rule here) */
+@media (min-width: 769px) and (max-width: 1150px) {
+  .ss #newsletter .index { gap: 3px; }
+  .ss #newsletter .index .cover { width: 28px; }
+}
+@media (max-width: 768px) {
+  .ss #newsletter .inner, .ss #newsletter .inner { width: 100%; max-height: calc(var(--vh, 100vh) - 9vh - 40px - var(--hud-bottom, 54px)); }
+  .ss #newsletter .pin, .ss #newsletter .pin { align-items: start; padding-top: 9vh; }
+  .ss .orbit-hint { display: none; }
+  .ss .reader { padding: 16px 18px 14px; }
+  .ss .issue-body { font-size: 15px; padding-right: 10px; }
+}
+@media (max-width: 550px) {
+  .ss .hud-social { gap: 2px; letter-spacing: 1.2px; }
+}
+
+/* Essays: two complete reading cards stay within the measured HUD band. */
+.ss #essays .pin, .ss #creative .pin { align-items: start; padding-top: 66px; }
+.ss #essays .essays-inner, .ss #creative .creative-inner { width: min(100%, 1060px); height: calc(var(--vh, 100vh) - var(--hud-bottom, 54px) - 82px); min-height: 0; display: flex; flex-direction: column; }
+.ss #essays h2, .ss #creative h2 { flex: none; margin-inline: auto; }
+.ss #essays .essay-spread { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: stretch; min-height: 0; margin-top: 20px; overflow-y: auto; padding: 5px 5px 10px; scrollbar-color: rgba(150,170,255,.4) transparent; }
+.ss #essays .essay-card { min-width: 0; border: 1px solid rgba(150,170,255,.24); border-radius: 14px; overflow: hidden; text-align: left; background: rgba(8,9,18,.84); box-shadow: 0 12px 42px rgba(0,0,0,.32); transition: transform .25s, border-color .25s, box-shadow .25s; }
+.ss #essays .essay-card:hover, .ss #essays .essay-card:focus-within { transform: translateY(-4px) !important; border-color: rgba(54,230,219,.6); box-shadow: 0 18px 48px rgba(0,0,0,.48); }
+.ss #essays .essay-card img { display: block; width: 100%; height: clamp(120px, 21vh, 205px); object-fit: cover; }
+.ss #essays .essay-copy { padding: clamp(14px, 2vw, 26px); }
+.ss #essays .essay-copy h3 { margin: 10px 0 0; font: 550 clamp(22px, 2.5vw, 34px)/1.14 var(--head); letter-spacing: -.025em; color: var(--ink); }
+.ss #essays .essay-copy p { margin: 14px 0 16px; font: 400 clamp(15px, 1.4vw, 18px)/1.52 var(--body); color: var(--mute); }
+.ss #essays .essay-copy a { display: inline-flex; gap: 8px; align-items: center; min-height: 30px; color: var(--cyan); font: 600 11px/1.4 var(--mono); letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid rgba(54,230,219,.5); }
+
+/* Creative reading and listening rooms. */
+.ss #creative .creative-inner { width: min(100%, 1200px); }
+.ss #creative .creative-switch { display: none; }
+.ss #creative .creative-stage { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; flex: 1; min-height: 0; margin-top: 12px; }
+.ss #creative .creative-world { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 14px; box-sizing: border-box; border: 1px solid rgba(158,132,205,.3); border-radius: 18px; background: linear-gradient(150deg, rgba(21,17,39,.82), rgba(8,9,18,.8)); box-shadow: 0 18px 70px rgba(0,0,0,.22); }
+.ss #creative .creative-world[hidden], .ss #creative .story-leaf[hidden], .ss #creative .record-leaf[hidden], .ss #creative .tape-leaf[hidden], .ss #creative .music-project[hidden] { display: none; }
+.ss #creative .creative-world h3 { flex: none; margin: 0 0 8px; color: #dbc3ff; font: 600 12px/1.4 var(--mono); letter-spacing: 1.4px; text-transform: uppercase; }
+.ss #creative .story-workspace { display: grid; grid-template-columns: minmax(120px, 27%) minmax(0, 1fr); gap: 10px; flex: 1; min-height: 0; }
+.ss #creative .story-index { min-height: 0; overflow: auto; padding: 2px 3px 2px 0; scrollbar-width: thin; scrollbar-color: rgba(186,143,230,.55) transparent; }
+.ss #creative .story-choice { display: flex; width: 100%; gap: 6px; align-items: baseline; margin-bottom: 3px; padding: 6px 5px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #b8b3c7; text-align: left; font: 500 11px/1.25 var(--body); cursor: pointer; }
+.ss #creative .story-choice span:first-child { color: #c49bed; font: 600 11px/1.25 var(--mono); }
+.ss #creative .story-choice[aria-current="true"] { border-color: rgba(205,159,248,.55); background: rgba(156,98,202,.19); color: #fff; }
+.ss #creative .story-choice:hover { background: rgba(156,98,202,.14); color: #fff; }
+.ss #creative .story-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border: 1px solid rgba(180,151,215,.32); border-radius: 11px; background: rgba(7,8,20,.78); }
+.ss #creative .story-leaf { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.ss #creative .story-header { display: flex; flex: none; gap: 10px; align-items: center; padding: 10px 13px; border-bottom: 1px solid rgba(180,151,215,.22); text-align: left; }
+.ss #creative .story-header > div { min-width: 0; }
+.ss #creative .story-number { color: #c89bf4; font: 300 36px/1 var(--head); }
+.ss #creative .story-header .lab { color: #bc9fe1; font: 600 11px/1.2 var(--mono); letter-spacing: 1px; text-transform: uppercase; }
+.ss #creative .story-header h4, .ss #creative .record-copy h4 { margin: 2px 0 3px; color: var(--ink); font: 550 clamp(17px, 1.6vw, 23px)/1.13 var(--head); }
+.ss #creative .story-header a, .ss #creative .record-links a, .ss #creative .tape-leaf a, .ss #creative .priaprizm-card a { color: var(--cyan); font: 600 11px/1.3 var(--mono); text-decoration: none; }
+.ss #creative .story-text { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 18px; color: #e0dce8; font: 400 16px/1.7 Georgia, "Times New Roman", serif; text-align: left; scrollbar-width: thin; scrollbar-color: rgba(186,143,230,.55) transparent; }
+.ss #creative .story-text p { max-width: 62ch; margin: 0 0 .9em; }
+.ss #creative .story-text p:last-child { margin-bottom: 0; }
+.ss #creative .story-progress { height: 3px; flex: none; background: rgba(196,155,237,.2); }
+.ss #creative .story-progress span { display: block; width: 0; height: 100%; background: #c89bf4; }
+.ss #creative .creative-controls { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 36px; margin: 8px 0 0; color: var(--mute); font: 600 11px/1.4 var(--mono); }
+.ss #creative .creative-controls button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: rgba(8,9,18,.8); color: var(--ink); font: 400 20px/1 var(--mono); cursor: pointer; }
+.ss #creative .creative-controls button:hover { border-color: var(--cyan); }
+.ss #creative .music-tabs { display: flex; gap: 5px; margin-bottom: 8px; }
+.ss #creative .music-tabs button { min-height: 33px; flex: 1; padding: 4px 5px; border: 1px solid var(--line); border-radius: 7px; background: rgba(8,9,18,.8); color: #c2bccb; font: 600 11px/1.2 var(--mono); cursor: pointer; }
+.ss #creative .music-tabs button[aria-selected="true"] { color: var(--cyan); border-color: var(--cyan); background: rgba(54,230,219,.09); }
+.ss #creative .music-project { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.ss #creative .creative-deck { flex: none; margin: 0 0 8px; color: var(--mute); font: 400 12px/1.35 var(--body); text-align: left; }
+.ss #creative .record-panel, .ss #creative .tape-panel { display: flex; flex: 1; min-height: 0; }
+.ss #creative .record-leaf, .ss #creative .tape-leaf { display: flex; flex-direction: column; width: 100%; min-height: 0; align-items: center; text-align: center; }
+.ss #creative .record-art { position: relative; flex: 0 1 225px; width: min(100%, 345px); min-height: 130px; }
+.ss #creative .record-disc { position: absolute; right: 0; top: 6%; height: 88%; aspect-ratio: 1; border: 2px solid #45404c; border-radius: 50%; background: repeating-radial-gradient(circle, #111116 0 3px, #2b2a30 4px 5px, #121217 6px 10px); box-shadow: 0 14px 23px rgba(0,0,0,.55), inset 0 0 0 7px #101014; }
+.ss #creative .vinyl-grooves { position: absolute; inset: 12%; border-radius: 50%; border: 1px solid rgba(255,255,255,.09); box-shadow: 0 0 0 7px rgba(255,255,255,.035), 0 0 0 14px rgba(255,255,255,.018); }
+.ss #creative .vinyl-label { position: absolute; inset: 26%; overflow: hidden; border-radius: 50%; }
+.ss #creative .vinyl-label img { width: 100%; height: 100%; object-fit: cover; }
+.ss #creative .vinyl-hole { position: absolute; left: calc(50% - 3px); top: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: #100e14; box-shadow: 0 0 0 2px rgba(227,214,234,.65); }
+.ss #creative .record-sleeve { position: absolute; left: 0; top: 0; height: 100%; aspect-ratio: 1; box-shadow: 0 16px 35px rgba(0,0,0,.65); }
+.ss #creative .record-sleeve img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss #creative .record-copy { max-width: 48ch; padding: 9px 6px 0; min-height: 0; overflow-y: auto; }
+.ss #creative .record-copy .lab { color: #bcb2ce; font: 600 11px/1.3 var(--mono); }
+.ss #creative .record-copy p { margin: 5px 0 8px; color: #d5d0df; font: 400 12px/1.35 var(--body); }
+.ss #creative .record-links { display: flex; justify-content: center; align-items: center; gap: 10px; }
+.ss #creative .music-pill { display: inline-flex; padding: 5px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--cyan); font: 600 11px/1.3 var(--mono); text-decoration: none; }
+.ss #creative #music-panel-colorpulse { align-items: center; }
+.ss #creative .tape-panel { width: 100%; }
+.ss #creative .tape-art { display: flex; flex-direction: column; justify-content: space-between; width: min(100%, 310px); aspect-ratio: 1.35; padding: 19px; box-sizing: border-box; border: 9px solid #1f363b; border-radius: 17px; background: linear-gradient(145deg,#68ced0,#246a77 55%,#152d46); box-shadow: 0 15px 35px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.35); color: #092f37; text-align: left; }
+.ss #creative .tape-art span { font: 700 11px/1.3 var(--mono); text-transform: uppercase; letter-spacing: 2px; }
+.ss #creative .tape-art strong { font: 600 36px/1 var(--head); }
+.ss #creative .tape-art i { height: 37px; background: repeating-linear-gradient(90deg, #123b48 0 3px, transparent 3px 7px, #b9eeee 7px 9px, transparent 9px 13px); clip-path: polygon(0 40%,5% 40%,8% 0,11% 90%,14% 35%,20% 35%,24% 100%,28% 15%,31% 45%,100% 45%,100% 55%,31% 55%,28% 85%,24% 0,20% 65%,14% 65%,11% 10%,8% 100%,5% 60%,0 60%); }
+.ss #creative .tape-leaf h4 { margin: 12px 0 6px; color: var(--ink); font: 550 23px/1.2 var(--head); }
+.ss #creative .priaprizm-card { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; border: 1px solid rgba(194,162,220,.35); border-radius: 12px; background: radial-gradient(circle at 50% 30%,rgba(161,96,179,.27),transparent 60%),rgba(8,9,18,.5); }
+.ss #creative .priaprizm-card .lab { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: 2px; }
+.ss #creative .priaprizm-card h4 { margin: 12px 0 4px; color: var(--ink); font: 550 36px/1.15 var(--head); }
+.ss #creative .priaprizm-card p { color: var(--mute); font: 400 14px var(--body); }
+.ss #creative button:focus-visible, .ss #creative a:focus-visible, .ss #creative .story-text:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+@media (max-width: 819px) {
+  .ss #creative .creative-switch { display: flex; justify-content: center; gap: 10px; margin: 8px auto 0; }
+  .ss #creative .creative-switch button { min-height: 36px; padding: 6px 16px; border: 1px solid var(--line); border-radius: 99px; background: rgba(8,9,18,.84); color: var(--mute); font: 600 12px/1.3 var(--mono); cursor: pointer; }
+  .ss #creative .creative-switch button[aria-selected="true"] { border-color: var(--cyan); color: var(--cyan); }
+  .ss #creative .creative-stage { display: block; margin-top: 8px; }
+  .ss #creative .creative-world { height: 100%; }
+}
+@media (max-width: 550px) {
+  .ss #creative .pin { padding: 48px 14px 0; }
+  .ss #creative .creative-inner { height: calc(var(--vh, 100vh) - var(--hud-bottom, 90px) - 58px); }
+  .ss #creative .story-workspace { grid-template-columns: 88px minmax(0,1fr); gap: 7px; }
+  .ss #creative .story-choice { display: block; padding: 5px 4px; font-size: 11px; }
+  .ss #creative .story-choice span:first-child { display: block; }
+  .ss #creative .story-text { padding: 10px 12px; font-size: 15px; }
+  .ss #creative .record-art { flex-basis: 205px; }
+}
+@media (prefers-reduced-motion: reduce) { .ss #creative * { animation: none !important; transition: none !important; } }
+html.ss-on.calm .ss #essays .essay-card { transition: none; }

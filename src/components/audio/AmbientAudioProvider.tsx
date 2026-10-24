@@ -33,7 +33,9 @@ export const AmbientAudioProvider: React.FC<Props> = ({ pagePath, children }) =>
     const engine = engineRef.current
     if (!engine) return
 
-    const initOnInteraction = () => {
+    const initOnInteraction = (event: MouseEvent | KeyboardEvent) => {
+      // scripted clicks cannot start audio; browsers without userActivation fall back to isTrusted alone
+      if (!event.isTrusted || (navigator.userActivation && !navigator.userActivation.isActive)) return
       if (!engine.initialized) {
         engine.init()
       }
