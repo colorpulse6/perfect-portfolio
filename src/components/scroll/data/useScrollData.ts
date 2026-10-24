@@ -47,7 +47,7 @@ export function useScrollData(): ScrollData {
   const query = useStaticQuery<ScrollQueryData>(graphql`
     query ScrollScenesData {
       allProject { nodes { name slug medium status link github tech description } }
-      allWriting { nodes { title } }
+      allWriting { nodes { title content } }
       changelog: allMarkdownRemark(
         filter: { fields: { sourceInstanceName: { eq: "changelog" } } }
         sort: { frontmatter: { date: DESC } }

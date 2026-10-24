@@ -30,7 +30,7 @@ interface ImageNode {
 
 export interface ScrollQueryData {
   allProject: { nodes: ProjectNode[] }
-  allWriting: { nodes: { title: string }[] }
+  allWriting: { nodes: { title: string; content: string }[] }
   changelog: { nodes: (Omit<ChangelogNode, "name"> & { name?: string; parent?: { name: string } })[] }
   newsletter: { nodes: NewsletterNode[] }
   allFile: { nodes: ImageNode[] }
@@ -101,7 +101,7 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
     projects: PRODUCTS.map(app).filter((item): item is AppItem => item !== null),
     tools: TOOLS.map(app).filter((item): item is AppItem => item !== null),
     stories: query.allWriting.nodes.map((node, index) => ({
-      title: node.title, num: String(index + 1).padStart(2, "0"),
+      title: node.title, content: node.content, num: String(index + 1).padStart(2, "0"),
       link: `/writing/#${storySlug(node.title)}`,
     })),
     essays: ESSAYS.map(essay => ({ ...essay, image: imageUrls[essay.image] ?? essay.image })),

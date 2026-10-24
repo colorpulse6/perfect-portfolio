@@ -77,21 +77,21 @@ export const ESSAYS: EssayItem[] = [
 ]
 
 export const RELEASES = [
-  { title: "Hungarian Spa", link: "https://alexshand.bandcamp.com/album/hungarian-spa", cover: "alexs-hand-hungarian-spa.jpg" },
-  { title: "KaTaTaK", link: "https://alexshand.bandcamp.com/album/katatak", cover: "alexs-hand-katatak.jpg" },
-  { title: "Künstler Scheiße", link: "https://alexshand.bandcamp.com/album/k-nstler-schei-e", cover: "alexs-hand-kunstler-scheisse.jpg" },
-  { title: "Goblinsz...?1!", link: "https://alexshand.bandcamp.com/album/goblinsz-1", cover: "alexs-hand-goblinsz.jpg" },
-  { title: "Alex's Hand presents: The Roaches", link: "https://alexshand.bandcamp.com/album/alexs-hand-presents-the-roaches", cover: "alexs-hand-the-roaches.jpg" },
-  { title: "Cancumbia", link: "https://alexshand.bandcamp.com/album/cancumbia", cover: "alexs-hand-cancumbia.jpg" },
-  { title: "An Albatross Around The Neck", link: "https://alexshand.bandcamp.com/album/an-albatross-around-the-neck", cover: null },
-  { title: "This cat is a genius.", link: "https://alexshand.bandcamp.com/album/this-cat-is-a-genius", cover: null },
-  { title: "Madame Psychosis", link: "https://alexshand.bandcamp.com/album/madame-psychosis", cover: null },
+  { title: "Hungarian Spa", date: "October 2019", tracks: 16, description: "A rock-in-opposition album about a spa as a cleanse for regret; the band's final album", link: "https://alexshand.bandcamp.com/album/hungarian-spa", cover: "alexs-hand-hungarian-spa.jpg" },
+  { title: "KaTaTaK", date: "September 2017", tracks: 5, description: "The fourth studio album, with jazz and orchestral elements and story-driven pieces", link: "https://alexshand.bandcamp.com/album/katatak", cover: "alexs-hand-katatak.jpg" },
+  { title: "Künstler Scheiße", date: "June 2016", tracks: 8, description: "Avant-rock blending progressive rock, jazz-rock and orchestral textures with a rotating lineup of guests", link: "https://alexshand.bandcamp.com/album/k-nstler-schei-e", cover: "alexs-hand-kunstler-scheisse.jpg" },
+  { title: "Goblinsz...?1!", date: "April 2016", tracks: 12, description: "An improvised session by Nic Barnes and Kellen Mills with guest Adam Meszaros", link: "https://alexshand.bandcamp.com/album/goblinsz-1", cover: "alexs-hand-goblinsz.jpg" },
+  { title: "Alex's Hand presents: The Roaches", date: "March 2014", tracks: 15, description: "A concept album with shifting styles, spoken-word interludes and a pulpy, cinematic feel", link: "https://alexshand.bandcamp.com/album/alexs-hand-presents-the-roaches", cover: "alexs-hand-the-roaches.jpg" },
+  { title: "Cancumbia", date: "September 2013", tracks: 5, description: "Live at Columbia City Theater for Seattle's Seaprog Festival, June 2013", link: "https://alexshand.bandcamp.com/album/cancumbia", cover: "alexs-hand-cancumbia.jpg" },
+  { title: "An Albatross Around The Neck", date: "June 2013", tracks: 12, description: "The album that followed the Madame Psychosis EP", link: "https://alexshand.bandcamp.com/album/an-albatross-around-the-neck", cover: "alexs-hand-an-albatross-around-the-neck.jpg" },
+  { title: "This cat is a genius.", date: "April 2013", tracks: 7, description: "B-sides and off-cuts previewing the debut album", link: "https://alexshand.bandcamp.com/album/this-cat-is-a-genius", cover: "alexs-hand-this-cat-is-a-genius.jpg" },
+  { title: "Madame Psychosis", date: "October 2012", tracks: 4, description: "The debut EP", link: "https://alexshand.bandcamp.com/album/madame-psychosis", cover: "alexs-hand-madame-psychosis.jpg" },
 ] as const
 
-export const MUSIC_LINKS = [
-  { label: "Spotify", link: "https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v" },
-  { label: "SoundCloud", link: "https://soundcloud.com/colorpulse" },
-  { label: "Priaprizm on Bandcamp", link: "https://priaprizm.bandcamp.com/track/im-inflammed" },
+export const COLORPULSE_ALBUMS = [
+  { title: "Plazma", link: "https://soundcloud.com/colorpulse/sets/plazma-1" },
+  { title: "Sorry", link: "https://soundcloud.com/colorpulse/sets/sorry-1" },
+  { title: "This Now", link: "https://soundcloud.com/colorpulse/sets/this-now-1" },
 ] as const
 
 export const SOCIAL = [

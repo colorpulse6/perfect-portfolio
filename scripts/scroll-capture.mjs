@@ -22,7 +22,8 @@ import sharp from 'sharp'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ESSAYS, MUSIC_LINKS, RELEASES } from '../src/components/scroll/data/content.ts'
+import { ESSAYS, COLORPULSE_ALBUMS, RELEASES } from '../src/components/scroll/data/content.ts'
+import { formatTextContent } from '../src/helpers/wordReveal.ts'
 const argv = process.argv.slice(2)
 const page = (argv.find(a => a.startsWith('--url=')) || '--url=http://127.0.0.1:9123/scroll/?ss-debug').slice(6)
 const origin = new URL(page).origin
@@ -75,7 +76,8 @@ const BIO = [faq.find(a => a.startsWith('Nichalas Barnes is a software engineer'
 // The stories and the projects' technologies, from gatsby-node.js itself; Chimera's from content.ts (not a node yet).
 const nodes = []
 createRequire(import.meta.url)(path.join(repo, 'gatsby-node.js')).sourceNodes({ actions: { createNode: n => nodes.push(n), createTypes() {} }, createNodeId: s => s, createContentDigest: () => 'x' })
-const STORIES = nodes.filter(n => n.internal.type === 'Writing').map(n => n.title)
+const WRITING = nodes.filter(n => n.internal.type === 'Writing')
+const STORIES = WRITING.map(n => n.title)
 const slug = title => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 const PROJECT_TECH = Object.fromEntries(nodes.filter(n => n.internal.type === 'Project').map(n => [n.name, n.tech]))
 const EXTRA_TECH = { Chimera: ['Unreal Engine 5', 'Astro'] }
@@ -138,7 +140,7 @@ const WORDS = `(() => {
   const hits = [], gone = [], root = document.querySelector('.ss');
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   for (let n = w.nextNode(); n; n = w.nextNode()) {
-    if (n.nodeType === 3) { if (n.parentElement.closest('script, style, noscript')) continue; if (/${GONE.source}/.test(n.textContent)) gone.push(n.textContent.trim().slice(0, 60)); if (n.parentElement.closest('.reader .issue-body, .project-tech, svg.ti')) continue; if (/${BANNED.source}/.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60)); }
+    if (n.nodeType === 3) { if (n.parentElement.closest('script, style, noscript, .story-text')) continue; if (/${GONE.source}/.test(n.textContent)) gone.push(n.textContent.trim().slice(0, 60)); if (n.parentElement.closest('.reader .issue-body, .story-text, .project-tech, svg.ti')) continue; if (/${BANNED.source}/.test(n.textContent)) hits.push(n.textContent.trim().slice(0, 60)); }
     else { for (const a of ['aria-label', 'alt', 'title']) { const v = n.getAttribute(a); if (!v) continue; if (/${GONE.source}/.test(v)) gone.push(a + '=' + v.slice(0, 60)); if (!n.closest('svg.ti') && /${BANNED.source}/.test(v)) hits.push(a + '=' + v.slice(0, 60)); } }
   }
   return { hits, gone, essays: document.querySelector('.ss #essays h2').textContent.trim(), strip: document.querySelectorAll('${GONE_MARKUP}').length };
@@ -601,58 +603,88 @@ try {
     })
     await group('creative', async () => {
       const sizes = [[1440, 813], [1366, 768], [1280, 720], [1024, 768], [390, 844]]
-      const fit = `(() => {
-        const box = el => { const r=el.getBoundingClientRect(); return [r.left,r.top,r.right,r.bottom] },
-          inside = (a,b) => a[0]>=b[0]-1&&a[1]>=b[1]-1&&a[2]<=b[2]+1&&a[3]<=b[3]+1,
-          stories=document.getElementById('creative-stories'), music=document.getElementById('creative-music'),
-          worlds=[stories,music], visible=worlds.filter(x=>!x.hidden), header=box(document.querySelector('.hud-top')),
-          legend=box(document.querySelector('.hud-nav')), headline=box(document.querySelector('#creative h2')),
-          all=visible.flatMap(w=>[...w.querySelectorAll('.story-bead,.story-planet,.record-disc,.record-sleeve,.story-panel,.record-panel,.creative-controls,.music-links')].filter(x=>getComputedStyle(x).display!=='none').map(box)),
-          worldBoxes=visible.map(box), bounds=[0,header[3],innerWidth,legend[1]],
-          fit=worldBoxes.every((w,i)=>inside(w,bounds)&&all.filter(r=>inside(r,w)).length>=1),
-          children=visible.every(w=>[...w.querySelectorAll('.story-bead,.story-planet,.record-disc,.record-sleeve,.story-panel,.record-panel,.creative-controls')].filter(x=>getComputedStyle(x).display!=='none' && !x.closest('[hidden]')).every(x=>inside(box(x),box(w)))),
-          separate=visible.length<2||worldBoxes[0][2]<worldBoxes[1][0],
-          clear=worldBoxes.every(w=>w[1]>headline[3]&&w[3]<legend[1]);
-        return {visible:visible.length, fit, children, separate, clear, overflow:document.documentElement.scrollWidth>innerWidth, beads:stories.querySelectorAll('.story-bead').length, records:music.querySelectorAll('.record-disc').length, links:[...stories.querySelectorAll('.story-leaf a')].map(x=>x.getAttribute('href')), recordLinks:[...music.querySelectorAll('.record-leaf a')].map(x=>x.href), extras:[...music.querySelectorAll('.music-links a')].map(x=>[x.textContent,x.href,x.rel]), covers:[...music.querySelectorAll('.record-sleeve img')].map(x=>x.complete&&x.naturalWidth>0), text:[...stories.querySelectorAll('.story-leaf h4')].map(x=>x.textContent), recordTitles:[...music.querySelectorAll('.record-leaf h4')].map(x=>x.textContent), box:worldBoxes };
+      const inspect = `(() => {
+        const box = el => el.getBoundingClientRect(), inside = (a,b) => a.left >= b.left-1 && a.top >= b.top-1 && a.right <= b.right+1 && a.bottom <= b.bottom+1,
+          worlds = [document.getElementById('creative-stories'),document.getElementById('creative-music')].filter(x=>!x.hidden),
+          header=box(document.querySelector('.hud-top')), legend=box(document.querySelector('.hud-nav')), headline=box(document.querySelector('#creative h2')),
+          children=worlds.every(w=>[...w.querySelectorAll('.story-index,.story-panel,.story-header,.story-text,.story-progress,.music-tabs,.music-project:not([hidden]),.record-art,.record-copy,.creative-controls')].filter(x=>!x.closest('[hidden]')).every(x=>inside(box(x),box(w))));
+        return { visible:worlds.length, fit:worlds.every(w=>{const r=box(w);return r.left>=0&&r.right<=innerWidth&&r.top>=header.bottom&&r.bottom<=legend.top&&r.top>headline.bottom}), children,
+          separate:worlds.length<2||box(worlds[0]).right<box(worlds[1]).left, overflow:document.documentElement.scrollWidth>innerWidth,
+          stories:document.querySelectorAll('.story-choice').length, records:document.querySelectorAll('.record-leaf').length, covers:[...document.querySelectorAll('.record-sleeve img')].map(x=>x.complete&&x.naturalWidth>0),
+          ghosts:document.querySelectorAll('.story-bead,.story-planet,.record-type').length,
+          tabs:[...document.querySelectorAll('.music-tabs [role=tab]')].map(x=>[x.textContent.trim(),x.getAttribute('aria-selected'),x.getAttribute('aria-controls'),document.getElementById(x.getAttribute('aria-controls'))?.getAttribute('role')]),
+          minPx:Math.min(...[...document.querySelectorAll('#creative h3,.story-choice,.story-text,.creative-controls,.music-tabs button,.record-copy .lab,.record-copy p,.record-links a')].filter(x=>!x.closest('[hidden]')).map(x=>parseFloat(getComputedStyle(x).fontSize))) }
       })()`
       for (const [w,h] of sizes) {
         await s.openEngine(join('p=5'),w,h)
-        const r=await s.evaluate(fit)
-        const phone=w<820
-        const expected=r.text.join('|')===STORIES.join('|')&&r.links.join('|')===STORIES.map(x=>`/writing/#${slug(x)}`).join('|')&&r.recordTitles.join('|')===RELEASES.map(x=>x.title).join('|')&&r.recordLinks.join('|')===RELEASES.map(x=>x.link).join('|')&&r.extras.length===MUSIC_LINKS.length&&r.extras.every((x,i)=>x[0]===MUSIC_LINKS[i].label&&x[1]===MUSIC_LINKS[i].link&&x[2].includes('noopener'))&&r.covers.length===6&&r.covers.every(Boolean)
-        row(`creative: both worlds visible (${w}x${h})`,r.visible===(phone?1:2)&&r.fit&&r.children&&r.separate&&r.clear&&!r.overflow&&r.beads===16&&r.records===9&&expected,`visible ${r.visible}, fit ${r.fit}, children ${r.children}, separate ${r.separate}, clear ${r.clear}, links ${expected}, boxes ${JSON.stringify(r.box)}`)
-        if (phone) { await s.evaluate(`document.getElementById('creative-tab-music').click()`); const mobile=await s.evaluate(fit); row('creative: phone music fits',mobile.visible===1&&mobile.children&&mobile.clear&&!mobile.overflow,JSON.stringify(mobile.box)) }
+        await until(() => s.evaluate(`[...document.querySelectorAll('.record-sleeve img')].every(x=>x.complete&&x.naturalWidth>0)`),5000)
+        const r=await s.evaluate(inspect)
+        row(`creative: both rooms fit (${w}x${h})`,r.visible===(w<820?1:2)&&r.fit&&r.children&&r.separate&&!r.overflow&&r.stories===16&&r.records===9&&r.covers.length===9&&r.covers.every(Boolean)&&r.ghosts===0&&r.minPx>=11&&r.tabs.map(t=>t[0]).join('|')==="Alex's Hand|Colorpulse|Priaprizm"&&r.tabs.every(t=>t[3]==='tabpanel')&&r.tabs.map(t=>t[1]).join('|')==='true|false|false',JSON.stringify(r))
+        if (w<820) { await s.evaluate(`document.getElementById('creative-tab-music').click()`); const m=await s.evaluate(inspect); row('creative: phone music fits',m.visible===1&&m.fit&&m.children&&!m.overflow,JSON.stringify(m)) }
       }
       await s.openEngine(join('p=5'),1440,813)
-      const bad=[]
-      for (let k=0;k<16;k++) { await s.evaluate(`document.querySelectorAll('.story-bead')[${k}].click()`); const r=await s.evaluate(`({index:__ss.creativeCarousel.story,shown:[...document.querySelectorAll('.story-leaf')].filter(x=>!x.hidden).length})`); if(r.index!==k||r.shown!==1)bad.push(`story ${k}`) }
-      for (let k=0;k<9;k++) { await s.evaluate(`document.querySelectorAll('.record-disc')[${k}].click()`); const r=await s.evaluate(`({index:__ss.creativeCarousel.record,shown:[...document.querySelectorAll('.record-leaf')].filter(x=>!x.hidden).length})`); if(r.index!==k||r.shown!==1)bad.push(`record ${k}`) }
-      await s.evaluate(`__ss.creativeWorld('stories'); __ss.creativeTo(0); document.querySelector('.story-bead').focus()`); await s.key('ArrowLeft',37,80)
-      const storyWrap=await s.evaluate('__ss.creativeCarousel.story')
-      await s.evaluate(`document.querySelector('.record-disc').focus()`); await s.key('ArrowRight',39,80)
-      const recordWrap=await s.evaluate('__ss.creativeCarousel.record')
-      const sb=await s.evaluate(`(() => {const r=document.querySelector('.story-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
-      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sb.x,y:sb.y,deltaX:120,deltaY:0});await sleep(80)
-      const storyWheel=await s.evaluate('__ss.creativeCarousel.story')
-      const rb=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
-      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:rb.x,y:rb.y,deltaX:120,deltaY:0});await sleep(80)
-      const recordWheel=await s.evaluate('__ss.creativeCarousel.record')
-      row('creative: beads and records keyboard and wheel',!bad.length&&storyWrap===15&&recordWrap===0&&storyWheel===0&&recordWheel===1,`clicks ${bad.join(' ')||'25'}, wrap ${storyWrap}/${recordWrap}, wheel ${storyWheel}/${recordWheel}`)
+      const storyBad=[]
+      for(let k=0;k<WRITING.length;k++) {
+        await s.evaluate(`document.querySelectorAll('.story-choice')[${k}].click()`)
+        const r=await s.evaluate(`(() => { const a=document.querySelector('.story-leaf:not([hidden])'); return {title:a.querySelector('h4').textContent,html:a.querySelector('.story-text').innerHTML,link:a.querySelector('a').getAttribute('href'),shown:document.querySelectorAll('.story-leaf:not([hidden])').length} })()`)
+        const expected=await s.evaluate(`(() => {const d=document.createElement('div');d.innerHTML=${JSON.stringify(formatTextContent(WRITING[k].content))};return d.innerHTML})()`)
+        if(r.title!==WRITING[k].title||r.html!==expected||r.link!==`/writing/#${slug(WRITING[k].title)}`||r.shown!==1)storyBad.push(k)
+      }
+      row('creative: all sixteen full stories and links',!storyBad.length,storyBad.join(',')||'all match source content')
+      const releaseBad=[]
+      for(let k=0;k<RELEASES.length;k++) {
+        await s.evaluate(`__ss.creativeWorld('music'); __ss.creativeTo(${k})`)
+        const r=await s.evaluate(`(() => {const a=document.querySelector('.record-leaf:not([hidden])');return {title:a.querySelector('h4').textContent,meta:a.querySelector('.lab').textContent,description:a.querySelector('p').textContent,href:a.querySelector('.record-links a').href,spotify:a.querySelector('.music-pill').href,cover:a.querySelector('.record-sleeve img').naturalWidth,shown:document.querySelectorAll('.record-leaf:not([hidden])').length}})()`)
+        const x=RELEASES[k]
+        if(r.title!==x.title||r.meta!==`${x.date} · ${x.tracks} tracks`||r.description!==x.description||r.href!==x.link||r.spotify!=='https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v'||r.cover<1||r.shown!==1)releaseBad.push(k)
+      }
+      row('creative: nine albums with covers and metadata',!releaseBad.length,releaseBad.join(',')||'all match release table')
+      const projectBad=[]
+      await s.evaluate(`document.getElementById('music-tab-colorpulse').click()`)
+      for(let k=0;k<COLORPULSE_ALBUMS.length;k++) {
+        if(k) await s.evaluate(`document.querySelector('#music-panel-colorpulse [data-creative-step="1"]').click()`)
+        const r=await s.evaluate(`(() => {const a=document.querySelector('.tape-leaf:not([hidden])');return {title:a.querySelector('h4').textContent,href:a.querySelector('a').href,count:document.getElementById('tape-count').textContent}})()`)
+        if(r.title!==COLORPULSE_ALBUMS[k].title||r.href!==COLORPULSE_ALBUMS[k].link||r.count!==`${k+1} of 3`)projectBad.push(k)
+      }
+      const profile=await s.evaluate(`document.querySelector('#music-panel-colorpulse > a').href`)
+      await s.evaluate(`document.getElementById('music-tab-priaprizm').click()`)
+      const pria=await s.evaluate(`(() => {const c=document.querySelector('.priaprizm-card');return {name:c.querySelector('h4').textContent,place:c.querySelector('p').textContent,href:c.querySelector('a').href,tracks:document.querySelectorAll('#music-panel-priaprizm .record-leaf,#music-panel-priaprizm .tape-leaf').length}})()`)
+      row('creative: Colorpulse albums and Priaprizm identity',!projectBad.length&&profile==='https://soundcloud.com/colorpulse'&&pria.name==='Priaprizm'&&pria.place==='Seattle, Washington'&&pria.href==='https://priaprizm.bandcamp.com/'&&pria.tracks===0,`${projectBad.join(',')||'albums match'}, ${JSON.stringify(pria)}`)
+      await s.evaluate(`document.getElementById('music-tab-priaprizm').focus()`);await s.key('ArrowLeft',37,0)
+      const musicKey=await s.evaluate(`({selected:document.getElementById('music-tab-colorpulse').getAttribute('aria-selected'),focused:document.activeElement.id,panel:document.getElementById('music-panel-colorpulse').hidden})`)
+      row('creative: music tabs use arrow keys and selected panels',musicKey.selected==='true'&&musicKey.focused==='music-tab-colorpulse'&&!musicKey.panel,JSON.stringify(musicKey))
       await s.openEngine(join('p=5'),1440,813)
+      await s.evaluate(`document.querySelector('.story-choice').focus()`); await s.key('ArrowLeft',37,0)
+      const storyWrap=await s.evaluate('__ss.creativeCarousel.story')
+      await s.evaluate(`document.querySelector('.music-tabs button').click(); document.querySelector('#music-panel-alex [data-creative-step="-1"]').click()`)
+      const recordWrap=await s.evaluate('__ss.creativeCarousel.record')
+      const sp=await s.evaluate(`(() => {const r=document.querySelector('.story-panel').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sp.x,y:sp.y,deltaX:120,deltaY:0})
+      const storyWheel=await s.evaluate('__ss.creativeCarousel.story')
+      const mp=await s.evaluate(`(() => {const r=document.querySelector('#music-panel-alex').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:mp.x,y:mp.y,deltaX:120,deltaY:0})
+      const recordWheel=await s.evaluate('__ss.creativeCarousel.record')
+      row('creative: controls, keyboard and sideways wheel wrap',storyWrap===15&&recordWrap===8&&storyWheel===0&&recordWheel===0,`${storyWrap}, ${recordWrap}, ${storyWheel}, ${recordWheel}`)
       const reach=[]
-      await s.evaluate(`document.querySelector('.story-bead').focus()`)
+      await s.evaluate(`document.querySelector('.story-choice').focus()`)
       for(let k=1;k<=16;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story key ${k}`)}
-      await s.evaluate(`document.querySelector('.record-disc').focus()`)
+      await s.evaluate(`document.querySelector('#music-panel-alex [data-creative-step="1"]').focus()`)
       for(let k=1;k<=9;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record key ${k}`)}
-      const storyPoint=await s.evaluate(`(() => {const r=document.querySelector('.story-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
-      for(let k=1;k<=16;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:storyPoint.x,y:storyPoint.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story wheel ${k}`)}
-      const recordPoint=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
-      for(let k=1;k<=9;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:recordPoint.x,y:recordPoint.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record wheel ${k}`)}
-      row('creative: all turns by keyboard and wheel',!reach.length,reach.join('; ')||'16 stories and 9 records by each input')
+      for(let k=1;k<=16;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sp.x,y:sp.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story wheel ${k}`)}
+      for(let k=1;k<=9;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:mp.x,y:mp.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record wheel ${k}`)}
+      row('creative: all turns by keyboard and sideways wheel',!reach.length,reach.join('; ')||'16 stories and 9 albums by each input')
       await s.openEngine(join('p=5'),390,844)
+      const reader=await s.evaluate(`(() => {const x=document.querySelector('.story-text');const r=x.getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),max:x.scrollHeight-x.clientHeight,top:x.scrollTop,page:scrollY}})()`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:reader.x,y:reader.y,deltaX:0,deltaY:120});await sleep(100)
+      const inPlace=await s.evaluate(`({top:document.querySelector('.story-text').scrollTop,page:scrollY})`)
+      await s.evaluate(`document.querySelector('.story-text').scrollTop=0`)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:reader.x,y:reader.y,deltaX:0,deltaY:-120});await sleep(450)
+      await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:reader.x,y:reader.y,deltaX:0,deltaY:-120});await sleep(180)
+      const out=await s.evaluate('scrollY')
+      row('creative: reader scrolls in place then hands off',reader.max>0&&inPlace.top>0&&inPlace.page===reader.page&&out<reader.page,`reader ${reader.max}, in ${JSON.stringify(inPlace)}, page ${reader.page} to ${out}`)
       await s.evaluate(`document.getElementById('creative-tab-stories').focus()`);await s.key('ArrowRight',39,0)
       const tab=await s.evaluate(`({selected:document.getElementById('creative-tab-music').getAttribute('aria-selected'),role:document.getElementById('creative-music').getAttribute('role'),stories:document.getElementById('creative-stories').hidden,music:document.getElementById('creative-music').hidden})`)
-      const touch=await s.evaluate(`(() => {const r=document.querySelector('.record-stage').getBoundingClientRect();return {x:Math.round(r.left+r.width*.8),y:Math.round(r.top+r.height/2)}})()`)
+      const touch=await s.evaluate(`(() => {const r=document.querySelector('#music-panel-alex').getBoundingClientRect();return {x:Math.round(r.left+r.width*.8),y:Math.round(r.top+r.height/2)}})()`)
       await s.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch]})
       await s.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:touch.x-80,y:touch.y}]})
       await s.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})
@@ -664,18 +696,18 @@ try {
     await group('stories', async () => {
       // The visible story panel preserves the source order and destination links.
       await s.openEngine(join(`p=${LEGEND.indexOf('Creative')}`)); await sleep(200)
-      const r = await s.evaluate(`({ titles:[...document.querySelectorAll('#creative .story-leaf h4')].map(x=>x.textContent.trim()), nums:[...document.querySelectorAll('#creative .story-leaf .story-number')].map(x=>x.textContent.trim()), beads:document.querySelectorAll('#creative .story-bead').length, links:[...document.querySelectorAll('#creative .story-leaf a')].map(x=>x.getAttribute('href')) })`)
+      const r = await s.evaluate(`({ titles:[...document.querySelectorAll('#creative .story-leaf h4')].map(x=>x.textContent.trim()), nums:[...document.querySelectorAll('#creative .story-leaf .story-number')].map(x=>x.textContent.trim()), choices:document.querySelectorAll('#creative .story-choice').length, links:[...document.querySelectorAll('#creative .story-leaf a')].map(x=>x.getAttribute('href')) })`)
       const linksWant = STORIES.map(t => `/writing/#${slug(t)}`)
-      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.beads === STORIES.length && r.links.join('|') === linksWant.join('|'), `${r.beads} beads, ${r.links.length} links`)
+      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.choices === STORIES.length && r.links.join('|') === linksWant.join('|'), `${r.choices} choices, ${r.links.length} links`)
       const nav = []
       s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId:p.requestId, errorReason:'Aborted' }).catch(() => {}) })
       await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', resourceType:'Document', requestStage:'Request' }] })
       const storyBad = []
       try {
         for (let k=0;k<STORIES.length;k++) {
-          await s.evaluate(`document.querySelectorAll('#creative .story-bead')[${k}].click()`)
+          await s.evaluate(`document.querySelectorAll('#creative .story-choice')[${k}].click()`)
           const before=nav.length
-          await s.evaluate(`document.querySelectorAll('#creative .story-leaf a')[${k}].click()`)
+          await s.evaluate(`document.querySelector('#creative .story-leaf:not([hidden]) a').click()`)
           await until(async()=>nav.length>before,1500,50)
           if (nav[before]!==new URL(linksWant[k],origin).href) storyBad.push(`${k}: ${nav[before]}`)
         }
@@ -1096,9 +1128,9 @@ try {
           if (!fit.inside || fit.overlaps || fit.overflowX) bad.push(`${id}: ${JSON.stringify(fit)}`)
         }
         await s.openEngine(join('p=5'),w,h)
-        const c=await s.evaluate(`(() => {const b=e=>e.getBoundingClientRect(),a=document.getElementById('creative-stories'),m=document.getElementById('creative-music'),hud=b(document.querySelector('.hud-nav')), items=[...a.querySelectorAll('.story-bead,.story-panel,.creative-controls')], pass=items.every(e=>{const r=b(e),w=b(a);return r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1})&&b(a).bottom<hud.top; return {pass,beads:a.querySelectorAll('.story-bead').length,records:m.querySelectorAll('.record-disc').length,overlap:!m.hidden&&b(a).right>=b(m).left,overflow:document.documentElement.scrollWidth>innerWidth}})()`)
-        spans.push(`creative ${c.beads}/${c.records}`)
-        if (!c.pass||c.beads!==16||c.records!==9||c.overlap||c.overflow) bad.push(`creative: ${JSON.stringify(c)}`)
+        const c=await s.evaluate(`(() => {const b=e=>e.getBoundingClientRect(),a=document.getElementById('creative-stories'),m=document.getElementById('creative-music'),hud=b(document.querySelector('.hud-nav')), items=[...a.querySelectorAll('.story-index,.story-panel,.creative-controls')], pass=items.every(e=>{const r=b(e),w=b(a);return r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1})&&b(a).bottom<hud.top; return {pass,stories:a.querySelectorAll('.story-choice').length,records:m.querySelectorAll('.record-leaf').length,overlap:!m.hidden&&b(a).right>=b(m).left,overflow:document.documentElement.scrollWidth>innerWidth}})()`)
+        spans.push(`creative ${c.stories}/${c.records}`)
+        if (!c.pass||c.stories!==16||c.records!==9||c.overlap||c.overflow) bad.push(`creative: ${JSON.stringify(c)}`)
         row(`cards fit (${w}x${h})`, !bad.length, bad.join('; ').slice(0, 400) || spans.join(', '))
       }
       await s.viewport(1440, 900)

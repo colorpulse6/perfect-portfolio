@@ -25,13 +25,18 @@ const NO_SCRIPT_CSS = `
 .ss #projects .project-leaf[hidden] { display: block; }
 .ss #projects .project-leaf { margin-bottom: 28px; }
 .ss #creative .creative-world[hidden] { display: block; }
-.ss #creative .record-disc, .ss #creative .record-orbit, .ss #creative .creative-switch, .ss #creative .creative-controls { display: none; }
-.ss #creative .record-stage { height: auto; }
-.ss #creative .record-panel { position: relative; inset: auto; transform: none; width: 100%; }
-.ss #creative .record-leaf[hidden] { display: block; }
+.ss #creative .creative-switch, .ss #creative .creative-controls, .ss #creative .music-tabs, .ss #creative .story-index { display: none; }
+.ss #creative .story-workspace { display: block; }
+.ss #creative .story-leaf[hidden], .ss #creative .record-leaf[hidden], .ss #creative .tape-leaf[hidden] { display: flex; }
+.ss #creative .story-panel { display: block; overflow: visible; }
+.ss #creative .story-leaf { margin-bottom: 28px; }
+.ss #creative .story-text { max-height: none; overflow: visible; }
+.ss #creative .story-progress { display: none; }
+.ss #creative .record-panel, .ss #creative .tape-panel { display: block; }
+.ss #creative .music-project[hidden] { display: block; }
 .ss #creative .record-leaf { margin: 0 0 20px; }
 .ss #essays .essays-inner, .ss #creative .creative-inner { height: auto; max-height: none; }
-.ss #essays .essay-spread, .ss #creative .stories-world .pieces { position: relative; overflow: visible; max-height: none; }
+.ss #essays .essay-spread { position: relative; overflow: visible; max-height: none; }
 .ss .hud { z-index: 5; }
 .ss { font-size: max(11px, 1rem); background: #111; color: rgba(232, 236, 255, 0.96); }
 `

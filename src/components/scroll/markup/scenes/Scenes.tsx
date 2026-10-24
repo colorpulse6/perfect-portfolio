@@ -1,11 +1,15 @@
 import React from "react"
-import { ABOUT_FACTS, CARD_LINE, MUSIC_LINKS, RELEASES, SCENE_COPY, SOCIAL } from "../../data/content"
+import { ABOUT_FACTS, CARD_LINE, COLORPULSE_ALBUMS, RELEASES, SCENE_COPY, SOCIAL } from "../../data/content"
+import { formatTextContent } from "../../../../helpers/wordReveal"
 import hungarianSpa from "../../images/alexs-hand-hungarian-spa.jpg"
 import katatak from "../../images/alexs-hand-katatak.jpg"
 import kunstler from "../../images/alexs-hand-kunstler-scheisse.jpg"
 import goblinsz from "../../images/alexs-hand-goblinsz.jpg"
 import roaches from "../../images/alexs-hand-the-roaches.jpg"
 import cancumbia from "../../images/alexs-hand-cancumbia.jpg"
+import albatross from "../../images/alexs-hand-an-albatross-around-the-neck.jpg"
+import cat from "../../images/alexs-hand-this-cat-is-a-genius.jpg"
+import psychosis from "../../images/alexs-hand-madame-psychosis.jpg"
 import type { AppItem, Letter, LogItem, SceneItem, ScrollData } from "../../data/types"
 import { TechMark } from "../TechMark"
 import { LetterBody } from "../LetterBody"
@@ -70,43 +74,58 @@ const releaseCovers: Record<string, string> = {
   "alexs-hand-hungarian-spa.jpg": hungarianSpa, "alexs-hand-katatak.jpg": katatak,
   "alexs-hand-kunstler-scheisse.jpg": kunstler, "alexs-hand-goblinsz.jpg": goblinsz,
   "alexs-hand-the-roaches.jpg": roaches, "alexs-hand-cancumbia.jpg": cancumbia,
+  "alexs-hand-an-albatross-around-the-neck.jpg": albatross,
+  "alexs-hand-this-cat-is-a-genius.jpg": cat,
+  "alexs-hand-madame-psychosis.jpg": psychosis,
 }
 export function CreativeScene({ data, scene }: Props) { return <Scene scene={scene} inner="inner creative-inner">
   <h2>{SCENE_COPY.creative.headline}</h2>
   <div className="creative-switch" role="tablist" aria-label="Creative worlds">
     <button type="button" role="tab" id="creative-tab-stories" aria-controls="creative-stories" aria-selected="true" tabIndex={0} data-creative-world="stories">Stories</button>
-    <button type="button" role="tab" id="creative-tab-music" aria-controls="creative-music" aria-selected="false" tabIndex={-1} data-creative-world="music">Alex&apos;s Hand</button>
+    <button type="button" role="tab" id="creative-tab-music" aria-controls="creative-music" aria-selected="false" tabIndex={-1} data-creative-world="music">Music</button>
   </div>
   <div className="creative-stage">
-    <div id="creative-stories" className="creative-world stories-world" role="region" aria-label="Stories carousel">
+    <div id="creative-stories" className="creative-world stories-world" role="region" aria-label="Stories" aria-labelledby="creative-tab-stories">
       <h3>Stories</h3>
-      <div className="story-stage" aria-label="Choose a story">
-        <div className="story-planet" aria-hidden="true" />
-        {data.stories.map((item, index) => <button className="story-bead" type="button" key={item.link} data-story={index} aria-label={`Show ${item.title}, story ${index + 1} of ${data.stories.length}`} aria-current={index === 0 ? "true" : "false"}>{item.num}</button>)}
+      <div className="story-workspace">
+        <nav className="story-index" aria-label="Choose a story">
+          {data.stories.map((item, index) => <button className="story-choice" type="button" key={item.link} data-story={index} aria-current={index === 0 ? "true" : "false"}><span>{item.num}</span><span>{item.title}</span></button>)}
+        </nav>
+        <section className="story-panel" aria-label="Active story">
+          {data.stories.map((item, index) => <article className="story-leaf" key={item.link} data-story-leaf={index} hidden={index !== 0}>
+            <header className="story-header"><span className="story-number">{item.num}</span><div><span className="lab">Fiction</span><h4 id={`creative-story-title-${index}`}>{item.title}</h4><a href={item.link}>Open on the Writing page <span aria-hidden="true">↗</span></a></div></header>
+            <div className="story-text" tabIndex={0} role="region" aria-labelledby={`creative-story-title-${index}`} dangerouslySetInnerHTML={{ __html: formatTextContent(item.content) }} />
+          </article>)}
+          <div className="story-progress" role="progressbar" aria-label="Story reading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}><span /></div>
+        </section>
       </div>
-      <section className="story-panel" aria-label="Active story">
-        {data.stories.map((item, index) => <article className="story-leaf" key={item.link} data-story-leaf={index} hidden={index !== 0}>
-          <span className="story-number">{item.num}</span><div><span className="lab">Fiction</span><h4>{item.title}</h4><a href={item.link}>Read the story <span aria-hidden="true">↗</span></a></div>
-        </article>)}
-      </section>
       <div className="creative-controls" role="group" aria-label="Turn stories"><button type="button" data-creative-step="-1" data-creative-target="stories" aria-label="Previous story">‹</button><span id="story-count">1 of {data.stories.length}</span><button type="button" data-creative-step="1" data-creative-target="stories" aria-label="Next story">›</button></div>
     </div>
-    <div id="creative-music" className="creative-world music-world" role="region" aria-label="Alex's Hand records">
-      <h3>Alex&apos;s Hand</h3>
-      <p className="creative-deck">Alex&apos;s Hand was a ten-piece ensemble founded in 2011 by Kellen Mills and Nic Barnes. We toured the US and Europe through 2019. Hungarian Spa was our final album.</p>
-      <div className="record-stage" aria-label="Choose a release">
-        {RELEASES.map((release, index) => <button className="record-disc" type="button" key={release.title} data-record={index} aria-label={`Show ${release.title}, record ${index + 1} of ${RELEASES.length}`} aria-current={index === 0 ? "true" : "false"}>
-          <span className="vinyl-grooves" aria-hidden="true" /><span className="vinyl-label">{release.cover ? <img src={releaseCovers[release.cover]} alt="" decoding="async" /> : <span className="record-type">{release.title}</span>}</span><span className="vinyl-hole" aria-hidden="true" />
-        </button>)}
+    <div id="creative-music" className="creative-world music-world" role="region" aria-label="Music" aria-labelledby="creative-tab-music">
+      <h3>Music</h3>
+      <div className="music-tabs" role="tablist" aria-label="Music projects">
+        <button type="button" role="tab" id="music-tab-alex" aria-controls="music-panel-alex" aria-selected="true" tabIndex={0} data-music-project="alex">Alex&apos;s Hand</button>
+        <button type="button" role="tab" id="music-tab-colorpulse" aria-controls="music-panel-colorpulse" aria-selected="false" tabIndex={-1} data-music-project="colorpulse">Colorpulse</button>
+        <button type="button" role="tab" id="music-tab-priaprizm" aria-controls="music-panel-priaprizm" aria-selected="false" tabIndex={-1} data-music-project="priaprizm">Priaprizm</button>
       </div>
-      <section className="record-panel" aria-label="Active record">
-        {RELEASES.map((release, index) => <article className="record-leaf" key={release.title} data-record-leaf={index} hidden={index !== 0}>
-          <span className="record-sleeve">{release.cover ? <img src={releaseCovers[release.cover]} alt="" decoding="async" /> : <span>{release.title}</span>}</span>
-          <span className="record-copy"><span className="lab">Release {index + 1} of {RELEASES.length}</span><h4>{release.title}</h4><a href={release.link} target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></span>
-        </article>)}
+      <section id="music-panel-alex" className="music-project" role="tabpanel" aria-labelledby="music-tab-alex">
+        <p className="creative-deck">Alex&apos;s Hand was a ten-piece ensemble founded in 2011 by Kellen Mills and Nic Barnes. We toured the US and Europe through 2019. Hungarian Spa was our final album.</p>
+        <div className="record-panel" aria-label="Active album">{RELEASES.map((release, index) => <article className="record-leaf" key={release.title} data-record-leaf={index} hidden={index !== 0}>
+          <div className="record-art"><span className="record-disc" aria-hidden="true"><span className="vinyl-grooves" /><span className="vinyl-label"><img src={releaseCovers[release.cover]} alt="" decoding="async" /></span><span className="vinyl-hole" /></span><span className="record-sleeve"><img src={releaseCovers[release.cover]} alt={`${release.title} album cover`} decoding="async" /></span></div>
+          <div className="record-copy"><span className="lab">{release.date} · {release.tracks} tracks</span><h4>{release.title}</h4><p>{release.description}</p><div className="record-links"><a href={release.link} target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a><a className="music-pill" href="https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v" target="_blank" rel="noopener noreferrer">Spotify</a></div></div>
+        </article>)}</div>
+        <div className="creative-controls" role="group" aria-label="Turn Alex's Hand albums"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous album">‹</button><span id="record-count">1 of {RELEASES.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next album">›</button></div>
       </section>
-      <div className="music-links" aria-label="More music">{MUSIC_LINKS.map(item => <a key={item.label} href={item.link} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div>
-      <div className="creative-controls" role="group" aria-label="Turn records"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous record">‹</button><span id="record-count">1 of {RELEASES.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next record">›</button></div>
+      <section id="music-panel-colorpulse" className="music-project" role="tabpanel" aria-labelledby="music-tab-colorpulse" hidden>
+        <div className="tape-panel" aria-label="Active Colorpulse album">{COLORPULSE_ALBUMS.map((album, index) => <article className="tape-leaf" key={album.title} data-tape-leaf={index} hidden={index !== 0}>
+          <div className="tape-art" aria-hidden="true"><span>Colorpulse</span><strong>{album.title}</strong><i /></div><h4>{album.title}</h4><a href={album.link} target="_blank" rel="noopener noreferrer">Listen on SoundCloud <span aria-hidden="true">↗</span></a>
+        </article>)}</div>
+        <a className="music-pill" href="https://soundcloud.com/colorpulse" target="_blank" rel="noopener noreferrer">Colorpulse on SoundCloud</a>
+        <div className="creative-controls" role="group" aria-label="Turn Colorpulse albums"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous Colorpulse album">‹</button><span id="tape-count">1 of {COLORPULSE_ALBUMS.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next Colorpulse album">›</button></div>
+      </section>
+      <section id="music-panel-priaprizm" className="music-project" role="tabpanel" aria-labelledby="music-tab-priaprizm" hidden>
+        <div className="priaprizm-card"><span className="lab">Music project</span><h4>Priaprizm</h4><p>Seattle, Washington</p><a href="https://priaprizm.bandcamp.com" target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></div>
+      </section>
     </div>
   </div>
 </Scene> }

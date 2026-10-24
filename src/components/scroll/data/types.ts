@@ -22,6 +22,7 @@ export interface StoryItem {
   title: string
   num: string
   link: string
+  content: string
 }
 
 export interface EssayItem {
