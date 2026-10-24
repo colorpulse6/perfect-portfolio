@@ -2,10 +2,14 @@ export const wrapIndex = (index: number, count: number) => ((index % count) + co
 
 export function orbitPoint(index: number, position: number, count: number, width: number, height: number) {
   const wide = width >= 820
-  const orbitHeight = wide ? height : Math.min(height, 270)
-  const radius = wide ? Math.min(orbitHeight * 0.33, width * 0.2) : Math.min(orbitHeight * 0.31, width * 0.3)
-  const cx = radius * 0.66
-  const cy = orbitHeight / 2
+  // the orbit area leaves room below for the controls; the ring is sized so every moon and its
+  // name stay inside it (vertical reach of the tilted ellipse is 1.34 r wide, 1.36 r phone)
+  const area = wide ? height - 52 : Math.min(height, 237)
+  const radius = wide
+    ? Math.max(60, Math.min((area / 2 - 81) / 1.34, width * 0.2))
+    : Math.max(40, Math.min((area / 2 - 56) / 1.36, (width - 80) / 3.1))
+  const cx = wide ? radius * 1.03 + 62 : radius * 1.5 + 40
+  const cy = area / 2
   const a = radius * 1.35
   const b = radius * (wide ? 1 : 1.5)
   let distance = wrapIndex(index - position, count)
@@ -21,5 +25,5 @@ export function orbitPoint(index: number, position: number, count: number, width
   const x = cx + lx * Math.cos(tilt) - ly * Math.sin(tilt)
   const y = cy + lx * Math.sin(tilt) + ly * Math.cos(tilt)
   const hidden = (cosine < 0 && Math.hypot(x - cx, y - cy) + size / 2 < radius) || x + size / 2 < 0
-  return { x, y, size, radius, cx, cy, depth, front, hidden, opacity: 0.45 + 0.55 * Math.max(depth, front), z: (cosine < 0 ? 100 : 300) + Math.round(depth * 90) }
+  return { x, y, size, radius, cx, cy, area, depth, front, hidden, opacity: 0.45 + 0.55 * Math.max(depth, front), z: (cosine < 0 ? 100 : 300) + Math.round(depth * 90) }
 }

@@ -43,7 +43,7 @@ const APP_IMAGES: Record<string, string> = {
   "Bot Battle": "bot-battle.jpg", Regexplain: "regexplain.jpg", "Knicks Knacks": "knicks-knacks.jpg",
 }
 const APP_VIDEOS: Record<string, string> = {
-  Cerebro: "cerebro-mycelium.mp4", "Brain Atlas": "brain-atlas-spin.mp4",
+  "Brain Atlas": "brain-atlas-spin.mp4",
   GalAtlas: "galatlas.mp4", "Polis Atlas": "polis-atlas.mp4", "El Form": "elform-docs-dark.mp4",
 }
 

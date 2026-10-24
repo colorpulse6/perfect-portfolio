@@ -123,12 +123,13 @@ export function createProjectCarousel(root: HTMLElement, items: AppItem[], input
   root.querySelectorAll<HTMLButtonElement>("#projects [data-project-step]").forEach(button => input.listen(button, "click", () => go(current + Number(button.dataset.projectStep))))
   input.listen(window, "keydown", event => {
     const e = event as KeyboardEvent
-    if (!active() || e.altKey || e.ctrlKey || e.metaKey || /^(input|textarea|select)$/i.test((e.target as HTMLElement)?.tagName || "")) return
+    const target = e.target as HTMLElement
+    if (!active() || e.altKey || e.ctrlKey || e.metaKey || target?.isContentEditable || /^(input|textarea|select)$/i.test(target?.tagName || "")) return
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); go(current + (e.key === "ArrowRight" ? 1 : -1)) }
   })
   input.listen(window, "wheel", event => {
     const e = event as WheelEvent
-    if (!active()) return
+    if (!active() || (e.target as HTMLElement)?.closest?.('input, textarea, select, [contenteditable]')) return
     const sideways = Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.2 || (e.shiftKey && !e.deltaX && !!e.deltaY)
     if (!sideways) return
     e.preventDefault()

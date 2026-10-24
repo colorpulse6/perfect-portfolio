@@ -18,6 +18,7 @@
 import { spawn, execFileSync } from 'node:child_process'
 import { accessSync, constants, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import sharp from 'sharp'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -358,10 +359,33 @@ try {
       const fps = await s.evaluate(`new Promise(done => { const f0 = __ss.frames; setTimeout(() => done(__ss.frames - f0), 1000) })`)
       row('fps', fps >= 55, `${fps} frames in 1 s at 1440x900 (60 wanted)`)
 
+      for (const fallback of [false, true]) {
+        await s.openEngine(join(`p=${LEGEND.indexOf('About')}${fallback ? '&nogl=1' : ''}`))
+        const sample = await s.evaluate(`(() => { const p = document.querySelector('#about .bio p'), r = p.getBoundingClientRect(), color = getComputedStyle(p.parentElement).color; const st = document.createElement('style'); st.id = 'contrast-probe'; st.textContent = '#about .bio p { color: transparent !important; text-shadow: none !important }'; document.head.appendChild(st); return { x:Math.round(r.left), y:Math.round(r.top), w:Math.round(r.width), h:Math.round(r.height), color, renderer:__ss.renderer } })()`)
+        await s.frames(2)
+        const png = Buffer.from((await s.send('Page.captureScreenshot', { format:'png' })).data, 'base64')
+        const { data: pixels, info } = await sharp(png).raw().toBuffer({ resolveWithObject:true })
+        await s.evaluate(`document.getElementById('contrast-probe').remove()`)
+        const rgb = sample.color.match(/[\d.]+/g).map(Number), a = rgb[3] ?? 1
+        const linear = v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4 }
+        const lum = c => c.reduce((sum, x, i) => sum + [0.2126, 0.7152, 0.0722][i] * linear(x), 0)
+        let worst = Infinity, lightest = 0
+        for (let iy = 1; iy <= 5; iy++) for (let ix = 1; ix <= 9; ix++) {
+          const x = Math.max(0, Math.min(info.width - 1, Math.round(sample.x + sample.w * ix / 10)))
+          const y = Math.max(0, Math.min(info.height - 1, Math.round(sample.y + sample.h * iy / 6)))
+          const off = (y * info.width + x) * info.channels, bg = [...pixels.subarray(off, off + 3)]
+          const fg = rgb.slice(0, 3).map((v, i) => v * a + bg[i] * (1 - a))
+          lightest = Math.max(lightest, lum(bg))
+          worst = Math.min(worst, (lum(fg) + .05) / (lum(bg) + .05))
+        }
+        row(`About paragraph contrast (${fallback ? 'Canvas2D' : 'WebGL'})`, worst >= 4.5 && sample.renderer === (fallback ? 'canvas2d' : 'webgl2'), `${worst.toFixed(2)}:1 minimum, lightest sampled luminance ${lightest.toFixed(3)}, ${sample.renderer}`)
+      }
+      await s.openEngine(page)
+
       // the smoothed position at 0, 25, 50, 75 and 100% of the document: 11 scenes, sp 0 to 10
       const spAt = []
       const maxY = await s.evaluate('document.documentElement.scrollHeight - innerHeight')
-      for (const f of [0, 0.25, 0.5, 0.75, 1]) { await s.evaluate(`scrollTo(0, ${f} * ${maxY})`); await sleep(900); spAt.push(Number((await s.evaluate('__ss.sp')).toFixed(2))) }
+      for (const f of [0, 0.25, 0.5, 0.75, 1]) { await s.evaluate(`scrollTo(0, ${f} * ${maxY})`); await sleep(400); let prev = -1, now = await s.evaluate('__ss.sp'); for (let t = 0; t < 6000 && Math.abs(now - prev) > 0.002; t += 150) { prev = now; await sleep(150); now = await s.evaluate('__ss.sp') } spAt.push(Number(now.toFixed(2))) }
       const spWant = [0, 2.5, 5, 7.5, 10]
       row('position', spAt.every((sp, i) => Math.abs(sp - spWant[i]) <= 0.06), `sp ${spAt.join(' ')} (prototype: 0 2.46 4.96 7.46 9.96)`)
 
@@ -772,6 +796,24 @@ try {
       await s.openEngine(atProjects)
       const initial = await s.evaluate(`(() => ({ names: [...document.querySelectorAll('#projects .project-moon')].map(b => b.querySelector('.project-tag').textContent), current: __ss.projectCarousel.current, live: document.getElementById('orbit-announce').getAttribute('aria-live'), panel: document.querySelector('#projects .project-panel').getAttribute('aria-label'), dive: __ss.detailSets.includes('projects') }))()`)
       row('moons reachable', initial.names.join('|') === PROJECT_NAMES.join('|') && initial.current === 0 && initial.live === 'polite' && initial.panel === 'Active project', JSON.stringify(initial))
+      for (const [w, h] of [[1440, 813], [1280, 720], [1024, 768], [390, 844]]) {
+        await s.openEngine(atProjects, w, h)
+        const fit = await s.evaluate(`(() => { const box = q => { const r = document.querySelector(q).getBoundingClientRect(); return { left:r.left, right:r.right, top:r.top, bottom:r.bottom } }; return { globe:box('#projects .project-globe'), panel:box('#projects .project-panel'), controls:box('#projects .project-controls'), hud:box('.hud-nav'), header:box('.hud-top'), moons:[...document.querySelectorAll('#projects .project-moon')].filter(m => { const c = getComputedStyle(m); return c.display !== 'none' && c.visibility !== 'hidden' && Number(c.opacity) > 0.1 }).map(m => { const r = m.getBoundingClientRect(); return { name:m.textContent.trim(), left:r.left, right:r.right, top:r.top, bottom:r.bottom } }) } })()`)
+        const g = fit.globe, p = fit.panel, c = fit.controls, hud = fit.hud, header = fit.header
+        const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+        row(`planet fully visible (${w}x${h})`, g.left >= 0 && g.right <= w && g.top >= header.bottom && g.bottom <= hud.top && apart(g, p) && apart(g, c) && p.right <= w && p.bottom <= hud.top, JSON.stringify(fit))
+        const strayMoons = fit.moons.filter(m => !(m.left >= 0 && m.right <= w && m.top >= 0 && m.bottom <= hud.top && apart(m, c) && apart(m, p)))
+        row(`moons on screen (${w}x${h})`, strayMoons.length === 0 && fit.moons.length >= 4, strayMoons.map(m => `${m.name} ${Math.round(m.left)},${Math.round(m.top)}-${Math.round(m.right)},${Math.round(m.bottom)}`).join('; ') || `${fit.moons.length} moons clear of the edges, legend, controls and panel`)
+      }
+      await s.openEngine(atProjects, 1280, 720)
+      const tall = []
+      for (let k = 0; k < PROJECT_NAMES.length; k++) {
+        await s.evaluate(`__ss.projectTo(${k})`); await sleep(500)
+        const r = await s.evaluate(`(() => { const p = document.querySelector('#projects .project-panel').getBoundingClientRect(), h = document.querySelector('.hud-nav').getBoundingClientRect(), t = document.querySelector('.hud-top').getBoundingClientRect(); return { top:p.top, bottom:p.bottom, hud:h.top, head:t.bottom } })()`)
+        if (r.bottom > r.hud || r.top < r.head) tall.push(`${PROJECT_NAMES[k]} ${Math.round(r.top)}-${Math.round(r.bottom)} (legend ${Math.round(r.hud)})`)
+      }
+      row('panel fits for every project (1280x720)', tall.length === 0, tall.join('; ') || 'seven panels between the header and the legend')
+      await s.openEngine(atProjects)
       const badText = [], badVideo = [], ghosts = []
       await s.evaluate('__ss.projectTo(1)'); await sleep(300) // so the first step is a real change and announces
       for (let k = 0; k < PROJECT_NAMES.length; k++) {
@@ -779,7 +821,7 @@ try {
         const state = await s.evaluate(`(() => { const leaves = [...document.querySelectorAll('#projects .project-leaf')], a = leaves.find(x => !x.hidden && !x.classList.contains('outgoing')), vids = leaves.map((x, k) => ({ k, src: x.querySelector('video')?.getAttribute('src') || '', playing: !!x.querySelector('video') && !x.querySelector('video').paused })); return { current: __ss.projectCarousel.current, name: a.querySelector('h3').textContent, description: a.querySelector('.project-more > p').textContent, medium: a.querySelector('.lab').textContent, visible: leaves.filter(x => !x.hidden).length, links: [...a.querySelectorAll('.project-actions a')].map(x => x.textContent.trim()), video: vids, moon: document.querySelectorAll('#projects .project-moon[aria-current="true"]').length, announce: document.getElementById('orbit-announce').textContent } })()`)
         if (state.name !== PROJECT_NAMES[k] || state.description !== PROJECT_DESCRIPTIONS[state.name] || state.current !== k) badText.push(`${k}: ${state.name}: ${state.description.slice(0, 40)}`)
         if (state.visible !== 1 || state.moon !== 1 || !state.announce.includes(state.name)) ghosts.push(`${k}: ${state.visible} leaves, ${state.moon} front moons, ${state.announce}`)
-        const videoWanted = !['Chimera', 'Job Toast'].includes(state.name)
+        const videoWanted = !['Chimera', 'Cerebro', 'Job Toast'].includes(state.name)
         if (state.video.filter(v => v.src).length !== (videoWanted ? 1 : 0) || state.video.some(v => v.k !== k && (v.src || v.playing))) badVideo.push(`${k}: ${JSON.stringify(state.video)}`)
         if (state.name === 'Cerebro' && state.links.join('|') !== 'Download↗|Site↗') badText.push(`Cerebro links ${state.links.join('|')}`)
         if (state.name === 'Brain Atlas' && !state.links[0].startsWith('Live')) badText.push('Brain Atlas live label')
@@ -810,6 +852,60 @@ try {
       await s.openEngine(join(`p=${LEGEND.indexOf('Projects')}&rm=1`))
       const calm = await s.evaluate(`(() => { const v = [...document.querySelectorAll('#projects video')]; return v.every(x => !x.getAttribute('src') && x.paused) })()`)
       row('projects: reduced motion stills', calm, `video sources absent: ${calm}`)
+    })
+
+    // ---------------------------------------------------------------- contact form
+    await group('contact', async () => {
+      await s.openEngine(join(`p=${LEGEND.indexOf('Contact')}`))
+      const fields = await s.evaluate(`(() => { const f = document.querySelector('#contact form'); return { named:f?.getAttribute('name'), registration:f?.hasAttribute('data-netlify'), hidden:f?.querySelector('[name="form-name"]')?.value, honeypot:!!f?.querySelector('[name="bot-field"]'), labels:[...f.querySelectorAll('label')].map(x => x.textContent.trim()), required:f.querySelector('[name="email"]')?.required, address:document.querySelector('.ss').textContent.includes('colorpulse@gmail.com') || !!document.querySelector('.ss a[href^="mailto:"]') } })()`)
+      row('contact form and fields', fields.named === 'contact' && fields.hidden === 'contact' && fields.honeypot && fields.required && !fields.registration && !fields.address && fields.labels.join('|') === 'Your Name|Your Email|Message', JSON.stringify(fields))
+      for (const [w, h] of [[1440, 813], [1024, 768], [390, 844]]) {
+        await s.openEngine(join(`p=${LEGEND.indexOf('Contact')}`), w, h)
+        const fit = await s.evaluate(`(() => { const r = document.querySelector('#contact .contact-form').getBoundingClientRect(), head = document.querySelector('.hud-top').getBoundingClientRect(), nav = document.querySelector('.hud-nav').getBoundingClientRect(); return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, head:head.bottom, nav:nav.top, font:parseFloat(getComputedStyle(document.querySelector('#contact label')).fontSize) } })()`)
+        row(`contact form fits (${w}x${h})`, Math.abs((fit.left + fit.right) / 2 - w / 2) <= 6 && fit.left >= 0 && fit.right <= w && fit.top >= fit.head && fit.bottom <= fit.nav && fit.font >= 11, JSON.stringify(fit))
+      }
+      await s.openEngine(join(`p=${LEGEND.indexOf('Contact')}`))
+      await s.evaluate(`document.querySelector('#scroll-contact-name').focus()`)
+      await s.send('Input.insertText', { text: 'Nic Test' })
+      await s.key('ArrowLeft', 37, 40)
+      await s.send('Input.insertText', { text: ' ' })
+      const typing = await s.evaluate(`({ name: document.querySelector('#scroll-contact-name').value, focus: document.activeElement.id, sp: __ss.sp })`)
+      row('contact typing keeps engine still', typing.name === 'Nic Tes t' && typing.focus === 'scroll-contact-name' && Math.abs(typing.sp - LEGEND.indexOf('Contact')) < .05, JSON.stringify(typing))
+      await s.evaluate(`document.querySelector('#scroll-contact-email').focus()`)
+      await s.send('Input.insertText', { text: 'nic@example.test' })
+      await s.evaluate(`document.querySelector('#scroll-contact-message').focus()`)
+      await s.send('Input.insertText', { text: 'A project idea' })
+      const posts = []
+      s.on('Fetch.requestPaused', p => {
+        if (p.request.method === 'POST' && new URL(p.request.url).pathname === '/') {
+          posts.push({ url:p.request.url, body:p.request.postData, headers:p.request.headers })
+          s.send('Fetch.fulfillRequest', { requestId:p.requestId, responseCode:200, responseHeaders:[{ name:'Content-Type', value:'text/plain' }], body:Buffer.from('ok').toString('base64') }).catch(() => {})
+        } else if (p.request.method === 'POST') s.send('Fetch.failRequest', { requestId:p.requestId, errorReason:'Aborted' }).catch(() => {})
+        else s.send('Fetch.continueRequest', { requestId:p.requestId }).catch(() => {})
+      })
+      await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', requestStage:'Request' }] })
+      try {
+        await s.click('#contact button[type="submit"]')
+        await until(() => s.evaluate(`!!document.querySelector('#contact [role="status"]')?.textContent.includes('Message sent.')`), 3000)
+      } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
+      const body = new URLSearchParams(posts[0]?.body || '')
+      row('contact posts typed values only to intercepted Netlify form', posts.length === 1 && body.get('form-name') === 'contact' && body.get('bot-field') === '' && body.get('name') === 'Nic Tes t' && body.get('email') === 'nic@example.test' && body.get('message') === 'A project idea', JSON.stringify(posts.map(p => ({ url:p.url, body:p.body }))))
+      const sent = await s.evaluate(`document.querySelector('#contact [role="status"]')?.textContent.trim()`)
+      row('contact sent inline', sent === 'Message sent. I will get back to you soon.', sent)
+      await s.openEngine(join(`p=${LEGEND.indexOf('Contact')}`))
+      await s.evaluate(`(() => { const input = document.querySelector('#scroll-contact-email'); const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; setter.call(input, 'nic@example.test'); input.dispatchEvent(new Event('input', { bubbles:true })); const box = document.querySelector('#scroll-contact-message'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(box, 'Keep this draft'); box.dispatchEvent(new Event('input', { bubbles:true })); })()`)
+      let rejected = 0
+      s.on('Fetch.requestPaused', p => {
+        if (p.request.method === 'POST') { rejected++; s.send('Fetch.fulfillRequest', { requestId:p.requestId, responseCode:500, body:Buffer.from('error').toString('base64') }).catch(() => {}) }
+        else s.send('Fetch.continueRequest', { requestId:p.requestId }).catch(() => {})
+      })
+      await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', requestStage:'Request' }] })
+      try {
+        await s.click('#contact button[type="submit"]')
+        await until(() => s.evaluate(`document.querySelector('#contact .contact-status.error')?.textContent.includes('Something went wrong')`), 3000)
+      } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
+      const retained = await s.evaluate(`({ email:document.querySelector('#scroll-contact-email')?.value, message:document.querySelector('#scroll-contact-message')?.value, error:document.querySelector('#contact .contact-status.error')?.textContent })`)
+      row('contact error keeps the draft', rejected === 1 && retained.email === 'nic@example.test' && retained.message === 'Keep this draft' && /Something went wrong/.test(retained.error), JSON.stringify(retained))
     })
 
     // ---------------------------------------------------------------- dives on the remaining detail scenes

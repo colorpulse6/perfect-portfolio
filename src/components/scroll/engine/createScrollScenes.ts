@@ -546,7 +546,7 @@ const VS_TRI = HEAD + `
 layout(location=0) in vec2 aPos; out vec2 vUv;
 void main(){ vUv = aPos * .5 + .5; gl_Position = vec4(aPos, 0., 1.); }`;
 
-// Nebula, rendered small and upsampled. Same fbm family as the study's cubemap.
+// Nebula, rendered at half resolution. Same fbm family as the study's cubemap.
 const FS_NEB = HEAD + NOISE + `
 in vec2 vUv; out vec4 o;
 uniform float uTime, uScroll, uAngle, uMode, uAspect, uExposure; uniform int uOct; uniform vec3 uA, uB;
@@ -565,7 +565,8 @@ void main(){
   vec3 col = mix(uA, uB, smoothstep(.35, .75, n2)) * dens * (.25 + .75 * n3);
   col *= 1. - .65 * smoothstep(.48, .78, n3);
   col = col * .27 * uExposure + vec3(.004, .005, .012);
-  o = vec4(col, 1.);
+  col += (hash12(gl_FragCoord.xy + fract(uTime * 3.7) * 83.) - .5) / 255.;
+  o = vec4(max(col, 0.), 1.);
 }`;
 
 // Composite: nebula, the orbit body, the descent mouth, vignette, grain.
@@ -1094,7 +1095,7 @@ function makeGL(canvas) {
     canvas.width = Math.max(2, Math.round(S.vw * S.dpr));
     canvas.height = Math.max(2, Math.round(S.vh * S.dpr));
     freeNeb();
-    const div = S.tier === 'high' ? 4 : 6;
+    const div = 2;
     const w = Math.max(2, Math.floor(canvas.width / div)), h = Math.max(2, Math.floor(canvas.height / div));
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -1113,7 +1114,7 @@ function makeGL(canvas) {
   function frame() {
     const c = sceneParams();
     const focal = 1.25;
-    // 1. nebula at low resolution
+    // 1. nebula at half resolution
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
     gl.bindFramebuffer(gl.FRAMEBUFFER, neb.fb);
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
@@ -1672,7 +1673,7 @@ function stepReader(dt) {
 }
 orbitBtns.forEach((b) => input.listen(b, 'click', (e) => { e.stopPropagation(); if (atOrbit()) orbitInput(Number(b.dataset.orb)); }));
 input.listen(window, 'wheel', (e) => {
-  if (!atOrbit()) return;
+  if (!atOrbit() || (e.target as HTMLElement)?.closest?.('input, textarea, select, [contenteditable]')) return;
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.
   let dx = e.deltaX, dy = e.deltaY;
 // @ts-expect-error Prototype JavaScript uses dynamic DOM and renderer records.

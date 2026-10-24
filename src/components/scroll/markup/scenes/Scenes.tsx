@@ -3,6 +3,7 @@ import { ABOUT_FACTS, CARD_LINE, SCENE_COPY, SOCIAL } from "../../data/content"
 import type { AppItem, EssayItem, Letter, LogItem, SceneItem, ScrollData, StoryItem } from "../../data/types"
 import { TechMark } from "../TechMark"
 import { LetterBody } from "../LetterBody"
+import { useNetlifyForm } from "../../../../helpers/useNetlifyForm"
 
 // The markup is the prototype's (index.html, r14) node for node: the engine finds
 // its pins, stagger groups (with their data-step), cards (data-set, data-k) and the
@@ -80,11 +81,20 @@ export function NewsletterScene({ data, scene }: Props) { return <Scene scene={s
 </Scene> }
 export function ChangelogScene({ data, scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.changelog.headline}</h2><PieceCards items={data.changelog} set="changelog" step="0.03" /></Scene> }
 export function WorkScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.work.headline}</h2><p className="lead">{SCENE_COPY.work.lead}</p><a className="pill" href={SCENE_COPY.work.link}>{SCENE_COPY.work.cta} <span aria-hidden="true">↗</span></a></Scene> }
-// the contact lead names the address; the address is a mail link, as in the prototype
-function ContactLead() {
-  const lead = SCENE_COPY.contact.lead, email = SCENE_COPY.contact.email, at = lead.indexOf(email)
-  if (at < 0) return <p className="lead">{lead}</p>
-  return <p className="lead">{lead.slice(0, at)}<a href={`mailto:${email}`}>{email}</a>{lead.slice(at + email.length)}</p>
+export function ContactScene({ scene }: Props) {
+  const { form, setForm, status, submit } = useNetlifyForm()
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); void submit() }
+  return <Scene scene={scene}><h2>{SCENE_COPY.contact.headline}</h2><p className="lead">{SCENE_COPY.contact.lead}</p>
+    {status === "sent" ? <p className="contact-status" role="status" aria-live="polite">Message sent. I will get back to you soon.</p> :
+      <form className="contact-form" name="contact" method="POST" onSubmit={handleSubmit}>
+        <input type="hidden" name="form-name" value="contact" /><input type="hidden" name="bot-field" />
+        <label htmlFor="scroll-contact-name">Your Name<input id="scroll-contact-name" name="name" type="text" autoComplete="name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></label>
+        <label htmlFor="scroll-contact-email">Your Email<input id="scroll-contact-email" name="email" type="email" autoComplete="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></label>
+        <label className="contact-message" htmlFor="scroll-contact-message">Message<textarea id="scroll-contact-message" name="message" rows={3} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} /></label>
+        <p className={`contact-status${status === "error" ? " error" : ""}`} role="status" aria-live="polite">{status === "sending" ? "Sending..." : status === "error" ? "Something went wrong. Your message is still here. Please try again." : ""}</p>
+        <button className="pill" type="submit" disabled={status === "sending"}>{status === "sending" ? "Sending..." : "Send message"}</button>
+      </form>}
+    <ul className="links stagger" data-step="0.03">{SOCIAL.slice(0, 4).map(item => <li key={item.label}><a href={item.href}>{item.label}</a></li>)}</ul>
+  </Scene>
 }
-export function ContactScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.contact.headline}</h2><ContactLead /><ul className="links stagger" data-step="0.03">{SOCIAL.slice(0, 4).map(item => <li key={item.label}><a href={item.href}>{item.label}</a></li>)}</ul></Scene> }
 export function AtlasScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.atlas.headline}</h2><p className="lead">{SCENE_COPY.atlas.lead}</p><p className="atlas-wrap"><a className="pill atlas" href={SCENE_COPY.atlas.link}>{SCENE_COPY.atlas.cta} <span aria-hidden="true">↗</span></a><span className="lab small">{SCENE_COPY.atlas.note}</span></p></Scene> }

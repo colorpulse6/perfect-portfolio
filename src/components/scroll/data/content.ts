@@ -25,7 +25,7 @@ export const SCENE_COPY = {
   newsletter: { headline: "A weekly builder's notebook." },
   changelog: { headline: "A running ship log." },
   work: { headline: "Thoughtful software. From idea to working product.", lead: "I help product teams and agencies build features, connect systems, and turn manual workflows into useful software.", cta: "Start the conversation", link: "#contact" },
-  contact: { headline: "Tell me about your project.", lead: "Share what you want to build or improve, your existing stack, and your target timeline. Or write to colorpulse@gmail.com.", email: "colorpulse@gmail.com" },
+  contact: { headline: "Tell me about your project.", lead: "Share what you want to build or improve, your existing stack, and your target timeline." },
   atlas: { headline: "A living map of every medium.", lead: "A 3D galaxy map of the work. Drag to rotate, dive into a cluster, and explore projects, essays, and fiction.", cta: "Explore the Atlas", note: "The last station opens into it", link: "/atlas/" },
 }
 
