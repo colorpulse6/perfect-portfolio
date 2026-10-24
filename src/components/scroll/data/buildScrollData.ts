@@ -77,7 +77,9 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
       blurb: BLURB_OVERRIDE[name] ?? node.description,
     }
   }
-  const files = new Map(query.allFile.nodes.map(node => [node.relativePath, node.childImageSharp?.resize.src]))
+  // Public issue slugs are lowercase; preserve the source filename for provenance.
+  const imageKey = (path: string) => path.replace(/^[^/]+/, week => week.toLowerCase())
+  const files = new Map(query.allFile.nodes.map(node => [imageKey(node.relativePath), node]))
   const letters = [...query.newsletter.nodes]
     .sort((a, b) => b.frontmatter.date.localeCompare(a.frontmatter.date))
     .map(node => {
@@ -86,9 +88,10 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
       const blocks: LetterBlock[] = letterBlocks(node.rawMarkdownBody).map(block => {
         if (block.kind !== "image") return block
         const path = `${week}/${block.src.replace(/^\.\//, "")}`
-        const src = files.get(path)
-        if (!src) throw new Error(`Missing newsletter image: ${path}`)
-        return { ...block, src, file: path }
+        const file = files.get(imageKey(path))
+        const src = file?.childImageSharp?.resize.src
+        if (!file || !src) throw new Error(`Missing newsletter image: ${path}`)
+        return { ...block, src, file: file.relativePath }
       })
       const formatted = formatDate(date)
       return { num: String(issue), title, date: formatted,

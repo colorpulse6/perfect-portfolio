@@ -9,7 +9,7 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
     allProject: { nodes: [...PRODUCTS.slice(1), ...TOOLS].map(name => ({ name, slug: name.toLowerCase(), medium: "APP", status: "released", link: "https://example.com", github: null, tech: ["Swift"], description: "Native workspace." })) },
     allWriting: { nodes: [{ title: "Jerks", content: "Full story." }] },
     changelog: { nodes: [] },
-    newsletter: { nodes: [{ fields: { slug: "2026-W42" }, frontmatter: { title: "Issue", date: "2026-10-16", issue: 14, deck: "A note." }, rawMarkdownBody: "Hello.\n\n![A picture](./img/x.jpg)" }] },
+    newsletter: { nodes: [{ fields: { slug: "2026-w42" }, frontmatter: { title: "Issue", date: "2026-10-16", issue: 14, deck: "A note." }, rawMarkdownBody: "Hello.\n\n![A picture](./img/x.jpg)" }] },
     allFile: { nodes: [{ relativePath: "2026-W42/img/x.jpg", childImageSharp: { resize: { src: "/static/x.jpg", width: 720, height: 450 } } }] },
   })
   assert.deepEqual(result.projects.map(item => item.name), PRODUCTS)
@@ -20,6 +20,7 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
   assert.equal(result.stories[0].link, "/writing/#jerks")
   assert.equal(result.stories[0].content, "Full story.")
   assert.equal(result.bio[1].includes("Cerebro Mycelium"), false)
+  assert.equal(result.letters[0].link, "/newsletter/2026-w42/")
   assert.equal(result.letters[0].blocks[1].kind, "image")
   // the source path stays with the picture, so a check can name the file behind a hashed src
   assert.deepEqual(result.letters[0].blocks[1], { kind: "image", alt: "A picture", src: "/static/x.jpg", file: "2026-W42/img/x.jpg" })
