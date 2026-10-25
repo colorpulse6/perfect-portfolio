@@ -16,6 +16,9 @@ import type { AppItem, Letter, LogItem, SceneItem, ScrollData } from "../../data
 import { TechMark } from "../TechMark"
 import { LetterBody } from "../LetterBody"
 import { useNetlifyForm } from "../../../../helpers/useNetlifyForm"
+import { navigate } from "gatsby"
+import { start as startMusic } from "../../../music/player"
+import { PlatformIcon } from "../../../music/PlatformIcon"
 
 // The markup is the prototype's (index.html, r14) node for node: the engine finds
 // its pins, stagger groups (with their data-step), cards (data-set, data-k) and the
@@ -105,6 +108,7 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
     </div>
     <div id="creative-music" className="creative-world music-world" role="region" aria-label="Music" aria-labelledby="creative-tab-music">
       <h3>Music</h3>
+      <button type="button" className="music-play-all" onClick={() => { void startMusic({ shuffle: true }) }}>Shuffle play <span aria-hidden="true">▶</span></button>
       <div className="music-tabs" role="tablist" aria-label="Music projects">
         <button type="button" role="tab" id="music-tab-alex" aria-controls="music-panel-alex" aria-selected="true" tabIndex={0} data-music-project="alex">Alex&apos;s Hand</button>
         <button type="button" role="tab" id="music-tab-colorpulse" aria-controls="music-panel-colorpulse" aria-selected="false" tabIndex={-1} data-music-project="colorpulse">Colorpulse</button>
@@ -114,19 +118,19 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
         <p className="creative-deck">Alex&apos;s Hand was a ten-piece ensemble founded in 2011 by Kellen Mills and Nic Barnes. We toured the US and Europe through 2019. Hungarian Spa was our final album.</p>
         <div className="record-panel" aria-label="Active album">{RELEASES.map((release, index) => <article className="record-leaf" key={release.title} data-record-leaf={index} hidden={index !== 0}>
           <div className="record-art"><span className="record-disc" aria-hidden="true"><span className="vinyl-grooves" /><span className="vinyl-label"><img src={releaseCovers[release.cover]} alt="" decoding="async" /></span><span className="vinyl-hole" /></span><span className="record-sleeve"><img src={releaseCovers[release.cover]} alt={`${release.title} album cover`} decoding="async" /></span></div>
-          <div className="record-copy"><span className="lab">{release.date} · {release.tracks} tracks</span><h4>{release.title}</h4><p>{release.description}</p><div className="record-links"><a href={release.link} target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a><a className="music-pill" href="https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v" target="_blank" rel="noopener noreferrer">Spotify</a></div></div>
+          <div className="record-copy"><span className="lab">{release.date} · {release.tracks} tracks</span><h4>{release.title}</h4><p>{release.description}</p><div className="record-links"><a href={release.link} target="_blank" rel="noopener noreferrer"><PlatformIcon platform="bandcamp" />Listen on Bandcamp <span aria-hidden="true">↗</span></a><a className="music-pill" href="https://open.spotify.com/artist/0iFemeRah3zjZQoctmYf2v" target="_blank" rel="noopener noreferrer"><PlatformIcon platform="spotify" />Spotify</a></div></div>
         </article>)}</div>
         <div className="creative-controls" role="group" aria-label="Turn Alex's Hand albums"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous album">‹</button><span id="record-count">1 of {RELEASES.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next album">›</button></div>
       </section>
       <section id="music-panel-colorpulse" className="music-project" role="tabpanel" aria-labelledby="music-tab-colorpulse" hidden>
         <div className="tape-panel" aria-label="Active Colorpulse album">{COLORPULSE_ALBUMS.map((album, index) => <article className="tape-leaf" key={album.title} data-tape-leaf={index} hidden={index !== 0}>
-          <div className="tape-art" aria-hidden="true" style={{ "--tape-photo": `url(${colorpulsePhoto})` } as React.CSSProperties}><span>Colorpulse</span><strong>{album.title}</strong><i /></div><h4>{album.title}</h4><a href={album.link} target="_blank" rel="noopener noreferrer">Listen on SoundCloud <span aria-hidden="true">↗</span></a>
+          <div className="tape-art" aria-hidden="true" style={{ "--tape-photo": `url(${colorpulsePhoto})` } as React.CSSProperties}><span>Colorpulse</span><strong>{album.title}</strong><i /></div><h4>{album.title}</h4><a href={album.link} target="_blank" rel="noopener noreferrer"><PlatformIcon platform="soundcloud" />Listen on SoundCloud <span aria-hidden="true">↗</span></a>
         </article>)}</div>
-        <a className="music-pill" href="https://soundcloud.com/colorpulse" target="_blank" rel="noopener noreferrer">Colorpulse on SoundCloud</a>
+        <a className="music-pill" href="https://soundcloud.com/colorpulse" target="_blank" rel="noopener noreferrer"><PlatformIcon platform="soundcloud" />Colorpulse on SoundCloud</a>
         <div className="creative-controls" role="group" aria-label="Turn Colorpulse albums"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous Colorpulse album">‹</button><span id="tape-count">1 of {COLORPULSE_ALBUMS.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next Colorpulse album">›</button></div>
       </section>
       <section id="music-panel-priaprizm" className="music-project" role="tabpanel" aria-labelledby="music-tab-priaprizm" hidden>
-        <div className="priaprizm-card"><img src={priaprizmPhoto} alt="Priaprizm playing a show, the band caught mid-pile on a bar floor" decoding="async" loading="lazy" /><span className="lab">Music project</span><h4>Priaprizm</h4><p>Seattle, Washington</p><a href="https://priaprizm.bandcamp.com" target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></div>
+        <div className="priaprizm-card"><img src={priaprizmPhoto} alt="Priaprizm playing a show, the band caught mid-pile on a bar floor" decoding="async" loading="lazy" /><span className="lab">Music project</span><h4>Priaprizm</h4><p>Seattle, Washington</p><a href="https://priaprizm.bandcamp.com" target="_blank" rel="noopener noreferrer"><PlatformIcon platform="bandcamp" />Listen on Bandcamp <span aria-hidden="true">↗</span></a></div>
       </section>
     </div>
   </div>
@@ -167,4 +171,4 @@ export function ContactScene({ scene }: Props) {
     <ul className="links stagger" data-step="0.03">{SOCIAL.slice(0, 4).map(item => <li key={item.label}><a href={item.href}>{item.label}</a></li>)}</ul>
   </Scene>
 }
-export function AtlasScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.atlas.headline}</h2><p className="lead">{SCENE_COPY.atlas.lead}</p><p className="atlas-wrap"><a className="pill atlas" href={SCENE_COPY.atlas.link}>{SCENE_COPY.atlas.cta} <span aria-hidden="true">↗</span></a><span className="lab small">{SCENE_COPY.atlas.note}</span></p></Scene> }
+export function AtlasScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.atlas.headline}</h2><p className="lead">{SCENE_COPY.atlas.lead}</p><p className="atlas-wrap"><a className="pill atlas" href={SCENE_COPY.atlas.link} onClick={event => { if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); void navigate(SCENE_COPY.atlas.link) }}>{SCENE_COPY.atlas.cta} <span aria-hidden="true">↗</span></a><span className="lab small">{SCENE_COPY.atlas.note}</span></p></Scene> }

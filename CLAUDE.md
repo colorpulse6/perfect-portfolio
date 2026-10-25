@@ -71,6 +71,13 @@ node scripts/cosmos-capture.mjs --help   # Headless captures and checks
 - **Debug hook**: `?ss-debug` exposes `window.__ss` and the prototype's hold params (`?p ?v ?t ?dive ?dt ?orb ?rd ?rm ?nogl`).
 - **Harness**: `node scripts/scroll-capture.mjs --check [--only=<groups>]` against `npx gatsby serve -p 9123 -H 127.0.0.1`; `essays` and `creative` are separate groups.
 
+## Music player (spike)
+
+- One player for the whole site, in `src/components/music/`: `queue.ts` (pure shuffle and loop queue across platforms, unit tested), `tracks.ts` (13 SoundCloud tracks from soundcloud.com/colorpulse, 10 Spotify top tracks for Alex's Hand), `adapters.ts` (SoundCloud widget API and Spotify iFrame API behind one interface), `player.ts` (module-level controller, so it survives route changes), `MusicBar.tsx` (the control surface, mounted by `layout.tsx` on the home and Atlas branches). Scripts and iframes load only after the first Play click.
+- SoundCloud plays after one click on the site and auto-advances. The Spotify embed refuses to autoplay until the listener presses play inside it once, so Spotify tracks join the queue only after the "+ Spotify" step. Keep the Spotify iframe in the viewport (invisible, not offscreen): offscreen it ignores track changes. Bandcamp has no control API and is not in the queue.
+- Home to Atlas must stay a client-side navigation (`navigate`), or the page reloads and the music stops.
+- `?music-debug` exposes `window.__music` and `window.__musicLog`.
+
 ## Environment Variables
 
 - `GEMINI_API_KEY` -- Google Gemini API key for terminal AI chat (in `.env`)

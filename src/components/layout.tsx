@@ -11,6 +11,7 @@ import Header from "./header"
 import ParticleBackground from "./nebula/ParticleBackground"
 import TerminalConsole from "./nebula/TerminalConsole"
 import CosmosStage from "./cosmos/CosmosStage"
+import MusicBar from "./music/MusicBar"
 import { useCosmos } from "./cosmos/cosmosStore"
 import { resolveTheme } from "./nebula/particleThemes"
 import { AmbientAudioProvider, useAmbientAudio } from "./audio/AmbientAudioProvider"
@@ -142,6 +143,7 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="layout-container">
           <CosmosStage key="cosmos-stage" path={pagePath} />
           {children}
+          <MusicBar />
         </div>
       </AmbientAudioProvider>
     )
@@ -159,6 +161,7 @@ const Layout: React.FC<LayoutProps> = ({
             <Header atlas />
           </div>
           <main>{children}</main>
+          <MusicBar />
           <TransitionSound transitionStatus={transitionStatus} />
         </div>
       </AmbientAudioProvider>
