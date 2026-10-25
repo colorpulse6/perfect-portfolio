@@ -690,6 +690,38 @@ try {
       await s.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})
       const swiped=await s.evaluate('__ss.creativeCarousel.record')
       row('creative: phone tabs and swipe',tab.selected==='true'&&tab.role==='tabpanel'&&tab.stories&&!tab.music&&swiped===1,`${JSON.stringify(tab)}, record ${swiped}`)
+      // the full screen reader: it opens from the story, fills the viewport, keeps the scene still, and gives focus back
+      for (const [w,h] of [[1440,813],[1024,768],[390,844]]) {
+        await s.openEngine(join('p=5'),w,h)
+        await s.evaluate(`document.querySelectorAll('.story-choice')[3].click()`)
+        const before = await s.evaluate(`({ y: scrollY })`)
+        await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) [data-story-expand]').focus(); document.querySelector('.story-leaf:not([hidden]) [data-story-expand]').click()`)
+        await sleep(200)
+        const o = await s.evaluate(`(() => { const d=document.getElementById('story-reader'), r=d.getBoundingClientRect(), page=document.getElementById('story-reader-page'), t=document.getElementById('story-reader-text'), c=page.querySelector('.story-reader-column').getBoundingClientRect(); return { shown:!d.hidden, full:r.left===0&&r.top===0&&r.width===innerWidth&&r.height===innerHeight, title:document.getElementById('story-reader-title').textContent, html:t.innerHTML, focus:document.activeElement===page, room:page.scrollHeight>page.clientHeight, col:c.width, colFits:c.left>=0&&c.right<=innerWidth, font:parseFloat(getComputedStyle(t).fontSize), count:document.getElementById('story-reader-count').textContent, over:document.documentElement.scrollWidth>innerWidth } })()`)
+        const want = await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) .story-text').innerHTML`)
+        const wantTitle = await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) h4').textContent`)
+        await s.send('Input.dispatchMouseEvent', { type:'mouseWheel', x:Math.round(w/2), y:Math.round(h/2), deltaX:0, deltaY:300 }); await sleep(250)
+        const scrolled = await s.evaluate(`({ top: document.getElementById('story-reader-page').scrollTop, y: scrollY, bar: document.querySelector('#story-reader .story-reader-progress').getAttribute('aria-valuenow') })`)
+        await s.key('ArrowRight',39,0); await sleep(150)
+        const nextStory = await s.evaluate(`({ title: document.getElementById('story-reader-title').textContent, story: __ss.creativeCarousel.story, count: document.getElementById('story-reader-count').textContent, top: document.getElementById('story-reader-page').scrollTop  , y: scrollY })`)
+        await s.key('Escape',27,0); await sleep(150)
+        const closed = await s.evaluate(`({ hidden: document.getElementById('story-reader').hidden, focusIsExpand: document.activeElement?.hasAttribute('data-story-expand')  , y: scrollY, world: __ss.creativeCarousel.world })`)
+        const ok = o.shown && o.full && o.title === wantTitle && o.html === want && o.focus && o.room && o.colFits && o.col <= 620 && o.font >= 18 && !o.over
+          && scrolled.top > 0 && scrolled.y === before.y && Number(scrolled.bar) > 0
+          && nextStory.story === 4 && nextStory.count === '5 of 16' && nextStory.title !== wantTitle && nextStory.top === 0 && nextStory.y === before.y
+          && closed.hidden && closed.focusIsExpand && closed.y === before.y
+        row(`creative: full screen story reader (${w}x${h})`, ok, JSON.stringify({ o: { ...o, html: o.html.length }, scrolled, nextStory, closed, before }).slice(0, 420))
+      }
+      // the photographs: Priaprizm's card and Colorpulse's tape both show their picture, inside the room
+      for (const [w,h] of [[1440,813],[1280,720],[1024,768],[390,844]]) {
+        await s.openEngine(join('p=5'),w,h)
+        await s.evaluate(`document.getElementById('creative-tab-music').click(); document.getElementById('music-tab-priaprizm').click()`)
+        await until(() => s.evaluate(`(() => { const i=document.querySelector('.priaprizm-card img'); return i.complete && i.naturalWidth>0 })()`), 5000)
+        const pr = await s.evaluate(`(() => { const i=document.querySelector('.priaprizm-card img'), r=i.getBoundingClientRect(), w=document.getElementById('creative-music').getBoundingClientRect(); return { loaded:i.complete&&i.naturalWidth>0, h:r.height, inside:r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1, alt:i.alt.length>8 } })()`)
+        await s.evaluate(`document.getElementById('music-tab-colorpulse').click()`)
+        const cp = await s.evaluate(`(() => { const a=document.querySelector('.tape-leaf:not([hidden]) .tape-art'), r=a.getBoundingClientRect(), w=document.getElementById('creative-music').getBoundingClientRect(); return { bg:getComputedStyle(a).backgroundImage.includes('colorpulse'), inside:r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1, h:r.height } })()`)
+        row(`creative: Priaprizm and Colorpulse photographs (${w}x${h})`, pr.loaded && pr.alt && pr.inside && pr.h >= 60 && cp.bg && cp.inside && cp.h >= 80, JSON.stringify({ pr, cp }))
+      }
     })
 
     // ---------------------------------------------------------------- stories

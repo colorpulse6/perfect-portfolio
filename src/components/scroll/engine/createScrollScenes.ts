@@ -3,6 +3,7 @@ import { TECH_ICON as techIcon } from '../data/content';
 import { createInput } from './input';
 import { createProjectCarousel } from './projectCarousel';
 import { createCreativeCarousel } from './creativeCarousel';
+import { createStoryReader } from './storyReader';
 import { attachVerticalHandoff } from './verticalHandoff';
 
 export function createScrollScenes(root: HTMLElement, options: { data: ScrollData }) {
@@ -1526,6 +1527,7 @@ function frame(now) {
 
 const projectCarousel = createProjectCarousel(root, data.projects, input, () => Math.abs(S.sp - sceneIndex('projects')) < 0.45 && !DIVE.active, () => S.rm);
 const creativeCarousel = createCreativeCarousel(root, data.stories.length, input, () => Math.abs(S.sp - sceneIndex('creative')) < 0.45 && !DIVE.active, () => S.rm);
+const storyReader = createStoryReader(root, data.stories.length, input, creativeCarousel);
 attachVerticalHandoff(root, '#essays .essay-spread', input, () => Math.abs(S.sp - sceneIndex('essays')) < 0.45 && !DIVE.active);
 attachVerticalHandoff(root, '#creative .creative-inner', input, () => Math.abs(S.sp - sceneIndex('creative')) < 0.45 && !DIVE.active);
 bootRenderer();
@@ -1779,6 +1781,9 @@ if (debug) window.__ss = {
   get projectCarousel() { return { current: projectCarousel.current, name: data.projects[projectCarousel.current].name }; },
   projectTo(k: number) { projectCarousel.go(k); },
   get creativeCarousel() { return { world: creativeCarousel.world, story: creativeCarousel.story, record: creativeCarousel.record }; },
+  get storyReader() { return { open: storyReader.isOpen, story: storyReader.story }; },
+  openStory(k: number) { creativeCarousel.select('stories'); creativeCarousel.go(k, 'stories'); storyReader.open(null); },
+  closeStory() { storyReader.close(); },
   creativeWorld(which: 'stories' | 'music') { creativeCarousel.select(which); },
   creativeTo(k: number) { creativeCarousel.go(k); },
   orbitTo,
