@@ -722,6 +722,21 @@ try {
         const cp = await s.evaluate(`(() => { const a=document.querySelector('.tape-leaf:not([hidden]) .tape-art'), r=a.getBoundingClientRect(), w=document.getElementById('creative-music').getBoundingClientRect(); return { bg:getComputedStyle(a).backgroundImage.includes('colorpulse'), inside:r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1, h:r.height } })()`)
         row(`creative: Priaprizm and Colorpulse photographs (${w}x${h})`, pr.loaded && pr.alt && pr.inside && pr.h >= 60 && cp.bg && cp.inside && cp.h >= 80, JSON.stringify({ pr, cp }))
       }
+      // a continuous wheel (a trackpad) over a reading card or the Creative room still carries the page on
+      {
+        await s.viewport(1440,813); await s.open(`${origin}/?ss-debug`); await sleep(5000)
+        const stuck = []
+        for (const [id, sel] of [['essays','#essays .essay-card'],['creative','#creative .creative-inner'],['creative','#creative .story-index']]) {
+          await s.evaluate(`scrollTo(0,0)`); await sleep(300)
+          await s.evaluate(`document.querySelector('.hud-nav a[href="#${id}"]').click()`); await sleep(2500)
+          const at = await s.evaluate(`(() => { const b=document.querySelector('${sel}').getBoundingClientRect(); return { x:b.left+b.width/2, y:b.top+b.height/2, sy:scrollY } })()`)
+          for (let i=0;i<150;i++) { await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:at.x,y:at.y,deltaX:0,deltaY:60}); await sleep(16) }
+          await sleep(400)
+          const end = await s.evaluate('scrollY')
+          if (end - at.sy < 400) stuck.push(`${sel}: ${at.sy} to ${end}`)
+        }
+        row('creative: continuous wheel over cards carries the page on', !stuck.length, stuck.join('; ') || 'essay card, Creative room and story list all hand off')
+      }
     })
 
     // ---------------------------------------------------------------- stories
