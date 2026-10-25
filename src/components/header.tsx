@@ -1,6 +1,5 @@
 import React from "react"
 import { Link } from "gatsby"
-import Hamburger from "./Hamburger"
 import Spring from "../components/Spring"
 import GithubIcon from "../images/github.png"
 import LinkedinIcon from "../images/linkedin-icon.png"
@@ -17,10 +16,6 @@ import "./header.css"
 interface HeaderProps {
   /** The title of the site to display in the header */
   siteTitle?: string
-  /** Whether the navigation menu is currently open */
-  navOpen: boolean
-  /** Function to toggle the navigation menu state */
-  setNavOpen: (isOpen: boolean) => void
   /** Center the social row (used on the full-bleed atlas so it clears the atlas's own top-left title) */
   atlas?: boolean
 }
@@ -30,11 +25,7 @@ interface HeaderProps {
  * @param props - The component props
  * @returns JSX element for the header
  */
-const Header: React.FC<HeaderProps> = ({
-  navOpen,
-  setNavOpen,
-  atlas = false,
-}) => {
+const Header: React.FC<HeaderProps> = ({ atlas = false }) => {
   return (
     <header data-cosmos-snapshot="50">
       <div className="header-container">
@@ -119,10 +110,6 @@ const Header: React.FC<HeaderProps> = ({
             </a>
           </Spring>
         </div>
-        <Link className="header-work-link" to="/work-with-me/">Work with me</Link>
-        <Spring isTitle={false}>
-          <Hamburger navOpen={navOpen} setNavOpen={setNavOpen} />
-        </Spring>
       </div>
     </header>
   )

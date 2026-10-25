@@ -96,7 +96,7 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
       const formatted = formatDate(date)
       return { num: String(issue), title, date: formatted,
         meta: `The weekly letter · No. ${issue} · ${formatted}`,
-        link: `/newsletter/${week}/`, excerpt: deck, blocks }
+        link: `#newsletter-${week}`, excerpt: deck, blocks }
     })
   return {
     scenes: SCENES,
@@ -105,7 +105,7 @@ export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string
     tools: TOOLS.map(app).filter((item): item is AppItem => item !== null),
     stories: query.allWriting.nodes.map((node, index) => ({
       title: node.title, content: node.content, num: String(index + 1).padStart(2, "0"),
-      link: `/writing/#${storySlug(node.title)}`,
+      link: `#creative-${storySlug(node.title)}`,
     })),
     essays: ESSAYS.map(essay => ({ ...essay, image: imageUrls[essay.image] ?? essay.image })),
     changelog: changelogItems(query.changelog.nodes.map(node => ({ ...node, name: node.parent?.name ?? node.name ?? "" }))),

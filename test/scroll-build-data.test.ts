@@ -17,10 +17,10 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
   assert.equal(result.projects.find(item => item.name === "Job Toast")?.video, undefined)
   assert.deepEqual(result.projects.filter(item => item.video).map(item => item.name), ["Chimera", "Brain Atlas", "GalAtlas", "Polis Atlas", "El Form"])
   assert.equal(result.projects[0].open, "Where the game stands")
-  assert.equal(result.stories[0].link, "/writing/#jerks")
+  assert.equal(result.stories[0].link, "#creative-jerks")
   assert.equal(result.stories[0].content, "Full story.")
   assert.equal(result.bio[1].includes("Cerebro Mycelium"), false)
-  assert.equal(result.letters[0].link, "/newsletter/2026-w42/")
+  assert.equal(result.letters[0].link, "#newsletter-2026-w42")
   assert.equal(result.letters[0].blocks[1].kind, "image")
   // the source path stays with the picture, so a check can name the file behind a hashed src
   assert.deepEqual(result.letters[0].blocks[1], { kind: "image", alt: "A picture", src: "/static/x.jpg", file: "2026-W42/img/x.jpg" })

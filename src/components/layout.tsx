@@ -6,11 +6,8 @@
  */
 
 import React, { useMemo, useRef, useEffect } from "react"
-import { useStaticQuery, graphql } from "gatsby"
 import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion"
 import Header from "./header"
-import SideBar from "../components/SideBar"
-import SideBarCollapsed from "../components/SideBarCollapsed"
 import ParticleBackground from "./nebula/ParticleBackground"
 import TerminalConsole from "./nebula/TerminalConsole"
 import CosmosStage from "./cosmos/CosmosStage"
@@ -21,19 +18,6 @@ import { useInteractionSounds } from "./audio/useInteractionSounds"
 import { GatsbyLocation } from "../types/gatsby"
 import { isScrollPath } from "../helpers/routes"
 import "./layout.css"
-
-// Type for the GraphQL query result
-interface SiteMetadataQuery {
-  site: {
-    siteMetadata: {
-      title: string
-      menuLinks: Array<{
-        name: string
-        link: string
-      }>
-    }
-  }
-}
 
 // Define the props interface for the Layout component
 interface LayoutProps {
@@ -93,21 +77,6 @@ const Layout: React.FC<LayoutProps> = ({
   transitionStatus,
   location,
 }) => {
-  const data: SiteMetadataQuery = useStaticQuery(graphql`
-    query SiteTitleQuery {
-      site {
-        siteMetadata {
-          title
-          menuLinks {
-            name
-            link
-          }
-        }
-      }
-    }
-  `)
-
-  const [navOpen, setNavOpen] = React.useState<boolean>(false)
   const [isTouch, setIsTouch] = React.useState(false)
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
@@ -133,8 +102,6 @@ const Layout: React.FC<LayoutProps> = ({
   const isScroll = isScrollPath(pagePath)
 
   React.useEffect(() => {
-    setNavOpen(false)
-
     if (typeof window !== "undefined") {
       const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0
       setIsTouch(hasTouch)
@@ -189,18 +156,7 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="layout-container">
           <CosmosStage key="cosmos-stage" path={pagePath} />
           <div className="atlas-chrome" data-hidden={hudVisible ? "false" : "true"}>
-            <Header
-              navOpen={navOpen}
-              setNavOpen={setNavOpen}
-              siteTitle={data.site.siteMetadata.title || "Title"}
-              atlas
-            />
-            <SideBar
-              navOpen={navOpen}
-              setNavOpen={setNavOpen}
-              transitionStatus={transitionStatus}
-              key="sidebar"
-            />
+            <Header atlas />
           </div>
           <main>{children}</main>
           <TransitionSound transitionStatus={transitionStatus} />
@@ -234,18 +190,7 @@ const Layout: React.FC<LayoutProps> = ({
             />
           </>
         )}
-        <Header
-          navOpen={navOpen}
-          setNavOpen={setNavOpen}
-          siteTitle={data.site.siteMetadata.title || "Title"}
-        />
-
-        <SideBar
-          navOpen={navOpen}
-          setNavOpen={setNavOpen}
-          transitionStatus={transitionStatus}
-          key="sidebar"
-        />
+        <Header />
 
         <div
           style={{

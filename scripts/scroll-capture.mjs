@@ -341,7 +341,7 @@ try {
       row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
       await session.close(); session = await tab()
       await session.open(page, true)
-      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p'),projects:[...document.querySelectorAll('#projects .project-leaf')].filter(a => getComputedStyle(a).display !== 'none').length})`)
+      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('#creative .story-text'),newsletter:!!document.querySelector('.issue-body p'),projects:[...document.querySelectorAll('#projects .project-leaf')].filter(a => getComputedStyle(a).display !== 'none').length})`)
       row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter && fallback.projects === 7, JSON.stringify(fallback))
       await session.close(); session = null
     })
@@ -626,9 +626,9 @@ try {
       const storyBad=[]
       for(let k=0;k<WRITING.length;k++) {
         await s.evaluate(`document.querySelectorAll('.story-choice')[${k}].click()`)
-        const r=await s.evaluate(`(() => { const a=document.querySelector('.story-leaf:not([hidden])'); return {title:a.querySelector('h4').textContent,html:a.querySelector('.story-text').innerHTML,link:a.querySelector('a').getAttribute('href'),shown:document.querySelectorAll('.story-leaf:not([hidden])').length} })()`)
+        const r=await s.evaluate(`(() => { const a=document.querySelector('.story-leaf:not([hidden])'); return {title:a.querySelector('h4').textContent,html:a.querySelector('.story-text').innerHTML,shown:document.querySelectorAll('.story-leaf:not([hidden])').length} })()`)
         const expected=await s.evaluate(`(() => {const d=document.createElement('div');d.innerHTML=${JSON.stringify(formatTextContent(WRITING[k].content))};return d.innerHTML})()`)
-        if(r.title!==WRITING[k].title||r.html!==expected||r.link!==`/writing/#${slug(WRITING[k].title)}`||r.shown!==1)storyBad.push(k)
+        if(r.title!==WRITING[k].title||r.html!==expected||r.shown!==1)storyBad.push(k)
       }
       row('creative: all sixteen full stories and links',!storyBad.length,storyBad.join(',')||'all match source content')
       const releaseBad=[]
@@ -694,43 +694,13 @@ try {
 
     // ---------------------------------------------------------------- stories
     await group('stories', async () => {
-      // The visible story panel preserves the source order and destination links.
+      // The visible story panel preserves the source order and links nowhere (the Writing page is retired from the surface).
       await s.openEngine(join(`p=${LEGEND.indexOf('Creative')}`)); await sleep(200)
       const r = await s.evaluate(`({ titles:[...document.querySelectorAll('#creative .story-leaf h4')].map(x=>x.textContent.trim()), nums:[...document.querySelectorAll('#creative .story-leaf .story-number')].map(x=>x.textContent.trim()), choices:document.querySelectorAll('#creative .story-choice').length, links:[...document.querySelectorAll('#creative .story-leaf a')].map(x=>x.getAttribute('href')) })`)
-      const linksWant = STORIES.map(t => `/writing/#${slug(t)}`)
-      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.choices === STORIES.length && r.links.join('|') === linksWant.join('|'), `${r.choices} choices, ${r.links.length} links`)
-      const nav = []
-      s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId:p.requestId, errorReason:'Aborted' }).catch(() => {}) })
-      await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', resourceType:'Document', requestStage:'Request' }] })
-      const storyBad = []
-      try {
-        for (let k=0;k<STORIES.length;k++) {
-          await s.evaluate(`document.querySelectorAll('#creative .story-choice')[${k}].click()`)
-          const before=nav.length
-          await s.evaluate(`document.querySelector('#creative .story-leaf:not([hidden]) a').click()`)
-          await until(async()=>nav.length>before,1500,50)
-          if (nav[before]!==new URL(linksWant[k],origin).href) storyBad.push(`${k}: ${nav[before]}`)
-        }
-      } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
-      row('stories open where they live',!storyBad.length&&nav.length===STORIES.length,`${nav.length} navigations; ${storyBad.join('; ')||'all match'}`)
-
-      // and /writing/#<slug> opens that story as a click on its title does: the reader
-      // fades in and the title's words are revealed. The page is the site's; its
-      // known noise (SITE_NOISE) is noted apart, any other message fails the row.
-      const hashBad = []
-      const site0 = siteLog.length
-      consoleScope = '/writing/'
-      try {
-        for (const title of STORIES) {
-          await s.viewport(1440, 900)
-          await s.open(`${origin}/writing/#${slug(title)}`)
-          const shown = await until(() => s.evaluate(`(document.querySelector('.reader-title') || {}).textContent === ${JSON.stringify(title)}`), 8000)
-          const revealed = shown && await until(() => s.evaluate("document.querySelectorAll('.reader-title .visible').length > 0"), 3000)
-          if (!shown || !revealed) hashBad.push(`${slug(title)}: shows "${await s.evaluate("(document.querySelector('.reader-title') || {}).textContent || ''")}"${shown ? ', title words never revealed' : ''}`)
-        }
-      } finally { consoleScope = 'scroll' }
-      const hashNoise = [...new Set(siteLog.slice(site0).filter(t => !SITE_NOISE.some(noise => noise.test(t))).map(t => t.split('\n')[0]))]
-      row('writing hash opens the story', !hashBad.length && !hashNoise.length, `${STORIES.length - hashBad.length} of ${STORIES.length} opened and revealed; ${hashBad.slice(0, 3).join('; ')}${hashNoise.length ? ` messages: ${hashNoise.join(' | ')}` : 'no messages beyond the site noise'}`)
+      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.choices === STORIES.length && r.links.length === 0, `${r.choices} choices, ${r.links.length} links`)
+      // nothing on the home surface leads to the retired pages (the menu and its routes are off the surface)
+      const retired = await s.evaluate(`[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href')).filter(h => /^(?:https?:\\/\\/(?:www\\.)?nichalasbarnes\\.com)?\\/(about|projects|writing|changelog|contact|newsletter|work-with-me)(?:[\\/#?]|$)/.test(h))`)
+      row('no link to the retired pages', retired.length === 0, retired.length ? retired.join(', ') : 'no anchor leads to the old menu pages')
     })
 
     // ---------------------------------------------------------------- the newsletter orbit and reader

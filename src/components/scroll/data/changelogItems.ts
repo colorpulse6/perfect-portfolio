@@ -21,7 +21,7 @@ export function changelogItems(nodes: readonly ChangelogNode[]): LogItem[] {
         num: String(Number(date.slice(8, 10))),
         kindLabel: `${month} ${date.slice(0, 4)}`,
         meta: `${type[0].toUpperCase()}${type.slice(1)} · ${project ?? ""} · ${formatted}`,
-        link: "/changelog/",
+        link: "#changelog",
         excerpt: first,
       }
     })

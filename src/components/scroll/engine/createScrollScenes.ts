@@ -379,7 +379,8 @@ function fillDetail(set, k) {
   $('#detail-meta').textContent = p.meta || `${p.medium} · ${p.status}`;
   $('#detail-blurb').textContent = p.blurb || p.excerpt;
   // an item may name its own link (round 14: Chimera's "Where the game stands")
-  $('#detail-link').href = p.link; $('#detail-link-label').textContent = p.open || set.open;
+  // an in-page link (the changelog's) has nowhere to open, so the pill hides
+  const dl = $('#detail-link'); dl.hidden = (p.link || '').startsWith('#'); dl.href = p.link; $('#detail-link-label').textContent = p.open || set.open;
   const gh = $('#detail-github'); gh.hidden = !p.github; gh.href = p.github || '#';
   $('#detail-back').textContent = set.back;
   // an app's technologies, each as its mark and its name (round 12); the names
