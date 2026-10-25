@@ -15,7 +15,7 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
   assert.deepEqual(result.projects.map(item => item.name), PRODUCTS)
   assert.equal(result.projects.find(item => item.name === "Cerebro")?.video, undefined)
   assert.equal(result.projects.find(item => item.name === "Job Toast")?.video, undefined)
-  assert.deepEqual(result.projects.filter(item => item.video).map(item => item.name), ["Brain Atlas", "GalAtlas", "Polis Atlas", "El Form"])
+  assert.deepEqual(result.projects.filter(item => item.video).map(item => item.name), ["Chimera", "Brain Atlas", "GalAtlas", "Polis Atlas", "El Form"])
   assert.equal(result.projects[0].open, "Where the game stands")
   assert.equal(result.stories[0].link, "/writing/#jerks")
   assert.equal(result.stories[0].content, "Full story.")

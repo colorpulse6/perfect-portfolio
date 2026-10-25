@@ -21,6 +21,7 @@ import video1 from "../../../images/brain-atlas-spin.mp4"
 import video2 from "../../../images/galatlas.mp4"
 import video3 from "../../../images/polis-atlas.mp4"
 import video4 from "../../../images/elform-docs-dark.mp4"
+import video5 from "../../../images/chimera-walk.mp4"
 
 const IMAGE_URLS: Record<string, string> = {
   "bot-battle.jpg": image0,
@@ -41,6 +42,7 @@ const IMAGE_URLS: Record<string, string> = {
   "galatlas.mp4": video2,
   "polis-atlas.mp4": video3,
   "elform-docs-dark.mp4": video4,
+  "chimera-walk.mp4": video5,
 }
 
 export function useScrollData(): ScrollData {

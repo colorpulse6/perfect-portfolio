@@ -67,7 +67,7 @@ function bio(): [string, string] {
 export function buildScrollData(query: ScrollQueryData, imageUrls: Record<string, string> = {}): ScrollData {
   const nodes = new Map(query.allProject.nodes.map(node => [node.name, node]))
   const app = (name: string): AppItem | null => {
-    if (name === "Chimera") return { ...CHIMERA, image: imageUrls[CHIMERA.image] ?? CHIMERA.image }
+    if (name === "Chimera") return { ...CHIMERA, image: imageUrls[CHIMERA.image] ?? CHIMERA.image, video: CHIMERA.video ? (imageUrls[CHIMERA.video] ?? CHIMERA.video) : undefined }
     const node = nodes.get(name)
     if (!node || node.status === "disabled") throw new Error(`Missing active project: ${name}`)
     return {
