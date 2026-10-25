@@ -16,6 +16,8 @@ import type { AppItem, Letter, LogItem, SceneItem, ScrollData } from "../../data
 import { TechMark } from "../TechMark"
 import { LetterBody } from "../LetterBody"
 import { useNetlifyForm } from "../../../../helpers/useNetlifyForm"
+import { navigate } from "gatsby"
+import { start as startMusic } from "../../../music/player"
 
 // The markup is the prototype's (index.html, r14) node for node: the engine finds
 // its pins, stagger groups (with their data-step), cards (data-set, data-k) and the
@@ -105,6 +107,7 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
     </div>
     <div id="creative-music" className="creative-world music-world" role="region" aria-label="Music" aria-labelledby="creative-tab-music">
       <h3>Music</h3>
+      <button type="button" className="music-play-all" onClick={() => { void startMusic({ shuffle: true }) }}>Shuffle play <span aria-hidden="true">▶</span></button>
       <div className="music-tabs" role="tablist" aria-label="Music projects">
         <button type="button" role="tab" id="music-tab-alex" aria-controls="music-panel-alex" aria-selected="true" tabIndex={0} data-music-project="alex">Alex&apos;s Hand</button>
         <button type="button" role="tab" id="music-tab-colorpulse" aria-controls="music-panel-colorpulse" aria-selected="false" tabIndex={-1} data-music-project="colorpulse">Colorpulse</button>
@@ -167,4 +170,4 @@ export function ContactScene({ scene }: Props) {
     <ul className="links stagger" data-step="0.03">{SOCIAL.slice(0, 4).map(item => <li key={item.label}><a href={item.href}>{item.label}</a></li>)}</ul>
   </Scene>
 }
-export function AtlasScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.atlas.headline}</h2><p className="lead">{SCENE_COPY.atlas.lead}</p><p className="atlas-wrap"><a className="pill atlas" href={SCENE_COPY.atlas.link}>{SCENE_COPY.atlas.cta} <span aria-hidden="true">↗</span></a><span className="lab small">{SCENE_COPY.atlas.note}</span></p></Scene> }
+export function AtlasScene({ scene }: Props) { return <Scene scene={scene}><h2>{SCENE_COPY.atlas.headline}</h2><p className="lead">{SCENE_COPY.atlas.lead}</p><p className="atlas-wrap"><a className="pill atlas" href={SCENE_COPY.atlas.link} onClick={event => { if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); void navigate(SCENE_COPY.atlas.link) }}>{SCENE_COPY.atlas.cta} <span aria-hidden="true">↗</span></a><span className="lab small">{SCENE_COPY.atlas.note}</span></p></Scene> }
