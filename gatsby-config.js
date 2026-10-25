@@ -6,32 +6,6 @@ module.exports = {
     author: `Nichalas Barnes`,
     twitterUsername: `@bathtubbarnes`,
     siteUrl: "https://nichalasbarnes.com/",
-    menuLinks: [
-      {
-        name: "home",
-        link: "/",
-      },
-      {
-        name: "projects",
-        link: "/projects",
-      },
-      {
-        name: "about",
-        link: "/about",
-      },
-      {
-        name: "contact",
-        link: "/contact",
-      },
-      {
-        name: "writing",
-        link: "/writing",
-      },
-      {
-        name: "newsletter",
-        link: "/newsletter",
-      },
-    ],
   },
   plugins: [
     "gatsby-plugin-typescript",

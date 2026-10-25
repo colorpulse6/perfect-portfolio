@@ -3,6 +3,7 @@ import type { ScrollData } from "./data/types"
 import { Hud } from "./markup/Hud"
 import { TechSprite } from "./markup/TechSprite"
 import { DetailDialog } from "./markup/DetailDialog"
+import { StoryReaderDialog } from "./markup/StoryReaderDialog"
 import { HeroScene, AboutScene, ProjectsScene, ToolsScene, CreativeScene, EssaysScene, NewsletterScene, ChangelogScene, WorkScene, ContactScene, AtlasScene } from "./markup/scenes/Scenes"
 
 // Without JavaScript the scenes stack as a plain page: every heading, card and letter
@@ -69,6 +70,7 @@ const ScrollScenes = React.memo(function ScrollScenes({ data }: { data: ScrollDa
       return <Component key={scene.id} data={data} scene={scene} />
     })}</main>
     <DetailDialog />
+    <StoryReaderDialog />
     <p id="fallback" hidden />
   </div>
 })

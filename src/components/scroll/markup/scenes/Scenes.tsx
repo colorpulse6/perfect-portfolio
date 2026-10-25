@@ -1,6 +1,8 @@
 import React from "react"
 import { ABOUT_FACTS, CARD_LINE, COLORPULSE_ALBUMS, RELEASES, SCENE_COPY, SOCIAL } from "../../data/content"
 import { formatTextContent } from "../../../../helpers/wordReveal"
+import priaprizmPhoto from "../../images/priaprizm.jpg"
+import colorpulsePhoto from "../../images/colorpulse.jpg"
 import hungarianSpa from "../../images/alexs-hand-hungarian-spa.jpg"
 import katatak from "../../images/alexs-hand-katatak.jpg"
 import kunstler from "../../images/alexs-hand-kunstler-scheisse.jpg"
@@ -93,7 +95,7 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
         </nav>
         <section className="story-panel" aria-label="Active story">
           {data.stories.map((item, index) => <article className="story-leaf" key={item.link} data-story-leaf={index} hidden={index !== 0}>
-            <header className="story-header"><span className="story-number">{item.num}</span><div><span className="lab">Fiction</span><h4 id={`creative-story-title-${index}`}>{item.title}</h4><a href={item.link}>Open on the Writing page <span aria-hidden="true">↗</span></a></div></header>
+            <header className="story-header"><span className="story-number">{item.num}</span><div><span className="lab">Fiction</span><h4 id={`creative-story-title-${index}`}>{item.title}</h4></div><button type="button" className="story-expand" data-story-expand aria-label={`Read ${item.title} full screen`}>Full screen <span aria-hidden="true">⤢</span></button></header>
             <div className="story-text" tabIndex={0} role="region" aria-labelledby={`creative-story-title-${index}`} dangerouslySetInnerHTML={{ __html: formatTextContent(item.content) }} />
           </article>)}
           <div className="story-progress" role="progressbar" aria-label="Story reading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}><span /></div>
@@ -118,13 +120,13 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
       </section>
       <section id="music-panel-colorpulse" className="music-project" role="tabpanel" aria-labelledby="music-tab-colorpulse" hidden>
         <div className="tape-panel" aria-label="Active Colorpulse album">{COLORPULSE_ALBUMS.map((album, index) => <article className="tape-leaf" key={album.title} data-tape-leaf={index} hidden={index !== 0}>
-          <div className="tape-art" aria-hidden="true"><span>Colorpulse</span><strong>{album.title}</strong><i /></div><h4>{album.title}</h4><a href={album.link} target="_blank" rel="noopener noreferrer">Listen on SoundCloud <span aria-hidden="true">↗</span></a>
+          <div className="tape-art" aria-hidden="true" style={{ "--tape-photo": `url(${colorpulsePhoto})` } as React.CSSProperties}><span>Colorpulse</span><strong>{album.title}</strong><i /></div><h4>{album.title}</h4><a href={album.link} target="_blank" rel="noopener noreferrer">Listen on SoundCloud <span aria-hidden="true">↗</span></a>
         </article>)}</div>
         <a className="music-pill" href="https://soundcloud.com/colorpulse" target="_blank" rel="noopener noreferrer">Colorpulse on SoundCloud</a>
         <div className="creative-controls" role="group" aria-label="Turn Colorpulse albums"><button type="button" data-creative-step="-1" data-creative-target="music" aria-label="Previous Colorpulse album">‹</button><span id="tape-count">1 of {COLORPULSE_ALBUMS.length}</span><button type="button" data-creative-step="1" data-creative-target="music" aria-label="Next Colorpulse album">›</button></div>
       </section>
       <section id="music-panel-priaprizm" className="music-project" role="tabpanel" aria-labelledby="music-tab-priaprizm" hidden>
-        <div className="priaprizm-card"><span className="lab">Music project</span><h4>Priaprizm</h4><p>Seattle, Washington</p><a href="https://priaprizm.bandcamp.com" target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></div>
+        <div className="priaprizm-card"><img src={priaprizmPhoto} alt="Priaprizm playing a show, the band caught mid-pile on a bar floor" decoding="async" loading="lazy" /><span className="lab">Music project</span><h4>Priaprizm</h4><p>Seattle, Washington</p><a href="https://priaprizm.bandcamp.com" target="_blank" rel="noopener noreferrer">Listen on Bandcamp <span aria-hidden="true">↗</span></a></div>
       </section>
     </div>
   </div>
@@ -132,8 +134,8 @@ export function CreativeScene({ data, scene }: Props) { return <Scene scene={sce
 export function EssaysScene({ data, scene }: Props) { return <Scene scene={scene} inner="inner essays-inner"><h2>{SCENE_COPY.essays.headline}</h2><div className="essay-spread stagger" data-step="0.05">{data.essays.map(item => <article className="essay-card" key={item.link}>
   <img src={item.image} alt="" decoding="async" /><div className="essay-copy"><span className="lab">{item.meta}</span><h3>{item.title}</h3><p>{item.excerpt}</p><a href={item.link} target="_blank" rel="noopener noreferrer">Read on Medium <span aria-hidden="true">↗</span></a></div>
 </article>)}</div></Scene> }
-// the letter's week, from its link (/newsletter/2026-W42/): the article carries it as data-week
-const weekOf = (letter: Letter) => letter.link.split("/").filter(Boolean).pop()
+// the letter's week, from its link (#newsletter-2026-W42): the article carries it as data-week
+const weekOf = (letter: Letter) => letter.link.replace(/^#newsletter-/, "")
 function LetterArticle({ letter, index }: { letter: Letter; index: number }) {
   return <article className="issue" data-week={weekOf(letter)} id={`issue-${letter.num}`} data-k={index} hidden={index > 0}>
     <p className="lab issue-meta">{letter.meta}</p><h3 id={`issue-${letter.num}-title`}>{letter.title}</h3>

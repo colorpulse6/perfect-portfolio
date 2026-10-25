@@ -341,7 +341,7 @@ try {
       row('SSR shell', shell.scenes === 11 && shell.links === 11 && shell.projects === 7 && shell.tools === 5 && shell.letters > 0, JSON.stringify(shell))
       await session.close(); session = await tab()
       await session.open(page, true)
-      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('a[href^="/writing/#"]'),newsletter:!!document.querySelector('.issue-body p'),projects:[...document.querySelectorAll('#projects .project-leaf')].filter(a => getComputedStyle(a).display !== 'none').length})`)
+      const fallback = await session.evaluate(`({scenes:document.querySelectorAll('.ss .scene').length,visible:getComputedStyle(document.querySelector('.ss .pin')).visibility,position:getComputedStyle(document.querySelector('.ss .pin')).position,story:!!document.querySelector('#creative .story-text'),newsletter:!!document.querySelector('.issue-body p'),projects:[...document.querySelectorAll('#projects .project-leaf')].filter(a => getComputedStyle(a).display !== 'none').length})`)
       row('no-JS fallback', fallback.scenes === 11 && fallback.visible === 'visible' && fallback.position !== 'fixed' && fallback.story && fallback.newsletter && fallback.projects === 7, JSON.stringify(fallback))
       await session.close(); session = null
     })
@@ -626,9 +626,9 @@ try {
       const storyBad=[]
       for(let k=0;k<WRITING.length;k++) {
         await s.evaluate(`document.querySelectorAll('.story-choice')[${k}].click()`)
-        const r=await s.evaluate(`(() => { const a=document.querySelector('.story-leaf:not([hidden])'); return {title:a.querySelector('h4').textContent,html:a.querySelector('.story-text').innerHTML,link:a.querySelector('a').getAttribute('href'),shown:document.querySelectorAll('.story-leaf:not([hidden])').length} })()`)
+        const r=await s.evaluate(`(() => { const a=document.querySelector('.story-leaf:not([hidden])'); return {title:a.querySelector('h4').textContent,html:a.querySelector('.story-text').innerHTML,shown:document.querySelectorAll('.story-leaf:not([hidden])').length} })()`)
         const expected=await s.evaluate(`(() => {const d=document.createElement('div');d.innerHTML=${JSON.stringify(formatTextContent(WRITING[k].content))};return d.innerHTML})()`)
-        if(r.title!==WRITING[k].title||r.html!==expected||r.link!==`/writing/#${slug(WRITING[k].title)}`||r.shown!==1)storyBad.push(k)
+        if(r.title!==WRITING[k].title||r.html!==expected||r.shown!==1)storyBad.push(k)
       }
       row('creative: all sixteen full stories and links',!storyBad.length,storyBad.join(',')||'all match source content')
       const releaseBad=[]
@@ -690,47 +690,64 @@ try {
       await s.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})
       const swiped=await s.evaluate('__ss.creativeCarousel.record')
       row('creative: phone tabs and swipe',tab.selected==='true'&&tab.role==='tabpanel'&&tab.stories&&!tab.music&&swiped===1,`${JSON.stringify(tab)}, record ${swiped}`)
+      // the full screen reader: it opens from the story, fills the viewport, keeps the scene still, and gives focus back
+      for (const [w,h] of [[1440,813],[1024,768],[390,844]]) {
+        await s.openEngine(join('p=5'),w,h)
+        await s.evaluate(`document.querySelectorAll('.story-choice')[3].click()`)
+        const before = await s.evaluate(`({ y: scrollY })`)
+        await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) [data-story-expand]').focus(); document.querySelector('.story-leaf:not([hidden]) [data-story-expand]').click()`)
+        await sleep(200)
+        const o = await s.evaluate(`(() => { const d=document.getElementById('story-reader'), r=d.getBoundingClientRect(), page=document.getElementById('story-reader-page'), t=document.getElementById('story-reader-text'), c=page.querySelector('.story-reader-column').getBoundingClientRect(); return { shown:!d.hidden, full:r.left===0&&r.top===0&&r.width===innerWidth&&r.height===innerHeight, title:document.getElementById('story-reader-title').textContent, html:t.innerHTML, focus:document.activeElement===page, room:page.scrollHeight>page.clientHeight, col:c.width, colFits:c.left>=0&&c.right<=innerWidth, font:parseFloat(getComputedStyle(t).fontSize), count:document.getElementById('story-reader-count').textContent, over:document.documentElement.scrollWidth>innerWidth } })()`)
+        const want = await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) .story-text').innerHTML`)
+        const wantTitle = await s.evaluate(`document.querySelector('.story-leaf:not([hidden]) h4').textContent`)
+        await s.send('Input.dispatchMouseEvent', { type:'mouseWheel', x:Math.round(w/2), y:Math.round(h/2), deltaX:0, deltaY:300 }); await sleep(250)
+        const scrolled = await s.evaluate(`({ top: document.getElementById('story-reader-page').scrollTop, y: scrollY, bar: document.querySelector('#story-reader .story-reader-progress').getAttribute('aria-valuenow') })`)
+        await s.key('ArrowRight',39,0); await sleep(150)
+        const nextStory = await s.evaluate(`({ title: document.getElementById('story-reader-title').textContent, story: __ss.creativeCarousel.story, count: document.getElementById('story-reader-count').textContent, top: document.getElementById('story-reader-page').scrollTop  , y: scrollY })`)
+        await s.key('Escape',27,0); await sleep(150)
+        const closed = await s.evaluate(`({ hidden: document.getElementById('story-reader').hidden, focusIsExpand: document.activeElement?.hasAttribute('data-story-expand')  , y: scrollY, world: __ss.creativeCarousel.world })`)
+        const ok = o.shown && o.full && o.title === wantTitle && o.html === want && o.focus && o.room && o.colFits && o.col <= 620 && o.font >= 18 && !o.over
+          && scrolled.top > 0 && scrolled.y === before.y && Number(scrolled.bar) > 0
+          && nextStory.story === 4 && nextStory.count === '5 of 16' && nextStory.title !== wantTitle && nextStory.top === 0 && nextStory.y === before.y
+          && closed.hidden && closed.focusIsExpand && closed.y === before.y
+        row(`creative: full screen story reader (${w}x${h})`, ok, JSON.stringify({ o: { ...o, html: o.html.length }, scrolled, nextStory, closed, before }).slice(0, 420))
+      }
+      // the photographs: Priaprizm's card and Colorpulse's tape both show their picture, inside the room
+      for (const [w,h] of [[1440,813],[1280,720],[1024,768],[390,844]]) {
+        await s.openEngine(join('p=5'),w,h)
+        await s.evaluate(`document.getElementById('creative-tab-music').click(); document.getElementById('music-tab-priaprizm').click()`)
+        await until(() => s.evaluate(`(() => { const i=document.querySelector('.priaprizm-card img'); return i.complete && i.naturalWidth>0 })()`), 5000)
+        const pr = await s.evaluate(`(() => { const i=document.querySelector('.priaprizm-card img'), r=i.getBoundingClientRect(), w=document.getElementById('creative-music').getBoundingClientRect(); return { loaded:i.complete&&i.naturalWidth>0, h:r.height, inside:r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1, alt:i.alt.length>8 } })()`)
+        await s.evaluate(`document.getElementById('music-tab-colorpulse').click()`)
+        const cp = await s.evaluate(`(() => { const a=document.querySelector('.tape-leaf:not([hidden]) .tape-art'), r=a.getBoundingClientRect(), w=document.getElementById('creative-music').getBoundingClientRect(); return { bg:getComputedStyle(a).backgroundImage.includes('colorpulse'), inside:r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1, h:r.height } })()`)
+        row(`creative: Priaprizm and Colorpulse photographs (${w}x${h})`, pr.loaded && pr.alt && pr.inside && pr.h >= 60 && cp.bg && cp.inside && cp.h >= 80, JSON.stringify({ pr, cp }))
+      }
+      // a continuous wheel (a trackpad) over a reading card or the Creative room still carries the page on
+      {
+        await s.viewport(1440,813); await s.open(`${origin}/?ss-debug`); await sleep(5000)
+        const stuck = []
+        for (const [id, sel] of [['essays','#essays .essay-card'],['creative','#creative .creative-inner'],['creative','#creative .story-index']]) {
+          await s.evaluate(`scrollTo(0,0)`); await sleep(300)
+          await s.evaluate(`document.querySelector('.hud-nav a[href="#${id}"]').click()`); await sleep(2500)
+          const at = await s.evaluate(`(() => { const b=document.querySelector('${sel}').getBoundingClientRect(); return { x:b.left+b.width/2, y:b.top+b.height/2, sy:scrollY } })()`)
+          for (let i=0;i<150;i++) { await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:at.x,y:at.y,deltaX:0,deltaY:60}); await sleep(16) }
+          await sleep(400)
+          const end = await s.evaluate('scrollY')
+          if (end - at.sy < 400) stuck.push(`${sel}: ${at.sy} to ${end}`)
+        }
+        row('creative: continuous wheel over cards carries the page on', !stuck.length, stuck.join('; ') || 'essay card, Creative room and story list all hand off')
+      }
     })
 
     // ---------------------------------------------------------------- stories
     await group('stories', async () => {
-      // The visible story panel preserves the source order and destination links.
+      // The visible story panel preserves the source order and links nowhere (the Writing page is retired from the surface).
       await s.openEngine(join(`p=${LEGEND.indexOf('Creative')}`)); await sleep(200)
       const r = await s.evaluate(`({ titles:[...document.querySelectorAll('#creative .story-leaf h4')].map(x=>x.textContent.trim()), nums:[...document.querySelectorAll('#creative .story-leaf .story-number')].map(x=>x.textContent.trim()), choices:document.querySelectorAll('#creative .story-choice').length, links:[...document.querySelectorAll('#creative .story-leaf a')].map(x=>x.getAttribute('href')) })`)
-      const linksWant = STORIES.map(t => `/writing/#${slug(t)}`)
-      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.choices === STORIES.length && r.links.join('|') === linksWant.join('|'), `${r.choices} choices, ${r.links.length} links`)
-      const nav = []
-      s.on('Fetch.requestPaused', p => { nav.push(p.request.url + (p.request.urlFragment || '')); s.send('Fetch.failRequest', { requestId:p.requestId, errorReason:'Aborted' }).catch(() => {}) })
-      await s.send('Fetch.enable', { patterns:[{ urlPattern:'*', resourceType:'Document', requestStage:'Request' }] })
-      const storyBad = []
-      try {
-        for (let k=0;k<STORIES.length;k++) {
-          await s.evaluate(`document.querySelectorAll('#creative .story-choice')[${k}].click()`)
-          const before=nav.length
-          await s.evaluate(`document.querySelector('#creative .story-leaf:not([hidden]) a').click()`)
-          await until(async()=>nav.length>before,1500,50)
-          if (nav[before]!==new URL(linksWant[k],origin).href) storyBad.push(`${k}: ${nav[before]}`)
-        }
-      } finally { await s.send('Fetch.disable'); s.off('Fetch.requestPaused') }
-      row('stories open where they live',!storyBad.length&&nav.length===STORIES.length,`${nav.length} navigations; ${storyBad.join('; ')||'all match'}`)
-
-      // and /writing/#<slug> opens that story as a click on its title does: the reader
-      // fades in and the title's words are revealed. The page is the site's; its
-      // known noise (SITE_NOISE) is noted apart, any other message fails the row.
-      const hashBad = []
-      const site0 = siteLog.length
-      consoleScope = '/writing/'
-      try {
-        for (const title of STORIES) {
-          await s.viewport(1440, 900)
-          await s.open(`${origin}/writing/#${slug(title)}`)
-          const shown = await until(() => s.evaluate(`(document.querySelector('.reader-title') || {}).textContent === ${JSON.stringify(title)}`), 8000)
-          const revealed = shown && await until(() => s.evaluate("document.querySelectorAll('.reader-title .visible').length > 0"), 3000)
-          if (!shown || !revealed) hashBad.push(`${slug(title)}: shows "${await s.evaluate("(document.querySelector('.reader-title') || {}).textContent || ''")}"${shown ? ', title words never revealed' : ''}`)
-        }
-      } finally { consoleScope = 'scroll' }
-      const hashNoise = [...new Set(siteLog.slice(site0).filter(t => !SITE_NOISE.some(noise => noise.test(t))).map(t => t.split('\n')[0]))]
-      row('writing hash opens the story', !hashBad.length && !hashNoise.length, `${STORIES.length - hashBad.length} of ${STORIES.length} opened and revealed; ${hashBad.slice(0, 3).join('; ')}${hashNoise.length ? ` messages: ${hashNoise.join(' | ')}` : 'no messages beyond the site noise'}`)
+      row('writing: every story, in order', r.titles.join('|') === STORIES.join('|') && r.nums.join('|') === STORIES.map((_, i) => String(i + 1).padStart(2, '0')).join('|') && r.choices === STORIES.length && r.links.length === 0, `${r.choices} choices, ${r.links.length} links`)
+      // nothing on the home surface leads to the retired pages (the menu and its routes are off the surface)
+      const retired = await s.evaluate(`[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href')).filter(h => /^(?:https?:\\/\\/(?:www\\.)?nichalasbarnes\\.com)?\\/(about|projects|writing|changelog|contact|newsletter|work-with-me)(?:[\\/#?]|$)/.test(h))`)
+      row('no link to the retired pages', retired.length === 0, retired.length ? retired.join(', ') : 'no anchor leads to the old menu pages')
     })
 
     // ---------------------------------------------------------------- the newsletter orbit and reader
@@ -921,7 +938,7 @@ try {
         const state = await s.evaluate(`(() => { const leaves = [...document.querySelectorAll('#projects .project-leaf')], a = leaves.find(x => !x.hidden && !x.classList.contains('outgoing')), vids = leaves.map((x, k) => ({ k, src: x.querySelector('video')?.getAttribute('src') || '', playing: !!x.querySelector('video') && !x.querySelector('video').paused })); return { current: __ss.projectCarousel.current, name: a.querySelector('h3').textContent, description: a.querySelector('.project-more > p').textContent, medium: a.querySelector('.lab').textContent, visible: leaves.filter(x => !x.hidden).length, links: [...a.querySelectorAll('.project-actions a')].map(x => x.textContent.trim()), video: vids, moon: document.querySelectorAll('#projects .project-moon[aria-current="true"]').length, announce: document.getElementById('orbit-announce').textContent } })()`)
         if (state.name !== PROJECT_NAMES[k] || state.description !== PROJECT_DESCRIPTIONS[state.name] || state.current !== k) badText.push(`${k}: ${state.name}: ${state.description.slice(0, 40)}`)
         if (state.visible !== 1 || state.moon !== 1 || !state.announce.includes(state.name)) ghosts.push(`${k}: ${state.visible} leaves, ${state.moon} front moons, ${state.announce}`)
-        const videoWanted = !['Chimera', 'Cerebro', 'Job Toast'].includes(state.name)
+        const videoWanted = !['Cerebro', 'Job Toast'].includes(state.name)
         if (state.video.filter(v => v.src).length !== (videoWanted ? 1 : 0) || state.video.some(v => v.k !== k && (v.src || v.playing))) badVideo.push(`${k}: ${JSON.stringify(state.video)}`)
         if (state.name === 'Cerebro' && state.links.join('|') !== 'Download↗|Site↗') badText.push(`Cerebro links ${state.links.join('|')}`)
         if (state.name === 'Brain Atlas' && !state.links[0].startsWith('Live')) badText.push('Brain Atlas live label')
