@@ -12,7 +12,7 @@ test("scroll sources stay local and keep copy and asset counts", () => {
   assert.doesNotMatch(content, /Open the full issue|All articles|Buy me a coffee/)
   assert.match(content, /Where the game stands/)
   assert.match(content, /project-chimera/)
-  assert.equal(readdirSync(new URL("images/", root)).filter(name => name.endsWith(".jpg")).length, 23)
+  assert.equal(readdirSync(new URL("images/", root)).filter(name => name.endsWith(".jpg")).length, 25)
   assert.equal(readdirSync(new URL("tech/", root)).filter(name => name.endsWith(".svg")).length, 21)
 })
 
