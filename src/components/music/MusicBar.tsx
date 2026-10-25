@@ -1,6 +1,7 @@
 import React, { useEffect } from "react"
 import { useAmbientAudio } from "../audio/AmbientAudioProvider"
 import { cancelSpotify, close, enableSpotify, getState, seekSpotify, next, prev, setShuffle, start, toggle, usePlayer } from "./player"
+import { PlatformIcon } from "./PlatformIcon"
 import "./music.css"
 
 const clock = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` }
@@ -24,12 +25,12 @@ const MusicBar: React.FC = () => {
         <button type="button" className="music-btn" onClick={() => next()} aria-label="Next track">›</button>
         <div className="music-info">
           <span className="music-title" aria-live="polite">{track.title}</span>
-          <span className="music-meta">{track.artist} · {track.platform === "spotify" ? "Spotify preview" : "SoundCloud"}{player.duration > 0 ? ` · ${clock(player.position)} / ${clock(player.duration)}` : ""}</span>
+          <span className="music-meta"><PlatformIcon platform={track.platform} />{track.artist} · {track.platform === "spotify" ? "Spotify preview" : "SoundCloud"}{player.duration > 0 ? ` · ${clock(player.position)} / ${clock(player.duration)}` : ""}</span>
         </div>
         <button type="button" className="music-btn" onClick={() => close()} aria-label="Close the player">×</button>
       </div>
       <div className="music-extras">
-        {player.spotify === "off" && <button type="button" className="music-btn music-spotify" onClick={() => { void enableSpotify() }} title="Add Alex's Hand from Spotify (30 second previews)">+ Spotify</button>}
+        {player.spotify === "off" && <button type="button" className="music-btn music-spotify" onClick={() => { void enableSpotify() }} title="Add Alex's Hand from Spotify (30 second previews)"><PlatformIcon platform="spotify" />+ Spotify</button>}
         <button type="button" className="music-btn music-shuffle" aria-pressed={player.shuffle} onClick={() => setShuffle(!player.shuffle)} title={player.shuffle ? "Shuffle on" : "Shuffle off"}>Shuffle</button>
       </div>
       <div className="music-progress" role="progressbar" aria-label="Track progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><span style={{ width: `${percent}%` }} /></div>

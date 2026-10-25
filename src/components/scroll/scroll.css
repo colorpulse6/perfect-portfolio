@@ -611,3 +611,10 @@ html.ss-on.calm .ss #essays .essay-card { transition: none; }
 .ss #creative .music-play-all { position: absolute; top: 9px; right: 14px; z-index: 2; padding: 5px 11px; border: 1px solid rgba(54,230,219,.5); border-radius: 99px; background: rgba(54,230,219,.1); color: #8ff3ec; font: 600 11px/1.2 var(--mono); letter-spacing: .6px; text-transform: uppercase; cursor: pointer; }
 .ss #creative .music-play-all:hover { background: rgba(54,230,219,.22); }
 .ss #creative .music-play-all:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* platform marks beside the music links */
+.ss #creative .platform-icon { width: 1.15em; height: 1.15em; margin-right: .45em; vertical-align: -.2em; fill: currentColor; }
+/* the scroll stylesheet reverts author styles on every non-svg-descendant, svg included, so the marks take their colour here */
+.ss #creative .platform-icon[data-platform="soundcloud"] { color: #ff5500; }
+.ss #creative .platform-icon[data-platform="spotify"] { color: #1ed760; }
+.ss #creative .platform-icon[data-platform="bandcamp"] { color: #1da0c3; }

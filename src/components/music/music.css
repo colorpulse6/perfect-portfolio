@@ -24,3 +24,5 @@
 @media (max-width: 560px) { .music-host-open { right: 12px; top: calc(214px + env(safe-area-inset-top, 0px)); } }
 .music-extras { display: flex; gap: 8px; margin-top: 8px; }
 .music-extras .music-btn { min-height: 26px; padding: 3px 10px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; }
+.music-bar .platform-icon { width: 1.1em; height: 1.1em; margin-right: 0.45em; vertical-align: -0.18em; }
+.music-spotify .platform-icon { margin-right: 0.35em; }
