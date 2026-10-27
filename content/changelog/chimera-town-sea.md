@@ -2,7 +2,7 @@
 title: "Chimera: The Town Reaches the Sea"
 date: "2026-10-24"
 type: "update"
-link: "https://colorpulse6.github.io/project-chimera/"
+link: "https://projectchimera.dev/"
 cta: "Visit"
 status: "in-progress"
 featured: false

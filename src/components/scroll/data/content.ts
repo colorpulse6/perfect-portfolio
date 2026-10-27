@@ -58,7 +58,7 @@ export const BLURB_OVERRIDE: Record<string, string> = {
 // Chimera is the one product absent from the Gatsby Project nodes in r14.
 export const CHIMERA: AppItem = {
   name: "Chimera", medium: "Game", status: "in progress", image: "chimera.jpg", video: "chimera-walk.mp4",
-  link: "https://colorpulse6.github.io/project-chimera/",
+  link: "https://projectchimera.dev/",
   github: "https://github.com/colorpulse6/project-chimera",
   tech: ["Unreal Engine 5", "Astro"], open: "Where the game stands",
   blurb: "A JRPG in a painted hill town, with a hero who is drawn rather than modelled. Designed, art-directed and built in Unreal Engine 5; the site is the live status record of the build.",
