@@ -26,7 +26,7 @@ test("query nodes become ordered scroll data with a curated Chimera override", (
   assert.deepEqual(result.letters[0].blocks[1], { kind: "image", alt: "A picture", src: "/static/x.jpg", file: "2026-W42/img/x.jpg" })
 })
 
-test("selected apps and all sixteen stories resolve from Gatsby nodes", () => {
+test("selected apps and all seventeen stories resolve from Gatsby nodes", () => {
   const require = createRequire(import.meta.url)
   const nodes: Array<{ internal: { type: string }; name?: string; status?: string; tech?: string[]; title?: string }> = []
   require("../gatsby-node.js").sourceNodes({
@@ -36,7 +36,7 @@ test("selected apps and all sixteen stories resolve from Gatsby nodes", () => {
   })
   const projects = nodes.filter(node => node.internal.type === "Project")
   const stories = nodes.filter(node => node.internal.type === "Writing")
-  assert.equal(stories.length, 16)
+  assert.equal(stories.length, 17)
   for (const name of [...PRODUCTS.slice(1), ...TOOLS]) {
     const project = projects.find(node => node.name === name)
     assert.ok(project && project.status !== "disabled", `Missing active project: ${name}`)

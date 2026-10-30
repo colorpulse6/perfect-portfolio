@@ -5,7 +5,7 @@ import { buildScrollData } from '../src/components/scroll/data/buildScrollData.t
 import { PRODUCTS, TOOLS, RELEASES, COLORPULSE_ALBUMS } from '../src/components/scroll/data/content.ts'
 import { creativeWrap, creativeRoomLayout } from '../src/components/scroll/engine/creativeCarouselMath.ts'
 
-test('all sixteen source stories retain their complete text and order', () => {
+test('all seventeen source stories retain their complete text and order', () => {
   const nodes: Array<{ internal: { type: string }; title?: string; content?: string }> = []
   createRequire(import.meta.url)('../gatsby-node.js').sourceNodes({
     actions: { createNode: (node: typeof nodes[number]) => nodes.push(node) },
@@ -15,7 +15,7 @@ test('all sixteen source stories retain their complete text and order', () => {
   const writing = nodes.filter((node): node is typeof node & { title: string; content: string } => node.internal.type === 'Writing' && !!node.title && !!node.content)
   const projects = [...PRODUCTS.slice(1), ...TOOLS].map(name => ({ name, slug: name, medium: 'APP', status: 'released', link: '', github: null, tech: [], description: '' }))
   const result = buildScrollData({ allProject: { nodes: projects }, allWriting: { nodes: writing }, changelog: { nodes: [] }, newsletter: { nodes: [] }, allFile: { nodes: [] } })
-  assert.equal(result.stories.length, 16)
+  assert.equal(result.stories.length, 17)
   assert.deepEqual(result.stories.map(s => s.content), writing.map(s => s.content))
   assert.ok(result.stories.every(s => s.content.length > 100))
 })
