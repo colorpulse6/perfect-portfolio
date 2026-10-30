@@ -49,7 +49,7 @@ export function createCreativeCarousel(root: HTMLElement, storyCount: number, in
   }
   function select(next: World, focus = false) {
     world = next; status()
-    announce.textContent = next === "stories" ? "Stories, sixteen pieces of short fiction" : "Music, three projects"
+    announce.textContent = next === "stories" ? `Stories, ${storyCount} pieces of short fiction` : "Music, three projects"
     if (focus) tabs[next === "stories" ? 0 : 1].focus({ preventScroll: true })
   }
   function selectProject(next: Project, focus = false) {

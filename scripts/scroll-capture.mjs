@@ -619,7 +619,7 @@ try {
         await s.openEngine(join('p=5'),w,h)
         await until(() => s.evaluate(`[...document.querySelectorAll('.record-sleeve img')].every(x=>x.complete&&x.naturalWidth>0)`),5000)
         const r=await s.evaluate(inspect)
-        row(`creative: both rooms fit (${w}x${h})`,r.visible===(w<820?1:2)&&r.fit&&r.children&&r.separate&&!r.overflow&&r.stories===16&&r.records===9&&r.covers.length===9&&r.covers.every(Boolean)&&r.ghosts===0&&r.minPx>=11&&r.tabs.map(t=>t[0]).join('|')==="Alex's Hand|Colorpulse|Priaprizm"&&r.tabs.every(t=>t[3]==='tabpanel')&&r.tabs.map(t=>t[1]).join('|')==='true|false|false',JSON.stringify(r))
+        row(`creative: both rooms fit (${w}x${h})`,r.visible===(w<820?1:2)&&r.fit&&r.children&&r.separate&&!r.overflow&&r.stories===17&&r.records===9&&r.covers.length===9&&r.covers.every(Boolean)&&r.ghosts===0&&r.minPx>=11&&r.tabs.map(t=>t[0]).join('|')==="Alex's Hand|Colorpulse|Priaprizm"&&r.tabs.every(t=>t[3]==='tabpanel')&&r.tabs.map(t=>t[1]).join('|')==='true|false|false',JSON.stringify(r))
         if (w<820) { await s.evaluate(`document.getElementById('creative-tab-music').click()`); const m=await s.evaluate(inspect); row('creative: phone music fits',m.visible===1&&m.fit&&m.children&&!m.overflow,JSON.stringify(m)) }
       }
       await s.openEngine(join('p=5'),1440,813)
@@ -630,7 +630,7 @@ try {
         const expected=await s.evaluate(`(() => {const d=document.createElement('div');d.innerHTML=${JSON.stringify(formatTextContent(WRITING[k].content))};return d.innerHTML})()`)
         if(r.title!==WRITING[k].title||r.html!==expected||r.shown!==1)storyBad.push(k)
       }
-      row('creative: all sixteen full stories and links',!storyBad.length,storyBad.join(',')||'all match source content')
+      row('creative: all seventeen full stories and links',!storyBad.length,storyBad.join(',')||'all match source content')
       const releaseBad=[]
       for(let k=0;k<RELEASES.length;k++) {
         await s.evaluate(`__ss.creativeWorld('music'); __ss.creativeTo(${k})`)
@@ -664,15 +664,15 @@ try {
       const mp=await s.evaluate(`(() => {const r=document.querySelector('#music-panel-alex').getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`)
       await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:mp.x,y:mp.y,deltaX:120,deltaY:0})
       const recordWheel=await s.evaluate('__ss.creativeCarousel.record')
-      row('creative: controls, keyboard and sideways wheel wrap',storyWrap===15&&recordWrap===8&&storyWheel===0&&recordWheel===0,`${storyWrap}, ${recordWrap}, ${storyWheel}, ${recordWheel}`)
+      row('creative: controls, keyboard and sideways wheel wrap',storyWrap===16&&recordWrap===8&&storyWheel===0&&recordWheel===0,`${storyWrap}, ${recordWrap}, ${storyWheel}, ${recordWheel}`)
       const reach=[]
       await s.evaluate(`document.querySelector('.story-choice').focus()`)
-      for(let k=1;k<=16;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story key ${k}`)}
+      for(let k=1;k<=17;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.story')!==k%17)reach.push(`story key ${k}`)}
       await s.evaluate(`document.querySelector('#music-panel-alex [data-creative-step="1"]').focus()`)
       for(let k=1;k<=9;k++){await s.key('ArrowRight',39,0);if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record key ${k}`)}
-      for(let k=1;k<=16;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sp.x,y:sp.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.story')!==k%16)reach.push(`story wheel ${k}`)}
+      for(let k=1;k<=17;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:sp.x,y:sp.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.story')!==k%17)reach.push(`story wheel ${k}`)}
       for(let k=1;k<=9;k++){await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:mp.x,y:mp.y,deltaX:120,deltaY:0});if(await s.evaluate('__ss.creativeCarousel.record')!==k%9)reach.push(`record wheel ${k}`)}
-      row('creative: all turns by keyboard and sideways wheel',!reach.length,reach.join('; ')||'16 stories and 9 albums by each input')
+      row('creative: all turns by keyboard and sideways wheel',!reach.length,reach.join('; ')||'17 stories and 9 albums by each input')
       await s.openEngine(join('p=5'),390,844)
       const reader=await s.evaluate(`(() => {const x=document.querySelector('.story-text');const r=x.getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),max:x.scrollHeight-x.clientHeight,top:x.scrollTop,page:scrollY}})()`)
       await s.send('Input.dispatchMouseEvent',{type:'mouseWheel',x:reader.x,y:reader.y,deltaX:0,deltaY:120});await sleep(100)
@@ -708,7 +708,7 @@ try {
         const closed = await s.evaluate(`({ hidden: document.getElementById('story-reader').hidden, focusIsExpand: document.activeElement?.hasAttribute('data-story-expand')  , y: scrollY, world: __ss.creativeCarousel.world })`)
         const ok = o.shown && o.full && o.title === wantTitle && o.html === want && o.focus && o.room && o.colFits && o.col <= 620 && o.font >= 18 && !o.over
           && scrolled.top > 0 && scrolled.y === before.y && Number(scrolled.bar) > 0
-          && nextStory.story === 4 && nextStory.count === '5 of 16' && nextStory.title !== wantTitle && nextStory.top === 0 && nextStory.y === before.y
+          && nextStory.story === 4 && nextStory.count === '5 of 17' && nextStory.title !== wantTitle && nextStory.top === 0 && nextStory.y === before.y
           && closed.hidden && closed.focusIsExpand && closed.y === before.y
         row(`creative: full screen story reader (${w}x${h})`, ok, JSON.stringify({ o: { ...o, html: o.html.length }, scrolled, nextStory, closed, before }).slice(0, 420))
       }
@@ -1147,7 +1147,7 @@ try {
         await s.openEngine(join('p=5'),w,h)
         const c=await s.evaluate(`(() => {const b=e=>e.getBoundingClientRect(),a=document.getElementById('creative-stories'),m=document.getElementById('creative-music'),hud=b(document.querySelector('.hud-nav')), items=[...a.querySelectorAll('.story-index,.story-panel,.creative-controls')], pass=items.every(e=>{const r=b(e),w=b(a);return r.left>=w.left-1&&r.right<=w.right+1&&r.top>=w.top-1&&r.bottom<=w.bottom+1})&&b(a).bottom<hud.top; return {pass,stories:a.querySelectorAll('.story-choice').length,records:m.querySelectorAll('.record-leaf').length,overlap:!m.hidden&&b(a).right>=b(m).left,overflow:document.documentElement.scrollWidth>innerWidth}})()`)
         spans.push(`creative ${c.stories}/${c.records}`)
-        if (!c.pass||c.stories!==16||c.records!==9||c.overlap||c.overflow) bad.push(`creative: ${JSON.stringify(c)}`)
+        if (!c.pass||c.stories!==17||c.records!==9||c.overlap||c.overflow) bad.push(`creative: ${JSON.stringify(c)}`)
         row(`cards fit (${w}x${h})`, !bad.length, bad.join('; ').slice(0, 400) || spans.join(', '))
       }
       await s.viewport(1440, 900)
