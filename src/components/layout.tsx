@@ -203,7 +203,8 @@ const Layout: React.FC<LayoutProps> = ({
         >
           <main>{children}</main>
           <footer className="site-footer" data-cosmos-snapshot="15">
-            &copy; Nichalas Barnes {new Date().getFullYear()}
+            &copy; Nichalas Barnes {new Date().getFullYear()}{" · "}
+            <a href="/copyright.html">Copyright and licensing</a>
           </footer>
         </div>
         <AudioToggle />
