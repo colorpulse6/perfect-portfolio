@@ -7,7 +7,7 @@ deck: "Chimera opens its first public demo, Sector Zero earns a way home, and th
 hero: ""
 ---
 
-*Delayed publication of the 2026-W44 working-week draft, published 2026-11-07. Progress and remaining checks below describe that week, not new claims as of publication.*
+Delayed publication of the 2026-W44 working-week draft, published 2026-11-07. Progress and remaining checks below describe that week, not new claims as of publication.
 
 A road in a game makes a promise before anybody writes dialogue.
 

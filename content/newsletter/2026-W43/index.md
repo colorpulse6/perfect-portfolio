@@ -7,7 +7,7 @@ deck: "Sector Zero earns a way out of scarcity, Job Toast checks what it actuall
 hero: ""
 ---
 
-*Delayed publication of the 2026-W43 working-week draft, published 2026-11-07. Progress and remaining checks below describe that week, not new claims as of publication.*
+Delayed publication of the 2026-W43 working-week draft, published 2026-11-07. Progress and remaining checks below describe that week, not new claims as of publication.
 
 A mine is an excellent way to get metal, provided you already have enough metal to build a mine.
 
